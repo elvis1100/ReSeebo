@@ -1,3 +1,4 @@
+import '../services/receipt_product_match.dart';
 import 'dart:math';
 import 'package:uuid/uuid.dart';
 import '../services/receipt_validator.dart';
@@ -207,33 +208,10 @@ class MockReseeboDataAdapter implements IReseeboDataAdapter {
 
   @override
   Future<List<ProductMatchSuggestion>> matchAliases(
-    String rawOcrDescription,
-  ) async {
-    final desc = rawOcrDescription.toLowerCase();
-    final suggestions = <ProductMatchSuggestion>[];
-
-    for (final p in _products) {
-      if (desc.contains(p.brand.toLowerCase()) ||
-          desc.contains(p.variant.toLowerCase().split(' ').first)) {
-        suggestions.add(
-          ProductMatchSuggestion(
-            product: p,
-            reason: 'Matched brand/variant from catalog',
-            exactAlias: desc.contains(p.brand.toLowerCase()),
-          ),
-        );
-      }
-    }
-    if (suggestions.isEmpty && _products.isNotEmpty) {
-      suggestions.add(
-        ProductMatchSuggestion(
-          product: _products.first,
-          reason: 'Suggested fallback based on recent purchases',
-          exactAlias: false,
-        ),
-      );
-    }
-    return suggestions;
+    String rawOcrDescription, {
+    String? supplierId,
+  }) async {
+    return receiptProductSuggestions(rawOcrDescription, _products);
   }
 
   @override
@@ -289,6 +267,7 @@ class MockReseeboDataAdapter implements IReseeboDataAdapter {
   Future<ReceiptDraft> processReceiptImage(
     String localImagePath, {
     String? recognitionImagePath,
+    String? comparisonImagePath,
   }) async {
     return ReceiptDraft(
       imagePath: localImagePath,
@@ -531,10 +510,12 @@ class MockReseeboDataAdapter implements IReseeboDataAdapter {
   Future<ReceiptDraft> processReceiptImages(
     List<String> localImagePaths, {
     List<String>? recognitionImagePaths,
+    List<String>? comparisonImagePaths,
   }) async {
     return processReceiptImage(
       localImagePaths.first,
       recognitionImagePath: recognitionImagePaths?.firstOrNull,
+      comparisonImagePath: comparisonImagePaths?.firstOrNull,
     );
   }
 

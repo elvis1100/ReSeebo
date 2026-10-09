@@ -28,7 +28,7 @@ void main() {
     expect(draft.lines[2].grossAmountCents, isNull);
     expect(draft.rawText, contains('10.,25'));
   });
-  test('trailing count with wrapped price pair requires exact arithmetic', () {
+  test('unlabeled trailing numerals remain identity despite agreeing prices', () {
     final draft = parse([
       'STORE',
       'Noodles 85g 2',
@@ -38,11 +38,32 @@ void main() {
       'Onions 0.622KIL',
       '290.00 180.38 E',
     ]);
-    expect(draft.lines.first.description, 'Noodles 85g');
-    expect(draft.lines.first.quantity, 2);
-    expect(draft.lines.first.grossAmountCents, 3700);
+    expect(draft.lines.first.description, 'Noodles 85g 2');
+    expect(draft.lines.first.quantity, isNull);
+    expect(draft.lines.first.grossAmountCents, isNull);
     expect(draft.lines.first.unit, isNull);
-    expect(draft.lines.skip(1).every((line) => line.quantity == null), isTrue);
+    expect(
+      draft.lines.first.warnings.any(
+        (warning) => warning.contains('Multiple prices'),
+      ),
+      isTrue,
+    );
+    expect(draft.lines[1].description, 'Coffee 26g 3');
+    expect(draft.lines[1].quantity, isNull);
+    expect(draft.lines[1].grossAmountCents, isNull);
+    expect(draft.lines.every((line) => line.quantity == null), isTrue);
+  });
+  test('quantity header identifies trailing count in a wrapped price pair', () {
+    final draft = parse([
+      'STORE',
+      'DESCRIPTION QTY PRICE AMOUNT',
+      'Noodles 85g 2',
+      '18.50 37.00 V',
+    ]);
+    expect(draft.lines.single.description, 'Noodles 85g');
+    expect(draft.lines.single.quantity, 2);
+    expect(draft.lines.single.grossAmountCents, 3700);
+    expect(draft.lines.single.unit, isNull);
   });
   test('unmarked price pair resolves only with exact quantity arithmetic', () {
     final draft = parse([

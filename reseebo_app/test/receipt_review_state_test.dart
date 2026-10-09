@@ -393,18 +393,20 @@ class _AutofillAdapter extends MockReseeboDataAdapter {
     const Supplier(id: 'supplier', name: 'Grocery Store', branch: 'Main'),
   ];
   @override
-  Future<List<ProductMatchSuggestion>> matchAliases(String description) async =>
-      [
-        const ProductMatchSuggestion(
-          product: coffee,
-          reason: 'Saved description',
-          exactAlias: true,
-        ),
-        if (ambiguous)
-          const ProductMatchSuggestion(
-            product: largeCoffee,
-            reason: 'Saved description',
-            exactAlias: true,
-          ),
-      ];
+  Future<List<ProductMatchSuggestion>> matchAliases(
+    String description, {
+    String? supplierId,
+  }) async => [
+    const ProductMatchSuggestion(
+      product: coffee,
+      reason: 'Saved description',
+      exactAlias: true,
+    ),
+    if (ambiguous)
+      const ProductMatchSuggestion(
+        product: largeCoffee,
+        reason: 'Saved description',
+        exactAlias: true,
+      ),
+  ];
 }

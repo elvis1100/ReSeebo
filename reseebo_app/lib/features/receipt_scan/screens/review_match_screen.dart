@@ -90,6 +90,7 @@ class _ReviewMatchScreenState extends State<ReviewMatchScreen> {
         child: ProductMatchPicker(
           adapter: widget.dataAdapter,
           description: line.description,
+          supplierId: _review.draft.supplierId,
         ),
       ),
     );

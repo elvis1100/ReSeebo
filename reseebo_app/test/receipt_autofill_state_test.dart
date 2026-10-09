@@ -10,8 +10,10 @@ import 'package:reseebo_app/features/receipt_scan/widgets/purchase_date_candidat
 
 class CatalogAdapter extends MockReseeboDataAdapter {
   @override
-  Future<List<ProductMatchSuggestion>> matchAliases(String description) async =>
-      [];
+  Future<List<ProductMatchSuggestion>> matchAliases(
+    String description, {
+    String? supplierId,
+  }) async => [];
   @override
   Future<List<Product>> getProducts({String? query}) async => const [
     Product(
@@ -27,8 +29,10 @@ class CatalogAdapter extends MockReseeboDataAdapter {
 class DelayedAliasAdapter extends CatalogAdapter {
   final pending = Completer<List<ProductMatchSuggestion>>();
   @override
-  Future<List<ProductMatchSuggestion>> matchAliases(String description) =>
-      pending.future;
+  Future<List<ProductMatchSuggestion>> matchAliases(
+    String description, {
+    String? supplierId,
+  }) => pending.future;
 }
 
 ReceiptDraft sample() => ReceiptParser().parse(
@@ -43,6 +47,26 @@ ReceiptDraft sample() => ReceiptParser().parse(
 );
 
 void main() {
+  test(
+    'changing supplier invalidates even confirmed supplier-learned matches',
+    () async {
+      final state = ReceiptReviewState(
+        adapter: CatalogAdapter(),
+        draft: sample(),
+      );
+      await state.load();
+      final line = state.draft.lines.single;
+      line.productId = 'oil';
+      line.matchOrigin = 'Previously matched';
+      line.confirmed = true;
+      state.draft.supplierId = 'different-store';
+      state.changed();
+      expect(line.productId, isNull);
+      expect(line.confirmed, isFalse);
+      await Future<void>.delayed(Duration.zero);
+      state.dispose();
+    },
+  );
   test(
     'corrected complete description immediately auto selects catalog item',
     () async {

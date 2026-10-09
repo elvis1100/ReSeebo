@@ -29,7 +29,10 @@ abstract class IReseeboDataAdapter {
   }
 
   Future<void> saveSupplier(Supplier supplier);
-  Future<List<ProductMatchSuggestion>> matchAliases(String rawOcrDescription);
+  Future<List<ProductMatchSuggestion>> matchAliases(
+    String rawOcrDescription, {
+    String? supplierId,
+  });
   Future<List<ProductAlias>> getAliases(String productId);
   Future<void> deleteAlias(String aliasId);
   Future<List<Receipt>> getRecentReceipts({int limit = 200, String? query});
@@ -37,6 +40,7 @@ abstract class IReseeboDataAdapter {
   Future<ReceiptDraft> processReceiptImage(
     String localImagePath, {
     String? recognitionImagePath,
+    String? comparisonImagePath,
   });
 
   /// Recognize ordered pages of one receipt, retaining every original. Adjusted
@@ -45,6 +49,7 @@ abstract class IReseeboDataAdapter {
   Future<ReceiptDraft> processReceiptImages(
     List<String> localImagePaths, {
     List<String>? recognitionImagePaths,
+    List<String>? comparisonImagePaths,
   }) {
     if (localImagePaths.length != 1) {
       throw const ValidationException(
@@ -54,6 +59,7 @@ abstract class IReseeboDataAdapter {
     return processReceiptImage(
       localImagePaths.single,
       recognitionImagePath: recognitionImagePaths?.single,
+      comparisonImagePath: comparisonImagePaths?.single,
     );
   }
 

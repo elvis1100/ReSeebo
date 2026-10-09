@@ -8,7 +8,6 @@ import 'package:path_provider/path_provider.dart';
 import 'package:reseebo_app/core/adapters/sqlite_reseebo_data_adapter.dart';
 import 'package:reseebo_app/features/receipt_scan/state/receipt_review_state.dart';
 import 'receipt_ocr_offline_test.dart' as smoke;
-import 'package:reseebo_app/core/services/receipt_parser.dart';
 import 'package:reseebo_app/core/models/models.dart';
 import 'package:reseebo_app/features/receipt_scan/services/local_receipt_image_service.dart';
 
@@ -36,6 +35,19 @@ void main() {
             marker['receiptId'] as String,
           );
           expect(detail.lines, hasLength(6));
+          final learned = await adapter.matchAliases(
+            detail.lines.first.originalDescription,
+            supplierId: detail.receipt.supplier.id,
+          );
+          expect(
+            learned.where((match) => match.exactAlias).single.product.id,
+            detail.lines.first.productId,
+          );
+          final elsewhere = await adapter.matchAliases(
+            detail.lines.first.originalDescription,
+            supplierId: 'another-store',
+          );
+          expect(elsewhere.any((match) => match.exactAlias), isFalse);
           expect(detail.receipt.totalCents, 19760);
           expect(detail.receipt.purchasedAt, DateTime(2026, 4, 17, 18, 47));
           expect(detail.lines.map((line) => line.netAmountCents), [
@@ -117,8 +129,28 @@ void main() {
           enhance: true,
         );
         generated.add(prepared);
-        final lines = await ocr.recognize(prepared);
-        final draft = ReceiptParser().parse(imagePath: path, textLines: lines);
+        final supportForOcr = await getApplicationSupportDirectory();
+        final pipelineRoot = await Directory(
+          '${supportForOcr.path}/receipt-pipeline-diagnostics',
+        ).create(recursive: true);
+        final pipeline = await SqliteReseeboDataAdapter.open(
+          databasePath: '${pipelineRoot.path}/samples.sqlite',
+          mediaDirectory: Directory('${pipelineRoot.path}/media'),
+          starterProducts: const [],
+        );
+        late final ReceiptDraft draft;
+        try {
+          draft = await pipeline.processReceiptImage(
+            path,
+            recognitionImagePath: prepared,
+            comparisonImagePath: recognitionSource,
+          );
+        } finally {
+          await pipeline.close();
+          await pipelineRoot.delete(recursive: true);
+        }
+        final lines = draft.ocrPages.single.textLines;
+        expect(draft.ocrPages.single.originalTextLines, isNotEmpty);
         // One record per sample makes host-side evidence extraction repeatable.
         // ignore: avoid_print
         print(
@@ -136,6 +168,7 @@ void main() {
                   ],
                 },
             ],
+            'comparisonLines': draft.ocrPages.single.originalTextLines.length,
             'date': draft.purchasedAt?.toIso8601String(),
             'total': draft.detectedTotalCents,
             'items': [

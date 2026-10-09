@@ -4,9 +4,16 @@ import 'dart:io';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:reseebo_app/core/models/models.dart';
 import 'package:reseebo_app/core/services/receipt_parser.dart';
+import 'package:reseebo_app/core/services/receipt_numeric_row.dart';
 
 void main() {
   final parser = ReceiptParser();
+
+  test('numeric rows preserve invalid money instead of throwing', () {
+    expect(receiptNumericRow('2 PC 1,2.00 24.00'), isNull);
+    expect(receiptNumericRow('2 PC 999999999999999.00 24.00'), isNull);
+    expect(receiptNumericRow('2 PC 15.00 3,0.00'), isNull);
+  });
 
   final fixtures =
       Directory('test/fixtures/receipts')

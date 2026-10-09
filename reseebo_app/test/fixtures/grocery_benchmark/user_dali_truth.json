@@ -1,0 +1,39 @@
+{
+  "kind": "photo-ground-truth",
+  "source": "Owner-provided 20261009_201820.jpg",
+  "verification": "Independently read from original photo and enlarged item crops on 2026-10-10 before inspecting OCR; quantities/amounts verified by arithmetic. Description excludes printed item code. Match patterns are evaluation-only row anchors. X leaves pieces/packs unresolved.",
+  "imageSha256": "f62890bbe945dca230070e1f3644c7925843cc7e769e1b03b83ede6d6a4cf6c4",
+  "captures": [
+    "user_dali_mlkit_original",
+    "user_dali_mlkit_enhanced",
+    "user_dali_ppocr_original",
+    "user_dali_ppocr_enhanced"
+  ],
+  "expected": {
+    "total": 23450,
+    "lines": [
+      {
+        "matchPattern": "Fiesta|Canola",
+        "description": "UFC Golden Fiesta Canola Oil SUP 1L",
+        "quantity": 1,
+        "unit": "piece",
+        "amount": 14400
+      },
+      {
+        "matchPattern": "Zippy|Dishwashing",
+        "description": "Mr. Zippy Dishwashing Liquid Kalamansi",
+        "quantity": 1,
+        "unit": "piece",
+        "amount": 2750
+      },
+      {
+        "matchPattern": "Wagi|Carne",
+        "description": "Wagi Carne Norte 150g",
+        "quantity": 3,
+        "unit": "piece",
+        "amount": 6300
+      }
+    ]
+  },
+  "captureDirectory": "test/fixtures/owner_receipts"
+}

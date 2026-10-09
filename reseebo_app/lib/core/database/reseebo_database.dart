@@ -6,9 +6,10 @@ import 'migrations/migration_003_starter_catalog.dart';
 import 'migrations/migration_004_name_only_products.dart';
 import 'migrations/migration_005_supplier_date_order.dart';
 import 'migrations/migration_006_product_categories.dart';
+import 'migrations/migration_007_supplier_product_aliases.dart';
 
 class ReseeboDatabase {
-  static const version = 6;
+  static const version = 7;
   static const migrations = <int, List<String>>{
     1: initialSchema,
     2: receiptPagesSchema,
@@ -16,6 +17,7 @@ class ReseeboDatabase {
     4: nameOnlyProductsSchema,
     5: supplierDateOrderSchema,
     6: productCategoriesSchema,
+    7: supplierProductAliasesSchema,
   };
 
   /// The caller owns the returned connection. Supplying a factory/path allows

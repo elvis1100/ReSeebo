@@ -1,0 +1,30 @@
+{
+  "synthetic": true,
+  "name": "unbounded labeled table must retain conflicting unit price",
+  "layoutFamily": "grocery_header_conflict",
+  "lines": [
+    {
+      "text": "GROCERY A"
+    },
+    {
+      "text": "2026-10-09"
+    },
+    {
+      "text": "DESCRIPTION QTY PRICE AMOUNT"
+    },
+    {
+      "text": "COFFEE ORIGINAL 26G 2 15.00 38.00"
+    }
+  ],
+  "expected": {
+    "date": "2026-10-09",
+    "lines": [
+      {
+        "description": "COFFEE ORIGINAL 26G",
+        "quantity": 2,
+        "unit": null,
+        "amount": null
+      }
+    ]
+  }
+}

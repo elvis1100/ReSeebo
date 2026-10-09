@@ -1,7 +1,7 @@
 {
   "version": 1,
   "source": "Open Food Facts",
-  "retrieved_on": "2026-10-09",
+  "retrieved_on": "2026-10-10",
   "database_license": "ODbL-1.0",
   "contents_license": "DbCL-1.0",
   "image_license": "CC-BY-SA-3.0",
@@ -2390,6 +2390,213 @@
       "size": "80 mL",
       "category": "Milk & dairy",
       "image_asset": "assets/catalog/images/0054028367911.webp"
+    },
+    {
+      "barcode": "4800194104869",
+      "name": "Oishi Crispy Patata",
+      "brand": "Oishi",
+      "variant": "Crispy Patata",
+      "size": "24 g",
+      "category": "Snacks & biscuits",
+      "image_asset": "assets/catalog/images/4800194104869.webp"
+    },
+    {
+      "barcode": "4800092660634",
+      "name": "Choco Mucho Caramel",
+      "brand": "Choco Mucho",
+      "variant": "Caramel",
+      "size": "33 g",
+      "category": "Snacks & biscuits",
+      "image_asset": "assets/catalog/images/4800092660634.webp"
+    },
+    {
+      "barcode": "4800361410816",
+      "name": "Bear Brand Fortified Milk Drink Powder",
+      "brand": "Bear Brand",
+      "variant": "Fortified Milk Drink Powder",
+      "size": "33 g",
+      "category": "Milk & dairy",
+      "image_asset": "assets/catalog/images/4800361410816.webp"
+    },
+    {
+      "barcode": "4800016663802",
+      "name": "Jack 'n Jill Nova Country Cheddar",
+      "brand": "Jack 'n Jill",
+      "variant": "Nova Country Cheddar",
+      "size": "40 g",
+      "category": "Snacks & biscuits",
+      "image_asset": "assets/catalog/images/4800016663802.webp"
+    },
+    {
+      "barcode": "4800016622533",
+      "name": "Jack 'n Jill V-Cut Spicy Barbecue",
+      "brand": "Jack 'n Jill",
+      "variant": "V-Cut Spicy Barbecue",
+      "size": "25 g",
+      "category": "Snacks & biscuits",
+      "image_asset": "assets/catalog/images/4800016622533.webp"
+    },
+    {
+      "barcode": "0089686010947",
+      "name": "Indomie Mi Goreng Regular",
+      "brand": "Indomie",
+      "variant": "Mi Goreng Regular",
+      "size": "85 g",
+      "category": "Instant noodles",
+      "image_asset": "assets/catalog/images/0089686010947.webp"
+    },
+    {
+      "barcode": "0748485401492",
+      "name": "Birch Tree Fortified Milk Powder",
+      "brand": "Birch Tree",
+      "variant": "Fortified Milk Powder",
+      "size": "33 g",
+      "category": "Milk & dairy",
+      "image_asset": "assets/catalog/images/0748485401492.webp"
+    },
+    {
+      "barcode": "4809010524034",
+      "name": "Sugo Greaseless Salted Peanuts",
+      "brand": "Sugo",
+      "variant": "Greaseless Salted Peanuts",
+      "size": "100 g",
+      "category": "Snacks & biscuits",
+      "image_asset": "assets/catalog/images/4809010524034.webp"
+    },
+    {
+      "barcode": "4801668605967",
+      "name": "Datu Puti Spicy Adobo Sauce",
+      "brand": "Datu Puti",
+      "variant": "Spicy Adobo Sauce",
+      "size": "180 mL",
+      "category": "Sauces & seasonings",
+      "image_asset": "assets/catalog/images/4801668605967.webp"
+    },
+    {
+      "barcode": "0748485801162",
+      "name": "555 Carne Norte",
+      "brand": "555",
+      "variant": "Carne Norte",
+      "size": "175 g",
+      "category": "Canned goods",
+      "image_asset": "assets/catalog/images/0748485801162.webp"
+    },
+    {
+      "barcode": "4807770100529",
+      "name": "Monde Nissin Butter Coconut",
+      "brand": "Monde Nissin",
+      "variant": "Butter Coconut",
+      "size": "14 g",
+      "category": "Snacks & biscuits",
+      "image_asset": "assets/catalog/images/4807770100529.webp"
+    },
+    {
+      "barcode": "7622300808365",
+      "name": "Tang Four Seasons Powder Drink",
+      "brand": "Tang",
+      "variant": "Four Seasons Powder Drink",
+      "size": "19 g",
+      "category": "Drinks",
+      "image_asset": "assets/catalog/images/7622300808365.webp"
+    },
+    {
+      "barcode": "7622300868635",
+      "name": "Tang Orange Mango Powder Drink",
+      "brand": "Tang",
+      "variant": "Orange Mango Powder Drink",
+      "size": "18 g",
+      "category": "Drinks",
+      "image_asset": "assets/catalog/images/7622300868635.webp"
+    },
+    {
+      "barcode": "8858705602379",
+      "name": "Bear Brand Milk Drink",
+      "brand": "Bear Brand",
+      "variant": "Milk Drink",
+      "size": "200 mL",
+      "category": "Milk & dairy",
+      "image_asset": "assets/catalog/images/8858705602379.webp"
+    },
+    {
+      "barcode": "0748485100401",
+      "name": "Century Tuna Flakes in Oil",
+      "brand": "Century Tuna",
+      "variant": "Flakes in Oil",
+      "size": "155 g",
+      "category": "Canned goods",
+      "image_asset": "assets/catalog/images/0748485100401.webp"
+    },
+    {
+      "barcode": "0750515017429",
+      "name": "M.Y. San Fita Crackers",
+      "brand": "M.Y. San",
+      "variant": "Fita Crackers",
+      "size": "30 g",
+      "category": "Snacks & biscuits",
+      "image_asset": "assets/catalog/images/0750515017429.webp"
+    },
+    {
+      "barcode": "4800092113536",
+      "name": "Rebisco Combi Triple Choco Wafer",
+      "brand": "Rebisco",
+      "variant": "Combi Triple Choco Wafer",
+      "size": "30 g",
+      "category": "Snacks & biscuits",
+      "image_asset": "assets/catalog/images/4800092113536.webp"
+    },
+    {
+      "barcode": "4807770270024",
+      "name": "Lucky Me! Instant Mami Chicken",
+      "brand": "Lucky Me!",
+      "variant": "Instant Mami Chicken",
+      "size": "55 g",
+      "category": "Instant noodles",
+      "image_asset": "assets/catalog/images/4807770270024.webp"
+    },
+    {
+      "barcode": "4800361339568",
+      "name": "Nescafé Classic Pure Soluble Coffee Stick",
+      "brand": "Nescafé",
+      "variant": "Classic Pure Soluble Coffee Stick",
+      "size": "1.9 g",
+      "category": "Coffee & tea",
+      "image_asset": "assets/catalog/images/4800361339568.webp"
+    },
+    {
+      "barcode": "4800016671807",
+      "name": "Jack 'n Jill Piattos Cheese Potato Crisps",
+      "brand": "Jack 'n Jill",
+      "variant": "Piattos Cheese Potato Crisps",
+      "size": "40 g",
+      "category": "Snacks & biscuits",
+      "image_asset": "assets/catalog/images/4800016671807.webp"
+    },
+    {
+      "barcode": "4800092550904",
+      "name": "Fudgee Barr Chocolate Cake Bar",
+      "brand": "Fudgee Barr",
+      "variant": "Chocolate Cake Bar",
+      "size": "42 g",
+      "category": "Snacks & biscuits",
+      "image_asset": "assets/catalog/images/4800092550904.webp"
+    },
+    {
+      "barcode": "4808887119480",
+      "name": "Purefoods Sizzling Sisig",
+      "brand": "Purefoods",
+      "variant": "Sizzling Sisig",
+      "size": "150 g",
+      "category": "Canned goods",
+      "image_asset": "assets/catalog/images/4808887119480.webp"
+    },
+    {
+      "barcode": "4808887030204",
+      "name": "Purefoods Luncheon Meat Chinese Style",
+      "brand": "Purefoods",
+      "variant": "Luncheon Meat Chinese Style",
+      "size": "165 g",
+      "category": "Canned goods",
+      "image_asset": "assets/catalog/images/4808887030204.webp"
     }
   ]
 }

@@ -206,15 +206,25 @@ class ReceiptOcrPage {
     required this.imagePath,
     required this.textLines,
     this.recognitionImagePath,
+    this.originalTextLines = const [],
+    this.comparisonImagePath,
   });
   final String imagePath;
   final String? recognitionImagePath;
   final List<OcrTextLine> textLines;
 
+  /// Secondary evidence keeps the original image's coordinate space separate.
+  final List<OcrTextLine> originalTextLines;
+  final String? comparisonImagePath;
+
   ReceiptOcrPage snapshot() => ReceiptOcrPage(
     imagePath: imagePath,
     recognitionImagePath: recognitionImagePath,
     textLines: List.unmodifiable(textLines.map((line) => line.snapshot())),
+    originalTextLines: List.unmodifiable(
+      originalTextLines.map((line) => line.snapshot()),
+    ),
+    comparisonImagePath: comparisonImagePath,
   );
 }
 
@@ -228,6 +238,7 @@ class ParsedLineItem {
     String? rawDescription,
     this.productId,
     this.matchOrigin,
+    this.printedItemCode,
     this.extractedQuantity,
     this.extractedAmountCents,
     this.quantityEdited = false,
@@ -252,8 +263,12 @@ class ParsedLineItem {
   String description;
   String? productId;
   String? matchOrigin;
-  final int? extractedQuantity;
-  final int? extractedAmountCents;
+
+  /// Uncorrected printed code, separate from product identity; raw OCR retains it.
+  final String? printedItemCode;
+  // OCR comparison completes this baseline before owner editing starts.
+  int? extractedQuantity;
+  int? extractedAmountCents;
   bool quantityEdited;
   bool amountEdited;
   int? quantity;
@@ -312,6 +327,7 @@ class ParsedLineItem {
     description: description,
     productId: productId,
     matchOrigin: matchOrigin,
+    printedItemCode: printedItemCode,
     extractedQuantity: extractedQuantity,
     extractedAmountCents: extractedAmountCents,
     quantityEdited: quantityEdited,

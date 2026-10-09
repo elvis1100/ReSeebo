@@ -1,0 +1,89 @@
+{
+  "synthetic": true,
+  "name": "grocery bounded weight review",
+  "layoutFamily": "grocery_bounded_weight_review",
+  "lines": [
+    {
+      "text": "GROCERY A",
+      "left": 0,
+      "top": 0,
+      "width": 40,
+      "height": 12
+    },
+    {
+      "text": "2026-10-09",
+      "left": 0,
+      "top": 15,
+      "width": 40,
+      "height": 12
+    },
+    {
+      "text": "DESCRIPTION",
+      "left": 0,
+      "top": 35,
+      "width": 40,
+      "height": 12
+    },
+    {
+      "text": "QTY",
+      "left": 150,
+      "top": 35,
+      "width": 40,
+      "height": 12
+    },
+    {
+      "text": "PRICE",
+      "left": 220,
+      "top": 35,
+      "width": 40,
+      "height": 12
+    },
+    {
+      "text": "AMOUNT",
+      "left": 300,
+      "top": 35,
+      "width": 40,
+      "height": 12
+    },
+    {
+      "text": "BANANA",
+      "left": 0,
+      "top": 55,
+      "width": 40,
+      "height": 12
+    },
+    {
+      "text": "0.50",
+      "left": 150,
+      "top": 55,
+      "width": 40,
+      "height": 12
+    },
+    {
+      "text": "80.00",
+      "left": 220,
+      "top": 55,
+      "width": 40,
+      "height": 12
+    },
+    {
+      "text": "40.00",
+      "left": 300,
+      "top": 55,
+      "width": 40,
+      "height": 12
+    }
+  ],
+  "expected": {
+    "date": "2026-10-09",
+    "lines": [
+      {
+        "description": "BANANA",
+        "quantity": null,
+        "unit": null,
+        "amount": null,
+        "warning": "Multiple prices"
+      }
+    ]
+  }
+}

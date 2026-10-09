@@ -149,45 +149,91 @@ class StoreInsightsPdf {
     }
     widgets.addAll([
       pw.SizedBox(height: 24),
-      pw.Text('Suggested suppliers', style: const pw.TextStyle(fontSize: 16, color: green)),
-      _note('Products grouped by the supplier with the lowest latest recorded cost per piece. '
+      pw.Text(
+        'Suggested suppliers',
+        style: const pw.TextStyle(fontSize: 16, color: green),
+      ),
+      _note(
+        'Products grouped by the supplier with the lowest latest recorded cost per piece. '
         'All history. Tied products appear under both suppliers. Prices may be out of date; '
-        'availability, whole-pack quantities, and travel costs can change your buying decision.'),
+        'availability, whole-pack quantities, and travel costs can change your buying decision.',
+      ),
     ]);
     final suggestions = suggestedSuppliers(insights.comparisons);
     for (final group in suggestions) {
       widgets.addAll([
         pw.SizedBox(height: 12),
-        pw.Text(group.supplier.displayName, style: const pw.TextStyle(fontSize: 12, color: green)),
+        pw.Text(
+          group.supplier.displayName,
+          style: const pw.TextStyle(fontSize: 12, color: green),
+        ),
         pw.SizedBox(height: 6),
-        _table(['Product', 'Latest purchase date', 'Cost / piece', 'Status'], [
-          for (final item in group.products) [
-            _identity(item.product),
-            purchaseDate(item.price.latestPurchaseDate, withTime: item.price.purchase.hasPurchaseTime),
-            pesos(item.price.purchase.costPerPieceCents),
-            item.tied ? 'Tied lowest' : 'Lowest recorded',
+        _table(
+          ['Product', 'Latest purchase date', 'Cost / piece', 'Status'],
+          [
+            for (final item in group.products)
+              [
+                _identity(item.product),
+                purchaseDate(
+                  item.price.latestPurchaseDate,
+                  withTime: item.price.purchase.hasPurchaseTime,
+                ),
+                pesos(item.price.purchase.costPerPieceCents),
+                item.tied ? 'Tied lowest' : 'Lowest recorded',
+              ],
           ],
-        ], widths: const [3, 2, 1.4, 1.8], numericColumns: const {2}),
+          widths: const [3, 2, 1.4, 1.8],
+          numericColumns: const {2},
+        ),
       ]);
     }
     if (suggestions.isEmpty) {
-      widgets.add(_note('No supplier suggestions yet. Record the same exact product from at least two suppliers.'));
+      widgets.add(
+        _note(
+          'No supplier suggestions yet. Record the same exact product from at least two suppliers.',
+        ),
+      );
     }
-    final uncompared = insights.comparisons.where((comparison) =>
-      comparison.latestPrices.map((row) => row.purchase.supplier.id).toSet().length == 1).toList();
+    final uncompared = insights.comparisons
+        .where(
+          (comparison) =>
+              comparison.latestPrices
+                  .map((row) => row.purchase.supplier.id)
+                  .toSet()
+                  .length ==
+              1,
+        )
+        .toList();
     if (uncompared.isNotEmpty) {
       widgets.addAll([
         pw.SizedBox(height: 16),
-        pw.Text('No comparison yet', style: const pw.TextStyle(fontSize: 12, color: green)),
-        _note('These products have only one recorded supplier and are not recommendations.'),
-        _table(['Product', 'Recorded supplier', 'Purchase date', 'Cost / piece'], [
-          for (final comparison in uncompared) [
-            _identity(comparison.product), comparison.latestPrices.single.purchase.supplier.displayName,
-            purchaseDate(comparison.latestPrices.single.latestPurchaseDate,
-              withTime: comparison.latestPrices.single.purchase.hasPurchaseTime),
-            pesos(comparison.latestPrices.single.purchase.costPerPieceCents),
+        pw.Text(
+          'No comparison yet',
+          style: const pw.TextStyle(fontSize: 12, color: green),
+        ),
+        _note(
+          'These products have only one recorded supplier and are not recommendations.',
+        ),
+        _table(
+          ['Product', 'Recorded supplier', 'Purchase date', 'Cost / piece'],
+          [
+            for (final comparison in uncompared)
+              [
+                _identity(comparison.product),
+                comparison.latestPrices.single.purchase.supplier.displayName,
+                purchaseDate(
+                  comparison.latestPrices.single.latestPurchaseDate,
+                  withTime:
+                      comparison.latestPrices.single.purchase.hasPurchaseTime,
+                ),
+                pesos(
+                  comparison.latestPrices.single.purchase.costPerPieceCents,
+                ),
+              ],
           ],
-        ], widths: const [3, 2.4, 2, 1.4], numericColumns: const {3}),
+          widths: const [3, 2.4, 2, 1.4],
+          numericColumns: const {3},
+        ),
       ]);
     }
     document.addPage(

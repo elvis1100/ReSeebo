@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'dart:io';
 import 'package:printing/printing.dart';
+import 'package:reseebo_app/features/insights/services/suggested_suppliers.dart';
 import 'package:reseebo_app/features/insights/services/store_insights_pdf.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -60,6 +61,57 @@ class EmptyAdapter extends MockReseeboDataAdapter {
 }
 
 void main() {
+  test(
+    'supplier suggestions group latest winners, include ties, exclude sole suppliers',
+    () {
+      final first = purchase('a', DateTime(2026, 10, 8));
+      final other = PurchaseRecord(
+        id: 'b',
+        receiptId: 'b',
+        productId: 'p',
+        supplier: const Supplier(id: 'b', name: 'Supplier B'),
+        purchasedAt: DateTime(2026, 10, 9),
+        hasPurchaseTime: false,
+        recordedAt: DateTime(2026, 10, 9),
+        originalDescription: 'Coffee',
+        quantity: 2,
+        unit: PurchaseUnit.piece,
+        piecesPerPack: 1,
+        netAmountCents: 1000,
+        imagePath: 'b.jpg',
+      );
+      final sole = comparison(
+        [],
+        prices: [SupplierPriceRow(purchase: first, bestCostPerPieceCents: 500)],
+      );
+      expect(suggestedSuppliers([sole]), isEmpty);
+      final tied = comparison(
+        [],
+        prices: [
+          SupplierPriceRow(purchase: first, bestCostPerPieceCents: 500),
+          SupplierPriceRow(purchase: other, bestCostPerPieceCents: 500),
+        ],
+      );
+      final groups = suggestedSuppliers([tied]);
+      expect(groups.length, 2);
+      expect(groups.every((group) => group.products.single.tied), isTrue);
+      expect(
+        groups.last.products.single.price.latestPurchaseDate,
+        DateTime(2026, 10, 9),
+      );
+      final higher = purchase('higher', DateTime(2026, 10, 10), amount: 1200);
+      final winner = comparison(
+        [],
+        prices: [
+          SupplierPriceRow(purchase: higher, bestCostPerPieceCents: 500),
+          SupplierPriceRow(purchase: other, bestCostPerPieceCents: 500),
+        ],
+      );
+      expect(suggestedSuppliers([winner]).single.supplier.id, 'b');
+      expect(suggestedSuppliers([winner]).single.products.single.tied, isFalse);
+    },
+  );
+
   TestWidgetsFlutterBinding.ensureInitialized();
   setUp(() {
     TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger

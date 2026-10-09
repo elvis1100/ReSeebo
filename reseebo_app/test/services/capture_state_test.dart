@@ -17,6 +17,7 @@ class CaptureAdapter extends MockReseeboDataAdapter {
   Future<ReceiptDraft> processReceiptImages(
     List<String> localImagePaths, {
     List<String>? recognitionImagePaths,
+    List<String>? comparisonImagePaths,
   }) async {
     originals = List.of(localImagePaths);
     adjusted = List.of(recognitionImagePaths!);
@@ -32,6 +33,7 @@ class BlockingCaptureAdapter extends CaptureAdapter {
   Future<ReceiptDraft> processReceiptImages(
     List<String> localImagePaths, {
     List<String>? recognitionImagePaths,
+    List<String>? comparisonImagePaths,
   }) async {
     entered.complete();
     await release.future;

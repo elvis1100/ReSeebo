@@ -1,5 +1,45 @@
 import '../models/models.dart';
 import 'receipt_numeric_row.dart';
+import 'receipt_item_evidence.dart';
+
+class ReceiptLayoutRow {
+  const ReceiptLayoutRow(this.text, {this.item});
+  final String text;
+  final ReceiptItemEvidence? item;
+}
+
+/// Typed bounded blocks bypass string reconstruction. Unclaimed segments keep
+/// their existing header/adjacency handling, with item boundaries between them.
+List<ReceiptLayoutRow> prepareReceiptLayout(List<OcrTextLine> lines) {
+  final groups = groupReceiptItems(lines);
+  if (groups.isEmpty) {
+    return prepareReceiptRows(lines).map(ReceiptLayoutRow.new).toList();
+  }
+  final ordered = List<OcrTextLine>.of(lines)
+    ..sort((a, b) => a.top.compareTo(b.top));
+  final output = <ReceiptLayoutRow>[];
+  final pending = <OcrTextLine>[];
+  final emitted = <ReceiptItemEvidence>{};
+  void flush() {
+    output.addAll(prepareReceiptRows(pending).map(ReceiptLayoutRow.new));
+    pending.clear();
+  }
+
+  for (final line in ordered) {
+    final owners = groups.where((group) => group.sources.contains(line));
+    if (owners.isEmpty) {
+      pending.add(line);
+      continue;
+    }
+    final owner = owners.single;
+    if (emitted.add(owner)) {
+      flush();
+      output.add(ReceiptLayoutRow('', item: owner));
+    }
+  }
+  flush();
+  return output;
+}
 
 /// Reconstruct printed rows from local OCR bounds. Header-labeled columns
 /// identify totals; unlabeled pairs need explicit count and exact arithmetic.
@@ -129,8 +169,12 @@ List<String> prepareReceiptRows(List<OcrTextLine> lines) {
             wholeQuantity &&
             price != null &&
             !receiptAmountsAgree(quantity, price, _money(amount)!);
+        final unsupportedQuantity = quantity.isNotEmpty && !wholeQuantity;
+        final retainedPrice = (disputed || unsupportedQuantity) && price != null
+            ? '$price '
+            : '';
         output.add(
-          '${wholeQuantity ? '${quantity.replaceFirst(RegExp(r'\.0+$'), '')}${pieceUnits ? ' pcs' : ' x'} ' : ''}$description ${disputed ? '$price ' : ''}${_money(amount)}',
+          '${wholeQuantity ? '${quantity.replaceFirst(RegExp(r'\.0+$'), '')}${pieceUnits ? ' pcs' : ' x'} ' : ''}$description ${unsupportedQuantity ? '$quantity ' : ''}$retainedPrice${_money(amount)}',
         );
         continue;
       }
@@ -191,8 +235,8 @@ List<String> prepareReceiptRows(List<OcrTextLine> lines) {
         _nearby(cells, rows[index + 1])) {
       final next = rows[index + 1].map((cell) => cell.text).join(' ').trim();
       // Some grocery tables put the count at the end of the description and
-      // both prices on the following baseline. Arithmetic supplies the column
-      // evidence when OCR loses the table headings; fractional weights stay out.
+      // both prices on the following baseline. A quantity heading establishes
+      // the trailing count; without it, preserve the competing interpretation.
       final trailingCount = RegExp(r'^(.+?)\s+(\d{1,3})$').firstMatch(text);
       final pricePair = RegExp(
         r'^(\d[\d,]*\.\d{2})\s+(\d[\d,]*\.\d{2})\s*(?:VE|[A-Z*])?$',
@@ -205,7 +249,13 @@ List<String> prepareReceiptRows(List<OcrTextLine> lines) {
             pricePair[1]!,
             pricePair[2]!,
           )) {
-        output.add('${trailingCount[2]} x ${trailingCount[1]} ${pricePair[2]}');
+        // A numeral at the end of a name can be a variant or size. Arithmetic
+        // alone cannot promote it to an explicitly printed purchase count.
+        output.add(
+          hasQuantityHeader && quantityFollowsDescription
+              ? '${trailingCount[2]}${pieceUnits ? ' pcs' : ' x'} ${trailingCount[1]} ${pricePair[2]}'
+              : '$text $next',
+        );
         index++;
         continue;
       }
@@ -213,6 +263,10 @@ List<String> prepareReceiptRows(List<OcrTextLine> lines) {
       // Preserve unfamiliar unit text; only the parser's known units infer units.
       final resolved = receiptNumericRow(next);
       if (resolved == null &&
+          !RegExp(
+            r'^(?:7\s+up|100\s+plus)\b',
+            caseSensitive: false,
+          ).hasMatch(next) &&
           RegExp(
             r'^(?:\d+\s+)?(?![x×]\b)[A-ZČ]{1,3}\s+\d[\d,]*\.\d{2}\s*(?:VE|[A-Z*])?$',
             caseSensitive: false,
@@ -321,7 +375,11 @@ List<String> prepareReceiptRows(List<OcrTextLine> lines) {
                 '${qty.group(1)}${pieceUnits ? ' pcs' : ' x'} ${description.substring(0, qty.start)}';
           }
         }
-        output.add('$description ${prices.last.group(0)}');
+        // A heading locates columns but does not make contradictory prices
+        // reliable. Retain every printed price for the parser's arithmetic check.
+        output.add(
+          '$description ${prices.map((price) => price.group(0)).join(' ')}',
+        );
         continue;
       }
     }
@@ -344,13 +402,8 @@ List<String> prepareReceiptRows(List<OcrTextLine> lines) {
   return output;
 }
 
-String? _money(String text) {
-  final match = RegExp(
-    r'^(?:₱|PHP\s*)?(\d[\d,]*\.\d{2})\s*(?:VE|[A-Z*])?$',
-    caseSensitive: false,
-  ).firstMatch(text.trim());
-  return match?.group(1);
-}
+String? _money(String text) =>
+    ReceiptMoneyEvidence(OcrTextLine(text: text)).rawAmount;
 
 bool _descriptionOnly(String text) =>
     RegExp(r'[a-z]', caseSensitive: false).hasMatch(text) &&
@@ -370,14 +423,15 @@ List<List<OcrTextLine>> _alignedCells(List<OcrTextLine> lines) {
       // slightly above its label must not join the preceding product merely
       // because that product was the only row seen so far.
       bool price(OcrTextLine line) =>
+          _money(line.text) != null ||
           RegExp(
-            r'^(?:PHP\s*)?[\d.,₱\s]+(?:VE|V|E|Z|€)?$',
-            caseSensitive: false,
-          ).hasMatch(line.text.trim()) &&
-          RegExp(
-            r'[.,]|[VEZ€]$',
-            caseSensitive: false,
-          ).hasMatch(line.text.trim());
+                r'^(?:PHP\s*|P\s*)?[\d.,₱\s]+(?:VE|V|E|Z|€)?$',
+                caseSensitive: false,
+              ).hasMatch(line.text.trim()) &&
+              RegExp(
+                r'[.,]|[VEZ€]$',
+                caseSensitive: false,
+              ).hasMatch(line.text.trim());
       final type = (price(a) ? 1 : 0).compareTo(price(b) ? 1 : 0);
       return type != 0 ? type : a.top.compareTo(b.top);
     });
@@ -409,7 +463,13 @@ List<List<OcrTextLine>> _alignedCells(List<OcrTextLine> lines) {
         final minWidth = cell.width < line.width ? cell.width : line.width;
         return end - start > minWidth * .5;
       });
-      final tooFarAbove = anchor.top - line.top > line.height * .35;
+      final totalLabel = RegExp(
+        r'^(?:grand\s+total|total(?:\s+(?:due|amount|sales))?|amount\s+(?:due|paid))\s*:?$',
+        caseSensitive: false,
+      ).hasMatch(anchor.text.trim());
+      final tooFarAbove =
+          anchor.top - line.top > line.height * .35 &&
+          !(totalLabel && _money(line.text) != null);
       if (!tooFarAbove &&
           !overlapsColumn &&
           line.height > 0 &&

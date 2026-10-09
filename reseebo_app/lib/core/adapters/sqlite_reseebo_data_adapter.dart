@@ -1,3 +1,4 @@
+import '../services/receipt_product_match.dart';
 import 'dart:convert';
 import 'dart:io';
 
@@ -13,6 +14,7 @@ import '../services/local_file_store.dart';
 import '../services/ocr_service.dart';
 import '../services/pricing_service.dart';
 import '../services/receipt_parser.dart';
+import '../services/receipt_ocr_comparison.dart';
 import '../services/receipt_validator.dart';
 import '../services/starter_catalog_service.dart';
 import 'i_reseebo_data_adapter.dart';
@@ -379,10 +381,32 @@ class SqliteReseeboDataAdapter implements IReseeboDataAdapter {
 
   @override
   Future<List<ProductMatchSuggestion>> matchAliases(
-    String rawOcrDescription,
-  ) async {
+    String rawOcrDescription, {
+    String? supplierId,
+  }) async {
     final key = _key(rawOcrDescription);
     if (key.isEmpty) return [];
+    final scoped = supplierId == null
+        ? <Map<String, Object?>>[]
+        : await _db.rawQuery(
+            'SELECT DISTINCT p.* FROM products p JOIN supplier_product_aliases a ON a.product_id = p.id WHERE a.supplier_id = ? AND a.description_key = ?',
+            [supplierId, key],
+          );
+    if (scoped.isNotEmpty) {
+      return scoped
+          .map(
+            (row) => ProductMatchSuggestion(
+              product: productFromRow(row),
+              reason: scoped.length > 1
+                  ? 'This supplier description has more than one confirmed mapping. Choose the exact variant and size.'
+                  : 'Previously confirmed description for this supplier branch.',
+              exactAlias: true,
+            ),
+          )
+          .toList();
+    }
+    // Global aliases have no reliable supplier provenance. They can suggest a
+    // product but must never silently decide which branch-specific variant wins.
     final exact = await _db.rawQuery(
       'SELECT DISTINCT p.* FROM products p JOIN product_aliases a ON a.product_id = p.id WHERE a.description_key = ?',
       [key],
@@ -391,49 +415,20 @@ class SqliteReseeboDataAdapter implements IReseeboDataAdapter {
         .map(
           (row) => ProductMatchSuggestion(
             product: productFromRow(row),
-            reason: exact.length > 1
-                ? 'This description has more than one confirmed mapping. Choose the exact variant and size.'
-                : 'Previously confirmed receipt description. Check this purchase before confirming.',
-            exactAlias: true,
+            reason:
+                'Saved catalog description. Confirm this supplier product and size.',
           ),
         )
         .toList();
     if (suggestions.isNotEmpty) return suggestions;
-    final tokens = key
-        .split(RegExp(r'[^a-z0-9]+'))
-        .where((token) => token.length >= 2)
-        .toSet();
-    if (tokens.isEmpty) return [];
-    final candidates = <(Product, int)>[];
-    for (final product in await getProducts()) {
-      final identity = _key(
-        '${product.name} ${product.brand} ${product.variant} ${product.size}',
-      );
-      final score = tokens.where((token) => identity.contains(token)).length;
-      if (score >= (tokens.length > 1 ? 2 : 1)) {
-        candidates.add((product, score));
-      }
-    }
-    candidates.sort((a, b) => b.$2.compareTo(a.$2));
-    return candidates
-        .take(8)
-        .map(
-          (entry) => ProductMatchSuggestion(
-            product: entry.$1,
-            reason:
-                'Similar catalog text. Confirm the exact brand, variant and size.',
-          ),
-        )
-        .toList();
+    return receiptProductSuggestions(rawOcrDescription, await getProducts());
   }
 
   @override
   Future<List<ProductAlias>> getAliases(String productId) async =>
-      (await _db.query(
-            'product_aliases',
-            where: 'product_id = ?',
-            whereArgs: [productId],
-            orderBy: 'description COLLATE NOCASE',
+      (await _db.rawQuery(
+            'SELECT id, product_id, description FROM product_aliases WHERE product_id = ? UNION ALL SELECT id, product_id, description FROM supplier_product_aliases WHERE product_id = ? ORDER BY description COLLATE NOCASE',
+            [productId, productId],
           ))
           .map(
             (row) => ProductAlias(
@@ -447,6 +442,11 @@ class SqliteReseeboDataAdapter implements IReseeboDataAdapter {
   @override
   Future<void> deleteAlias(String aliasId) => _write(() async {
     await _db.delete('product_aliases', where: 'id = ?', whereArgs: [aliasId]);
+    await _db.delete(
+      'supplier_product_aliases',
+      where: 'id = ?',
+      whereArgs: [aliasId],
+    );
   });
 
   @override
@@ -506,21 +506,26 @@ class SqliteReseeboDataAdapter implements IReseeboDataAdapter {
   Future<ReceiptDraft> processReceiptImage(
     String localImagePath, {
     String? recognitionImagePath,
+    String? comparisonImagePath,
   }) => processReceiptImages(
     [localImagePath],
     recognitionImagePaths: [recognitionImagePath ?? localImagePath],
+    comparisonImagePaths: [comparisonImagePath ?? localImagePath],
   );
 
   @override
   Future<ReceiptDraft> processReceiptImages(
     List<String> localImagePaths, {
     List<String>? recognitionImagePaths,
+    List<String>? comparisonImagePaths,
   }) async {
     final originals = List<String>.of(localImagePaths);
     final adjusted = List<String>.of(recognitionImagePaths ?? originals);
+    final comparison = List<String>.of(comparisonImagePaths ?? originals);
     if (originals.isEmpty ||
         originals.length > maxReceiptPages ||
-        adjusted.length != originals.length) {
+        adjusted.length != originals.length ||
+        comparison.length != originals.length) {
       throw const ValidationException(
         'Choose 1 to 20 photos in receipt order.',
       );
@@ -534,9 +539,20 @@ class SqliteReseeboDataAdapter implements IReseeboDataAdapter {
       }
     }
     final pages = <ReceiptOcrPage>[];
+    final comparisonWarnings = <String>[];
     for (var index = 0; index < originals.length; index++) {
       try {
         final text = await _ocr.recognize(adjusted[index]);
+        var originalText = <OcrTextLine>[];
+        if (adjusted[index] != comparison[index]) {
+          try {
+            originalText = await _ocr.recognize(comparison[index]);
+          } catch (_) {
+            comparisonWarnings.add(
+              'Photo ${index + 1}: the original photo could not be compared. Review the enhanced reading.',
+            );
+          }
+        }
         pages.add(
           ReceiptOcrPage(
             imagePath: originals[index],
@@ -544,13 +560,27 @@ class SqliteReseeboDataAdapter implements IReseeboDataAdapter {
                 ? null
                 : adjusted[index],
             textLines: text,
+            originalTextLines: originalText,
+            comparisonImagePath: comparison[index],
           ),
         );
       } on AppException catch (failure) {
         throw AppException('Photo ${index + 1}: ${failure.message}');
       }
     }
-    return _parser.parsePages(pages: pages);
+    final draft = _parser.parsePages(pages: pages);
+    draft.ocrPages
+      ..clear()
+      ..addAll(pages);
+    const ReceiptOcrComparison().supplement(draft, pages);
+    for (var index = 0; index < pages.length; index++) {
+      if (pages[index].originalTextLines.isNotEmpty) {
+        draft.rawText +=
+            '\n\n--- Original photo ${index + 1} comparison ---\n${pages[index].originalTextLines.map((line) => line.text).join('\n')}';
+      }
+    }
+    draft.warnings.addAll(comparisonWarnings);
+    return draft;
   }
 
   @override
@@ -801,14 +831,19 @@ class SqliteReseeboDataAdapter implements IReseeboDataAdapter {
             'created_at': now,
             'updated_at': now,
           });
-          await txn.insert('product_aliases', {
-            'id': const Uuid().v4(),
-            'product_id': productId,
-            'description': line.description.trim(),
-            'description_key': _key(line.description),
-            'created_at': now,
-            'updated_at': now,
-          }, conflictAlgorithm: sqlite.ConflictAlgorithm.ignore);
+          await txn.insert(
+            'supplier_product_aliases',
+            {
+              'id': const Uuid().v4(),
+              'supplier_id': supplierId,
+              'product_id': productId,
+              'description': line.description.trim(),
+              'description_key': _key(line.description),
+              'created_at': now,
+              'updated_at': now,
+            },
+            conflictAlgorithm: sqlite.ConflictAlgorithm.ignore,
+          );
           lineIds.add(lineId);
           costs.add(line.netAmountCents! / line.totalPieces!);
         }

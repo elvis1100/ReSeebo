@@ -1,0 +1,30 @@
+{
+  "synthetic": true,
+  "name": "explicit numeric row before product",
+  "layoutFamily": "grocery_numeric_before",
+  "lines": [
+    {
+      "text": "GROCERY A"
+    },
+    {
+      "text": "2026-10-09"
+    },
+    {
+      "text": "2 PC 15.00 30.00"
+    },
+    {
+      "text": "COFFEE ORIGINAL 26G"
+    }
+  ],
+  "expected": {
+    "date": "2026-10-09",
+    "lines": [
+      {
+        "description": "COFFEE ORIGINAL 26G",
+        "quantity": 2,
+        "unit": "piece",
+        "amount": 3000
+      }
+    ]
+  }
+}

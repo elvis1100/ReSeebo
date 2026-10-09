@@ -1,0 +1,27 @@
+{
+  "synthetic": true,
+  "name": "explicit pieces and decimal whole count with @",
+  "layoutFamily": "grocery_at_piece",
+  "lines": [
+    {
+      "text": "GROCERY A"
+    },
+    {
+      "text": "2026-10-09"
+    },
+    {
+      "text": "2.00 PC COFFEE ORIGINAL 26G @15.00 30.00"
+    }
+  ],
+  "expected": {
+    "date": "2026-10-09",
+    "lines": [
+      {
+        "description": "COFFEE ORIGINAL 26G",
+        "quantity": 2,
+        "unit": "piece",
+        "amount": 3000
+      }
+    ]
+  }
+}

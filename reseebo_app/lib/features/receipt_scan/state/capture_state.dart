@@ -293,6 +293,13 @@ class CaptureState extends ChangeNotifier {
                   : page.preparedPath!,
             )
             .toList(),
+        comparisonImagePaths: _pages
+            .map(
+              (page) => page.useOriginal
+                  ? page.originalPreparedPath!
+                  : page.editedPath,
+            )
+            .toList(),
       );
       _draftProduced = true;
       return draft;

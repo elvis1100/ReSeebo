@@ -1,0 +1,372 @@
+{
+  "id": "user_wellbest_ppocr_enhanced",
+  "provenance": "Local desktop CPU PP-OCRv5 mobile via RapidOCR/ONNX; not Android verification; sanitized to supplier header and item/total region; no transcription corrections",
+  "rapidocrVersion": "3.10.0",
+  "onnxruntimeVersion": "1.31.0",
+  "imageSha256": "a712fa3b023c3a579c47f3c2a2f0a69844762b60601a07039caf7c1c368274ea",
+  "modelSha256": {
+    "en_PP-OCRv5_rec_mobile.onnx": "c3461add59bb4323ecba96a492ab75e06dda42467c9e3d0c18db5d1d21924be8",
+    "ch_ppocr_mobile_v2.0_cls_mobile.onnx": "e47acedf663230f8863ff1ab0e64dd2d82b838fceb5957146dab185a89d6215c",
+    "ch_PP-OCRv5_det_mobile.onnx": "4d97c44a20d30a81aad087d6a396b08f786c4635742afc391f6621f5c6ae78ae"
+  },
+  "elapsedSeconds": 3.9708044689978124,
+  "lines": [
+    {
+      "text": "WELLBEST BATANGAS CITY",
+      "confidence": 0.99618,
+      "tokens": [
+        {
+          "text": "WELLBEST",
+          "left": 199.0,
+          "top": 300.0,
+          "width": 152.0,
+          "height": 58.0
+        },
+        {
+          "text": "BATANGAS",
+          "left": 374.0,
+          "top": 295.0,
+          "width": 151.0,
+          "height": 58.0
+        },
+        {
+          "text": "CITY",
+          "left": 541.0,
+          "top": 292.0,
+          "width": 72.0,
+          "height": 56.0
+        }
+      ],
+      "left": 196.84210205078125,
+      "top": 292.7197570800781,
+      "width": 419.73681640625,
+      "height": 65.3790283203125
+    },
+    {
+      "text": "001747347 BIRCH TREE FORTIFIED 64G TP",
+      "confidence": 0.98435,
+      "tokens": [
+        {
+          "text": "001747347",
+          "left": 42.0,
+          "top": 1159.0,
+          "width": 175.0,
+          "height": 57.0
+        },
+        {
+          "text": "BIRCH",
+          "left": 234.0,
+          "top": 1154.0,
+          "width": 91.0,
+          "height": 53.0
+        },
+        {
+          "text": "TREE",
+          "left": 350.0,
+          "top": 1150.0,
+          "width": 74.0,
+          "height": 52.0
+        },
+        {
+          "text": "FORTIFIED",
+          "left": 434.0,
+          "top": 1141.0,
+          "width": 174.0,
+          "height": 57.0
+        },
+        {
+          "text": "64G",
+          "left": 627.0,
+          "top": 1138.0,
+          "width": 58.0,
+          "height": 51.0
+        },
+        {
+          "text": "TP",
+          "left": 704.0,
+          "top": 1135.0,
+          "width": 34.0,
+          "height": 50.0
+        }
+      ],
+      "left": 40.52631378173828,
+      "top": 1135.2176513671875,
+      "width": 709.2105102539062,
+      "height": 80.2379150390625
+    },
+    {
+      "text": "157.50V",
+      "confidence": 0.92925,
+      "tokens": [
+        {
+          "text": "157.50",
+          "left": 622.0,
+          "top": 1185.0,
+          "width": 122.0,
+          "height": 58.0
+        },
+        {
+          "text": "V",
+          "left": 779.0,
+          "top": 1183.0,
+          "width": 22.0,
+          "height": 51.0
+        }
+      ],
+      "left": 620.9210205078125,
+      "top": 1182.76611328125,
+      "width": 186.71051025390625,
+      "height": 59.4354248046875
+    },
+    {
+      "text": "10 X",
+      "confidence": 0.96222,
+      "tokens": [
+        {
+          "text": "10",
+          "left": 87.0,
+          "top": 1210.0,
+          "width": 34.0,
+          "height": 50.0
+        },
+        {
+          "text": "X",
+          "left": 141.0,
+          "top": 1207.0,
+          "width": 18.0,
+          "height": 50.0
+        }
+      ],
+      "left": 76.71052551269531,
+      "top": 1206.540283203125,
+      "width": 107.10525512695312,
+      "height": 53.491943359375
+    },
+    {
+      "text": "15.75",
+      "confidence": 0.99976,
+      "tokens": [
+        {
+          "text": "15.75",
+          "left": 236.0,
+          "top": 1203.0,
+          "width": 96.0,
+          "height": 49.0
+        }
+      ],
+      "left": 227.23683166503906,
+      "top": 1203.5684814453125,
+      "width": 110.00001525878906,
+      "height": 49.0343017578125
+    },
+    {
+      "text": "001500581 6+1ARIEL LAU LI0.SR FRS 58G",
+      "confidence": 0.96332,
+      "tokens": [
+        {
+          "text": "001500581",
+          "left": 44.0,
+          "top": 1258.0,
+          "width": 176.0,
+          "height": 52.0
+        },
+        {
+          "text": "6+1ARIEL",
+          "left": 237.0,
+          "top": 1252.0,
+          "width": 149.0,
+          "height": 51.0
+        },
+        {
+          "text": "LAU",
+          "left": 403.0,
+          "top": 1249.0,
+          "width": 58.0,
+          "height": 47.0
+        },
+        {
+          "text": "LI0.SR",
+          "left": 478.0,
+          "top": 1244.0,
+          "width": 117.0,
+          "height": 50.0
+        },
+        {
+          "text": "FRS",
+          "left": 611.0,
+          "top": 1242.0,
+          "width": 57.0,
+          "height": 46.0
+        },
+        {
+          "text": "58G",
+          "left": 684.0,
+          "top": 1239.0,
+          "width": 64.0,
+          "height": 47.0
+        }
+      ],
+      "left": 43.421051025390625,
+      "top": 1239.2298583984375,
+      "width": 704.868408203125,
+      "height": 71.322509765625
+    },
+    {
+      "text": "93.00 V",
+      "confidence": 0.95259,
+      "tokens": [
+        {
+          "text": "93.00",
+          "left": 647.0,
+          "top": 1288.0,
+          "width": 99.0,
+          "height": 53.0
+        },
+        {
+          "text": "V",
+          "left": 777.0,
+          "top": 1285.0,
+          "width": 23.0,
+          "height": 51.0
+        }
+      ],
+      "left": 638.2894287109375,
+      "top": 1285.2923583984375,
+      "width": 170.78948974609375,
+      "height": 54.977783203125
+    },
+    {
+      "text": "1 X",
+      "confidence": 0.98621,
+      "tokens": [
+        {
+          "text": "1",
+          "left": 102.0,
+          "top": 1312.0,
+          "width": 29.0,
+          "height": 47.0
+        },
+        {
+          "text": "X",
+          "left": 139.0,
+          "top": 1310.0,
+          "width": 29.0,
+          "height": 47.0
+        }
+      ],
+      "left": 96.97367858886719,
+      "top": 1310.5523681640625,
+      "width": 81.05262756347656,
+      "height": 49.0343017578125
+    },
+    {
+      "text": "93.00",
+      "confidence": 0.99814,
+      "tokens": [
+        {
+          "text": "93.00",
+          "left": 235.0,
+          "top": 1306.0,
+          "width": 99.0,
+          "height": 45.0
+        }
+      ],
+      "left": 228.6842041015625,
+      "top": 1306.0947265625,
+      "width": 107.10525512695312,
+      "height": 46.0625
+    },
+    {
+      "text": "Total Items:",
+      "confidence": 0.99741,
+      "tokens": [
+        {
+          "text": "Total",
+          "left": 58.0,
+          "top": 1410.0,
+          "width": 86.0,
+          "height": 49.0
+        },
+        {
+          "text": "Items:",
+          "left": 169.0,
+          "top": 1407.0,
+          "width": 111.0,
+          "height": 50.0
+        }
+      ],
+      "left": 49.21052551269531,
+      "top": 1407.135009765625,
+      "width": 230.13157653808594,
+      "height": 50.5201416015625
+    },
+    {
+      "text": "11",
+      "confidence": 0.99978,
+      "tokens": [
+        {
+          "text": "11",
+          "left": 347.0,
+          "top": 1405.0,
+          "width": 43.0,
+          "height": 43.0
+        }
+      ],
+      "left": 347.368408203125,
+      "top": 1405.649169921875,
+      "width": 44.868438720703125,
+      "height": 43.0906982421875
+    },
+    {
+      "text": "P250.50",
+      "confidence": 0.99239,
+      "tokens": [
+        {
+          "text": "P250.50",
+          "left": 650.0,
+          "top": 1486.0,
+          "width": 132.0,
+          "height": 51.0
+        }
+      ],
+      "left": 641.1842041015625,
+      "top": 1485.8870849609375,
+      "width": 147.631591796875,
+      "height": 52.0059814453125
+    },
+    {
+      "text": "TOTAL",
+      "confidence": 0.9995,
+      "tokens": [
+        {
+          "text": "TOTAL",
+          "left": 63.0,
+          "top": 1509.0,
+          "width": 88.0,
+          "height": 43.0
+        }
+      ],
+      "left": 55.0,
+      "top": 1509.6612548828125,
+      "width": 102.76315307617188,
+      "height": 43.0906982421875
+    },
+    {
+      "text": "P223.66",
+      "confidence": 0.99497,
+      "tokens": [
+        {
+          "text": "P223.66",
+          "left": 643.0,
+          "top": 1535.0,
+          "width": 137.0,
+          "height": 52.0
+        }
+      ],
+      "left": 642.631591796875,
+      "top": 1534.9212646484375,
+      "width": 147.63153076171875,
+      "height": 52.006103515625
+    }
+  ]
+}

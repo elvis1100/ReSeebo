@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../../core/adapters/i_reseebo_data_adapter.dart';
+import '../../../core/services/receipt_product_match.dart';
 import '../../catalog/screens/product_editor_screen.dart';
 import '../../../core/widgets/shared_widgets.dart';
 
@@ -9,9 +10,11 @@ class ProductMatchPicker extends StatefulWidget {
     super.key,
     required this.adapter,
     required this.description,
+    this.supplierId,
   });
   final IReseeboDataAdapter adapter;
   final String description;
+  final String? supplierId;
   @override
   State<ProductMatchPicker> createState() => _ProductMatchPickerState();
 }
@@ -22,6 +25,7 @@ class _ProductMatchPickerState extends State<ProductMatchPicker> {
   String _query = '';
   String? _error;
   bool _adding = false;
+  bool _loading = false;
 
   @override
   void initState() {
@@ -30,18 +34,44 @@ class _ProductMatchPickerState extends State<ProductMatchPicker> {
   }
 
   Future<void> _load() async {
+    if (_loading) return;
+    setState(() {
+      _loading = true;
+      _error = null;
+    });
     try {
       final products = await widget.adapter.getProducts();
-      final suggestions = await widget.adapter.matchAliases(widget.description);
+      final suggestions = await widget.adapter.matchAliases(
+        widget.description,
+        supplierId: widget.supplierId,
+      );
       if (mounted) {
         setState(() {
           _products = products;
-          _suggestions = suggestions;
+          final learned = suggestions.where((s) => s.exactAlias).toList();
+          final ids = learned.map((s) => s.product.id).toSet();
+          final ranked = receiptProductSuggestions(
+            widget.description,
+            products,
+          );
+          final rankedIds = ranked.map((s) => s.product.id).toSet();
+          _suggestions = [
+            ...learned,
+            ...ranked.where((s) => !ids.contains(s.product.id)),
+            ...suggestions.where(
+              (s) =>
+                  !s.exactAlias &&
+                  !ids.contains(s.product.id) &&
+                  !rankedIds.contains(s.product.id),
+            ),
+          ];
           _error = null;
         });
       }
     } catch (error) {
       if (mounted) setState(() => _error = userMessage(error));
+    } finally {
+      if (mounted) setState(() => _loading = false);
     }
   }
 
@@ -142,15 +172,18 @@ class _ProductMatchPickerState extends State<ProductMatchPicker> {
             ),
             const SizedBox(height: 8),
             OutlinedButton.icon(
-              onPressed: _adding ? null : _add,
+              onPressed: _adding || _loading ? null : _add,
               icon: const Icon(Icons.add),
               label: const Text('Add a new product'),
             ),
             const SizedBox(height: 8),
             if (_error != null) ...[
               Text(_error!),
-              TextButton(onPressed: _load, child: const Text('Retry')),
-            ] else if (_products == null)
+              TextButton(
+                onPressed: _loading ? null : _load,
+                child: const Text('Retry'),
+              ),
+            ] else if (_loading || _products == null)
               const Padding(
                 padding: EdgeInsets.all(24),
                 child: Center(child: CircularProgressIndicator()),

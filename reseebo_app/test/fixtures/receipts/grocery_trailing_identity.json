@@ -1,0 +1,31 @@
+{
+  "synthetic": true,
+  "name": "grocery trailing identity",
+  "layoutFamily": "grocery_trailing_identity",
+  "lines": [
+    {
+      "text": "GROCERY A"
+    },
+    {
+      "text": "2026-10-09"
+    },
+    {
+      "text": "COFFEE 26"
+    },
+    {
+      "text": "1.00 26.00"
+    }
+  ],
+  "expected": {
+    "date": "2026-10-09",
+    "lines": [
+      {
+        "description": "COFFEE 26",
+        "quantity": null,
+        "unit": null,
+        "amount": null,
+        "warning": "Multiple prices"
+      }
+    ]
+  }
+}

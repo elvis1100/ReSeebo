@@ -1,0 +1,34 @@
+{
+  "kind": "photo-ground-truth",
+  "source": "Owner-provided 20261009_201745.jpg",
+  "verification": "Independently read from original photo and enlarged item crops on 2026-10-10 before inspecting OCR; quantities/amounts verified by arithmetic. Description excludes printed item code. Match patterns are evaluation-only row anchors. X leaves pieces/packs unresolved.",
+  "imageSha256": "9b1fe91ab4d6cd86e7c4f451160fa371308358c8dae9cfaebd5e67c39f945df9",
+  "captures": [
+    "user_wellbest_mlkit_original",
+    "user_wellbest_mlkit_enhanced",
+    "user_wellbest_ppocr_original",
+    "user_wellbest_ppocr_enhanced"
+  ],
+  "expected": {
+    "total": 25050,
+    "lines": [
+      {
+        "matchPattern": "BIRCH|TREE|FORTIFIED",
+        "description": "BIRCH TREE FORTIFIED 64G TP",
+        "printedItemCode": "001747347",
+        "quantity": 10,
+        "unit": null,
+        "amount": 15750
+      },
+      {
+        "matchPattern": "ARIEL|LAU",
+        "description": "6+1ARIEL LAU LIQ.SR FRS 58G",
+        "printedItemCode": "001500581",
+        "quantity": 1,
+        "unit": null,
+        "amount": 9300
+      }
+    ]
+  },
+  "captureDirectory": "test/fixtures/owner_receipts"
+}

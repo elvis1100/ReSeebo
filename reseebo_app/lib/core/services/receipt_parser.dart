@@ -14,7 +14,7 @@ class ReceiptParser {
     required List<OcrTextLine> textLines,
     String? recognitionImagePath,
   }) {
-    final rows = prepareReceiptRows(textLines);
+    final rows = prepareReceiptLayout(textLines);
     final draft = ReceiptDraft(
       imagePath: imagePath,
       recognitionImagePath: recognitionImagePath,
@@ -37,14 +37,20 @@ class ReceiptParser {
     draft.dateFromReceipt = purchase.purchasedAt != null;
     draft.warnings.addAll(purchase.warnings);
     final amountPattern = RegExp(
-      r'(?:₱|PHP\s*)?(-?\d[\d,]*\.\d{2})\s*(?:(?:VE|[A-Z*]))?\s*$',
+      r'(?:(?<![a-z0-9])(?:₱\s*|PHP\s*|P\s*))?(-?\d[\d,]*\.\d{2})\s*(VE|[\p{L}*])?\s*$',
       caseSensitive: false,
+      unicode: true,
     );
     int? printedUnitCount;
     var reachedTotal = false;
     var inItemTable = false;
     for (var index = 0; index < rows.length; index++) {
-      final text = rows[index].trim();
+      final row = rows[index];
+      if (row.item != null) {
+        if (!reachedTotal) draft.lines.add(row.item!.resolve());
+        continue;
+      }
+      final text = row.text.trim();
       if (text.isEmpty) continue;
       final count = RegExp(
         r'^(?:total\s+items|items\s+purchased)\s*:?\s*(\d+)$|^(\d+)\s+item(?:\(s\)|s)?$',
@@ -223,6 +229,16 @@ class ReceiptParser {
         }
       }
       final warnings = <String>['Confirm the exact brand, variant and size.'];
+      final marker = amountMatch[2];
+      if (marker != null &&
+          !RegExp(
+            r'^(?:VE|V|E|Z|\*)$',
+            caseSensitive: false,
+          ).hasMatch(marker)) {
+        warnings.add(
+          'Unclear trailing price marker "$marker". Check the original receipt.',
+        );
+      }
       if (inferredLeadingQuantity) {
         warnings.add(
           'Confirm that the leading number is a purchased quantity rather than a product name or code.',

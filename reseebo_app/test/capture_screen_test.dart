@@ -20,6 +20,7 @@ class DelayedCaptureAdapter extends MockReseeboDataAdapter {
   Future<ReceiptDraft> processReceiptImages(
     List<String> localImagePaths, {
     List<String>? recognitionImagePaths,
+    List<String>? comparisonImagePaths,
   }) async {
     await release.future;
     return ReceiptDraft(imagePath: localImagePaths.first);
@@ -73,7 +74,9 @@ void main() {
       );
       state.selectedPage!.preparedPath = original.path;
       addTearDown(state.dispose);
-      await tester.pumpWidget(MaterialApp(theme: AppTheme.light, home: const Scaffold()));
+      await tester.pumpWidget(
+        MaterialApp(theme: AppTheme.light, home: const Scaffold()),
+      );
       await tester.runAsync(
         () => precacheImage(
           ResizeImage(FileImage(original), width: 1000),

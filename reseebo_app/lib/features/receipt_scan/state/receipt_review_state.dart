@@ -2,7 +2,7 @@ import 'package:flutter/foundation.dart';
 
 import '../../../core/adapters/i_reseebo_data_adapter.dart';
 import '../../../core/constants/formatters.dart';
-import '../../../core/services/exact_product_match.dart';
+import '../../../core/services/receipt_product_match.dart';
 import '../../../core/services/receipt_purchase_datetime.dart';
 import '../../../core/services/receipt_layout.dart';
 
@@ -76,7 +76,7 @@ class ReceiptReviewState extends ChangeNotifier {
         line.description = text;
         line.productId = null;
         line.matchOrigin = null;
-        final product = exactProductMatch(text, products);
+        final product = receiptProductMatch(text, products);
         if (product != null) {
           line.productId = product.id;
           line.matchOrigin = 'Matched from receipt';
@@ -105,6 +105,8 @@ class ReceiptReviewState extends ChangeNotifier {
     changed(line: line);
   }
 
+  String? _matchedSupplierId;
+  bool _hasMatchedSupplier = false;
   bool _disposed = false;
   void _changed() {
     if (!_disposed) notifyListeners();
@@ -137,18 +139,23 @@ class ReceiptReviewState extends ChangeNotifier {
         }
       }
       refreshDateSuggestion();
+      _matchedSupplierId = draft.supplierId;
+      _hasMatchedSupplier = true;
       // Unique confirmed aliases or complete exact catalog identities prefill
       // product identity. Similar catalog names still need an explicit choice.
       final aliases = <String, List<ProductMatchSuggestion>>{};
       for (final line in draft.lines) {
         if (line.productId != null || line.description.trim().isEmpty) continue;
         final description = line.description;
-        final key = _key(description);
+        final supplierId = draft.supplierId;
+        final key = '${supplierId ?? ''}|${_key(description)}';
         final matches = aliases[key] ??= await adapter.matchAliases(
           description,
+          supplierId: supplierId,
         );
         if (_disposed ||
             line.description != description ||
+            draft.supplierId != supplierId ||
             line.productId != null) {
           continue;
         }
@@ -162,7 +169,7 @@ class ReceiptReviewState extends ChangeNotifier {
           line.matchOrigin = 'Previously matched';
           line.confirmed = false;
         } else if (exactIds.isEmpty) {
-          final product = exactProductMatch(line.description, products);
+          final product = receiptProductMatch(line.description, products);
           if (product != null) {
             line.productId = product.id;
             line.matchOrigin = 'Matched from receipt';
@@ -248,6 +255,17 @@ class ReceiptReviewState extends ChangeNotifier {
   }
 
   void changed({ParsedLineItem? line, bool affectsTotal = false}) {
+    if (_hasMatchedSupplier && _matchedSupplierId != draft.supplierId) {
+      _matchedSupplierId = draft.supplierId;
+      for (final item in draft.lines) {
+        if (item.matchOrigin == 'Previously matched') {
+          item.productId = null;
+          item.matchOrigin = null;
+          item.confirmed = false;
+        }
+      }
+      load();
+    }
     if (line != null) line.confirmed = false;
     if (affectsTotal) draft.totalDifferenceConfirmed = false;
     draft.allowDuplicate = false;

@@ -1,7 +1,7 @@
 {
   "version": 1,
   "source": "Open Food Facts",
-  "retrieved_on": "2026-10-09",
+  "retrieved_on": "2026-10-10",
   "database_license": "ODbL-1.0",
   "contents_license": "DbCL-1.0",
   "image_license": "CC-BY-SA-3.0",
@@ -121,16 +121,16 @@
       "source_quantity": "60g",
       "product_url": "https://world.openfoodfacts.org/product/4800016680267",
       "image_url": "https://images.openfoodfacts.net/images/products/480/001/668/0267/front_en.4.200.jpg",
-      "download_url": "https://openfoodfacts-images.s3.eu-west-3.amazonaws.com/data/480/001/668/0267/1.400.jpg",
+      "download_url": "https://images.openfoodfacts.net/images/products/480/001/668/0267/front_en.4.400.jpg",
       "creator": "foodless",
       "image_license": "CC-BY-SA-3.0",
       "image_asset": "assets/catalog/images/4800016680267.webp",
-      "image_bytes": 4528,
+      "image_bytes": 4684,
       "image_dimensions": [
-        180,
-        104
+        104,
+        180
       ],
-      "modifications": "EXIF orientation; RGB conversion; proportional resize to at most 180px; WebP quality 72"
+      "modifications": "EXIF orientation; server rotation/crop; proportional resize to at most 180px; WebP quality 72"
     },
     {
       "barcode": "4800249909319",
@@ -283,16 +283,16 @@
       "source_quantity": "1L",
       "product_url": "https://world.openfoodfacts.org/product/4801981119981",
       "image_url": "https://images.openfoodfacts.net/images/products/480/198/111/9981/front_en.6.200.jpg",
-      "download_url": "https://openfoodfacts-images.s3.eu-west-3.amazonaws.com/data/480/198/111/9981/1.400.jpg",
+      "download_url": "https://images.openfoodfacts.net/images/products/480/198/111/9981/front_en.6.400.jpg",
       "creator": "foodless",
       "image_license": "CC-BY-SA-3.0",
       "image_asset": "assets/catalog/images/4801981119981.webp",
-      "image_bytes": 2932,
+      "image_bytes": 2990,
       "image_dimensions": [
-        180,
-        97
+        97,
+        180
       ],
-      "modifications": "EXIF orientation; RGB conversion; proportional resize to at most 180px; WebP quality 72"
+      "modifications": "EXIF orientation; server rotation/crop; proportional resize to at most 180px; WebP quality 72"
     },
     {
       "barcode": "4801981127177",
@@ -553,16 +553,16 @@
       "source_quantity": "1 L",
       "product_url": "https://world.openfoodfacts.org/product/4800024579317",
       "image_url": "https://images.openfoodfacts.net/images/products/480/002/457/9317/front_en.9.200.jpg",
-      "download_url": "https://openfoodfacts-images.s3.eu-west-3.amazonaws.com/data/480/002/457/9317/1.400.jpg",
+      "download_url": "https://images.openfoodfacts.net/images/products/480/002/457/9317/front_en.9.400.jpg",
       "creator": "foodless",
       "image_license": "CC-BY-SA-3.0",
       "image_asset": "assets/catalog/images/4800024579317.webp",
-      "image_bytes": 4538,
+      "image_bytes": 4620,
       "image_dimensions": [
-        180,
-        104
+        104,
+        180
       ],
-      "modifications": "EXIF orientation; RGB conversion; proportional resize to at most 180px; WebP quality 72"
+      "modifications": "EXIF orientation; server rotation/crop; proportional resize to at most 180px; WebP quality 72"
     },
     {
       "barcode": "4800024582461",
@@ -1237,16 +1237,16 @@
       "source_quantity": "28 g",
       "product_url": "https://world.openfoodfacts.org/product/4800016082641",
       "image_url": "https://images.openfoodfacts.net/images/products/480/001/608/2641/front_en.10.200.jpg",
-      "download_url": "https://openfoodfacts-images.s3.eu-west-3.amazonaws.com/data/480/001/608/2641/1.400.jpg",
+      "download_url": "https://images.openfoodfacts.net/images/products/480/001/608/2641/front_en.10.400.jpg",
       "creator": "openfoodfacts-contributors",
       "image_license": "CC-BY-SA-3.0",
       "image_asset": "assets/catalog/images/4800016082641.webp",
-      "image_bytes": 4368,
+      "image_bytes": 4714,
       "image_dimensions": [
-        135,
-        180
+        180,
+        135
       ],
-      "modifications": "EXIF orientation; RGB conversion; proportional resize to at most 180px; WebP quality 72"
+      "modifications": "EXIF orientation; server rotation/crop; proportional resize to at most 180px; WebP quality 72"
     },
     {
       "barcode": "4800016666261",
@@ -1867,16 +1867,16 @@
       "source_quantity": "130 ml",
       "product_url": "https://world.openfoodfacts.org/product/4800361316934",
       "image_url": "https://images.openfoodfacts.net/images/products/480/036/131/6934/front_en.24.200.jpg",
-      "download_url": "https://openfoodfacts-images.s3.eu-west-3.amazonaws.com/data/480/036/131/6934/4.400.jpg",
+      "download_url": "https://images.openfoodfacts.net/images/products/480/036/131/6934/front_en.24.400.jpg",
       "creator": "wblondel",
       "image_license": "CC-BY-SA-3.0",
       "image_asset": "assets/catalog/images/4800361316934.webp",
-      "image_bytes": 2096,
+      "image_bytes": 2122,
       "image_dimensions": [
         58,
         180
       ],
-      "modifications": "EXIF orientation; RGB conversion; proportional resize to at most 180px; WebP quality 72"
+      "modifications": "EXIF orientation; server rotation/crop; proportional resize to at most 180px; WebP quality 72"
     },
     {
       "barcode": "4800361420129",
@@ -2245,16 +2245,16 @@
       "source_quantity": "33g",
       "product_url": "https://world.openfoodfacts.org/product/4800092660962",
       "image_url": "https://images.openfoodfacts.net/images/products/480/009/266/0962/front_en.15.200.jpg",
-      "download_url": "https://openfoodfacts-images.s3.eu-west-3.amazonaws.com/data/480/009/266/0962/1.400.jpg",
+      "download_url": "https://images.openfoodfacts.net/images/products/480/009/266/0962/front_en.15.400.jpg",
       "creator": "antoniojr",
       "image_license": "CC-BY-SA-3.0",
       "image_asset": "assets/catalog/images/4800092660962.webp",
-      "image_bytes": 5086,
+      "image_bytes": 5208,
       "image_dimensions": [
-        107,
-        180
+        180,
+        107
       ],
-      "modifications": "EXIF orientation; RGB conversion; proportional resize to at most 180px; WebP quality 72"
+      "modifications": "EXIF orientation; server rotation/crop; proportional resize to at most 180px; WebP quality 72"
     },
     {
       "barcode": "4800092661174",
@@ -2857,16 +2857,16 @@
       "source_quantity": "60 g",
       "product_url": "https://world.openfoodfacts.org/product/4800194105958",
       "image_url": "https://images.openfoodfacts.net/images/products/480/019/410/5958/front_en.7.200.jpg",
-      "download_url": "https://openfoodfacts-images.s3.eu-west-3.amazonaws.com/data/480/019/410/5958/2.400.jpg",
+      "download_url": "https://images.openfoodfacts.net/images/products/480/019/410/5958/front_en.7.400.jpg",
       "creator": "openfoodfacts-contributors",
       "image_license": "CC-BY-SA-3.0",
       "image_asset": "assets/catalog/images/4800194105958.webp",
-      "image_bytes": 5696,
+      "image_bytes": 5738,
       "image_dimensions": [
-        180,
-        135
+        135,
+        180
       ],
-      "modifications": "EXIF orientation; RGB conversion; proportional resize to at most 180px; WebP quality 72"
+      "modifications": "EXIF orientation; server rotation/crop; proportional resize to at most 180px; WebP quality 72"
     },
     {
       "barcode": "4800194106696",
@@ -3037,16 +3037,16 @@
       "source_quantity": "1 L",
       "product_url": "https://world.openfoodfacts.org/product/4800194187084",
       "image_url": "https://images.openfoodfacts.net/images/products/480/019/418/7084/front_en.5.200.jpg",
-      "download_url": "https://openfoodfacts-images.s3.eu-west-3.amazonaws.com/data/480/019/418/7084/1.400.jpg",
+      "download_url": "https://images.openfoodfacts.net/images/products/480/019/418/7084/front_en.5.400.jpg",
       "creator": "foodless",
       "image_license": "CC-BY-SA-3.0",
       "image_asset": "assets/catalog/images/4800194187084.webp",
-      "image_bytes": 3668,
+      "image_bytes": 3670,
       "image_dimensions": [
-        180,
-        104
+        104,
+        180
       ],
-      "modifications": "EXIF orientation; RGB conversion; proportional resize to at most 180px; WebP quality 72"
+      "modifications": "EXIF orientation; server rotation/crop; proportional resize to at most 180px; WebP quality 72"
     },
     {
       "barcode": "4808591800049",
@@ -3235,16 +3235,16 @@
       "source_quantity": "55g",
       "product_url": "https://world.openfoodfacts.org/product/4804888889018",
       "image_url": "https://images.openfoodfacts.net/images/products/480/488/888/9018/front_nb.11.200.jpg",
-      "download_url": "https://openfoodfacts-images.s3.eu-west-3.amazonaws.com/data/480/488/888/9018/1.400.jpg",
+      "download_url": "https://images.openfoodfacts.net/images/products/480/488/888/9018/front_nb.11.400.jpg",
       "creator": "odinh",
       "image_license": "CC-BY-SA-3.0",
       "image_asset": "assets/catalog/images/4804888889018.webp",
-      "image_bytes": 2786,
+      "image_bytes": 5314,
       "image_dimensions": [
         180,
-        135
+        129
       ],
-      "modifications": "EXIF orientation; RGB conversion; proportional resize to at most 180px; WebP quality 72"
+      "modifications": "EXIF orientation; server rotation/crop; proportional resize to at most 180px; WebP quality 72"
     },
     {
       "barcode": "4806505854973",
@@ -3361,16 +3361,16 @@
       "source_quantity": "41 g",
       "product_url": "https://world.openfoodfacts.org/product/4800092550669",
       "image_url": "https://images.openfoodfacts.net/images/products/480/009/255/0669/front_en.10.200.jpg",
-      "download_url": "https://openfoodfacts-images.s3.eu-west-3.amazonaws.com/data/480/009/255/0669/1.400.jpg",
+      "download_url": "https://images.openfoodfacts.net/images/products/480/009/255/0669/front_en.10.400.jpg",
       "creator": "smoothie-app",
       "image_license": "CC-BY-SA-3.0",
       "image_asset": "assets/catalog/images/4800092550669.webp",
-      "image_bytes": 4142,
+      "image_bytes": 4168,
       "image_dimensions": [
-        135,
-        180
+        180,
+        135
       ],
-      "modifications": "EXIF orientation; RGB conversion; proportional resize to at most 180px; WebP quality 72"
+      "modifications": "EXIF orientation; server rotation/crop; proportional resize to at most 180px; WebP quality 72"
     },
     {
       "barcode": "4800016073335",
@@ -3433,16 +3433,16 @@
       "source_quantity": "250ml",
       "product_url": "https://world.openfoodfacts.org/product/4801981118519",
       "image_url": "https://images.openfoodfacts.net/images/products/480/198/111/8519/front_en.11.200.jpg",
-      "download_url": "https://openfoodfacts-images.s3.eu-west-3.amazonaws.com/data/480/198/111/8519/3.400.jpg",
+      "download_url": "https://images.openfoodfacts.net/images/products/480/198/111/8519/front_en.11.400.jpg",
       "creator": "foodless",
       "image_license": "CC-BY-SA-3.0",
       "image_asset": "assets/catalog/images/4801981118519.webp",
-      "image_bytes": 2520,
+      "image_bytes": 1822,
       "image_dimensions": [
-        180,
-        135
+        58,
+        180
       ],
-      "modifications": "EXIF orientation; RGB conversion; proportional resize to at most 180px; WebP quality 72"
+      "modifications": "EXIF orientation; server rotation/crop; proportional resize to at most 180px; WebP quality 72"
     },
     {
       "barcode": "4801981118571",
@@ -3469,16 +3469,16 @@
       "source_quantity": "195ml",
       "product_url": "https://world.openfoodfacts.org/product/4801981127207",
       "image_url": "https://images.openfoodfacts.net/images/products/480/198/112/7207/front_en.5.200.jpg",
-      "download_url": "https://openfoodfacts-images.s3.eu-west-3.amazonaws.com/data/480/198/112/7207/1.400.jpg",
+      "download_url": "https://images.openfoodfacts.net/images/products/480/198/112/7207/front_en.5.400.jpg",
       "creator": "foodless",
       "image_license": "CC-BY-SA-3.0",
       "image_asset": "assets/catalog/images/4801981127207.webp",
-      "image_bytes": 2344,
+      "image_bytes": 2368,
       "image_dimensions": [
-        180,
-        116
+        116,
+        180
       ],
-      "modifications": "EXIF orientation; RGB conversion; proportional resize to at most 180px; WebP quality 72"
+      "modifications": "EXIF orientation; server rotation/crop; proportional resize to at most 180px; WebP quality 72"
     },
     {
       "barcode": "4806513742569",
@@ -3703,16 +3703,16 @@
       "source_quantity": "14 g",
       "product_url": "https://world.openfoodfacts.org/product/4800365881315",
       "image_url": "https://images.openfoodfacts.net/images/products/480/036/588/1315/front_en.7.200.jpg",
-      "download_url": "https://openfoodfacts-images.s3.eu-west-3.amazonaws.com/data/480/036/588/1315/2.400.jpg",
+      "download_url": "https://images.openfoodfacts.net/images/products/480/036/588/1315/front_en.7.400.jpg",
       "creator": "hiroshi23",
       "image_license": "CC-BY-SA-3.0",
       "image_asset": "assets/catalog/images/4800365881315.webp",
-      "image_bytes": 1990,
+      "image_bytes": 4920,
       "image_dimensions": [
-        180,
-        123
+        124,
+        180
       ],
-      "modifications": "EXIF orientation; RGB conversion; proportional resize to at most 180px; WebP quality 72"
+      "modifications": "EXIF orientation; server rotation/crop; proportional resize to at most 180px; WebP quality 72"
     },
     {
       "barcode": "4801981120369",
@@ -3757,16 +3757,16 @@
       "source_quantity": "50g",
       "product_url": "https://world.openfoodfacts.org/product/4800016022258",
       "image_url": "https://images.openfoodfacts.net/images/products/480/001/602/2258/front_en.11.200.jpg",
-      "download_url": "https://openfoodfacts-images.s3.eu-west-3.amazonaws.com/data/480/001/602/2258/4.400.jpg",
+      "download_url": "https://images.openfoodfacts.net/images/products/480/001/602/2258/front_en.11.400.jpg",
       "creator": "maruco",
       "image_license": "CC-BY-SA-3.0",
       "image_asset": "assets/catalog/images/4800016022258.webp",
-      "image_bytes": 4158,
+      "image_bytes": 5186,
       "image_dimensions": [
-        180,
+        156,
         180
       ],
-      "modifications": "EXIF orientation; RGB conversion; proportional resize to at most 180px; WebP quality 72"
+      "modifications": "EXIF orientation; server rotation/crop; proportional resize to at most 180px; WebP quality 72"
     },
     {
       "barcode": "4800016783609",
@@ -3847,16 +3847,16 @@
       "source_quantity": "35g",
       "product_url": "https://world.openfoodfacts.org/product/4800016964466",
       "image_url": "https://images.openfoodfacts.net/images/products/480/001/696/4466/front_en.7.200.jpg",
-      "download_url": "https://openfoodfacts-images.s3.eu-west-3.amazonaws.com/data/480/001/696/4466/1.400.jpg",
+      "download_url": "https://images.openfoodfacts.net/images/products/480/001/696/4466/front_en.7.400.jpg",
       "creator": "antoniojr",
       "image_license": "CC-BY-SA-3.0",
       "image_asset": "assets/catalog/images/4800016964466.webp",
-      "image_bytes": 5936,
+      "image_bytes": 5954,
       "image_dimensions": [
-        106,
-        180
+        180,
+        106
       ],
-      "modifications": "EXIF orientation; RGB conversion; proportional resize to at most 180px; WebP quality 72"
+      "modifications": "EXIF orientation; server rotation/crop; proportional resize to at most 180px; WebP quality 72"
     },
     {
       "barcode": "4806521791719",
@@ -4603,16 +4603,16 @@
       "source_quantity": "32g",
       "product_url": "https://world.openfoodfacts.org/product/84001771",
       "image_url": "https://images.openfoodfacts.net/images/products/000/008/400/1771/front_en.17.200.jpg",
-      "download_url": "https://openfoodfacts-images.s3.eu-west-3.amazonaws.com/data/000/008/400/1771/1.400.jpg",
+      "download_url": "https://images.openfoodfacts.net/images/products/000/008/400/1771/front_en.17.400.jpg",
       "creator": "antoniojr",
       "image_license": "CC-BY-SA-3.0",
       "image_asset": "assets/catalog/images/84001771.webp",
-      "image_bytes": 3132,
+      "image_bytes": 3180,
       "image_dimensions": [
-        95,
-        180
+        180,
+        95
       ],
-      "modifications": "EXIF orientation; RGB conversion; proportional resize to at most 180px; WebP quality 72"
+      "modifications": "EXIF orientation; server rotation/crop; proportional resize to at most 180px; WebP quality 72"
     },
     {
       "barcode": "0037600840804",
@@ -4773,6 +4773,420 @@
       "image_dimensions": [
         180,
         108
+      ],
+      "modifications": "EXIF orientation; RGB conversion; proportional resize to at most 180px; WebP quality 72"
+    },
+    {
+      "barcode": "4800194104869",
+      "source_name": "Oishi Crispy Patata",
+      "source_brands": "Oishi",
+      "source_quantity": "24 g",
+      "product_url": "https://world.openfoodfacts.org/product/4800194104869",
+      "image_url": "https://images.openfoodfacts.net/images/products/480/019/410/4869/front_en.23.200.jpg",
+      "download_url": "https://openfoodfacts-images.s3.eu-west-3.amazonaws.com/data/480/019/410/4869/3.400.jpg",
+      "creator": "foodless",
+      "image_license": "CC-BY-SA-3.0",
+      "image_asset": "assets/catalog/images/4800194104869.webp",
+      "image_bytes": 6650,
+      "image_dimensions": [
+        160,
+        180
+      ],
+      "modifications": "EXIF orientation; RGB conversion; proportional resize to at most 180px; WebP quality 72"
+    },
+    {
+      "barcode": "4800092660634",
+      "source_name": "Choco Mucho Caramel",
+      "source_brands": "Choco Mucho",
+      "source_quantity": "33 g",
+      "product_url": "https://world.openfoodfacts.org/product/4800092660634",
+      "image_url": "https://images.openfoodfacts.net/images/products/480/009/266/0634/front_en.4.200.jpg",
+      "download_url": "https://openfoodfacts-images.s3.eu-west-3.amazonaws.com/data/480/009/266/0634/1.400.jpg",
+      "creator": "antoniojr",
+      "image_license": "CC-BY-SA-3.0",
+      "image_asset": "assets/catalog/images/4800092660634.webp",
+      "image_bytes": 7234,
+      "image_dimensions": [
+        120,
+        180
+      ],
+      "modifications": "EXIF orientation; RGB conversion; proportional resize to at most 180px; WebP quality 72"
+    },
+    {
+      "barcode": "4800361410816",
+      "source_name": "Bear Brand Fortified Milk Drink Powder",
+      "source_brands": "Bear Brand",
+      "source_quantity": "33 g",
+      "product_url": "https://world.openfoodfacts.org/product/4800361410816",
+      "image_url": "https://images.openfoodfacts.net/images/products/480/036/141/0816/front_en.90.200.jpg",
+      "download_url": "https://openfoodfacts-images.s3.eu-west-3.amazonaws.com/data/480/036/141/0816/25.400.jpg",
+      "creator": "foodless",
+      "image_license": "CC-BY-SA-3.0",
+      "image_asset": "assets/catalog/images/4800361410816.webp",
+      "image_bytes": 6162,
+      "image_dimensions": [
+        141,
+        180
+      ],
+      "modifications": "EXIF orientation; RGB conversion; proportional resize to at most 180px; WebP quality 72"
+    },
+    {
+      "barcode": "4800016663802",
+      "source_name": "Jack 'n Jill Nova Country Cheddar",
+      "source_brands": "Jack 'n Jill",
+      "source_quantity": "40 g",
+      "product_url": "https://world.openfoodfacts.org/product/4800016663802",
+      "image_url": "https://images.openfoodfacts.net/images/products/480/001/666/3802/front_en.53.200.jpg",
+      "download_url": "https://openfoodfacts-images.s3.eu-west-3.amazonaws.com/data/480/001/666/3802/8.400.jpg",
+      "creator": "foodless",
+      "image_license": "CC-BY-SA-3.0",
+      "image_asset": "assets/catalog/images/4800016663802.webp",
+      "image_bytes": 5990,
+      "image_dimensions": [
+        144,
+        180
+      ],
+      "modifications": "EXIF orientation; RGB conversion; proportional resize to at most 180px; WebP quality 72"
+    },
+    {
+      "barcode": "4800016622533",
+      "source_name": "Jack 'n Jill V-Cut Spicy Barbecue",
+      "source_brands": "Jack 'n Jill",
+      "source_quantity": "25 g",
+      "product_url": "https://world.openfoodfacts.org/product/4800016622533",
+      "image_url": "https://images.openfoodfacts.net/images/products/480/001/662/2533/front_en.37.200.jpg",
+      "download_url": "https://openfoodfacts-images.s3.eu-west-3.amazonaws.com/data/480/001/662/2533/6.400.jpg",
+      "creator": "foodless",
+      "image_license": "CC-BY-SA-3.0",
+      "image_asset": "assets/catalog/images/4800016622533.webp",
+      "image_bytes": 6924,
+      "image_dimensions": [
+        169,
+        180
+      ],
+      "modifications": "EXIF orientation; RGB conversion; proportional resize to at most 180px; WebP quality 72"
+    },
+    {
+      "barcode": "0089686010947",
+      "source_name": "Indomie Mi Goreng Regular",
+      "source_brands": "Indomie",
+      "source_quantity": "85 g",
+      "product_url": "https://world.openfoodfacts.org/product/0089686010947",
+      "image_url": "https://images.openfoodfacts.net/images/products/008/968/601/0947/front_en.72.200.jpg",
+      "download_url": "https://images.openfoodfacts.net/images/products/008/968/601/0947/front_en.72.400.jpg",
+      "creator": "mfarisaf23",
+      "image_license": "CC-BY-SA-3.0",
+      "image_asset": "assets/catalog/images/0089686010947.webp",
+      "image_bytes": 6402,
+      "image_dimensions": [
+        180,
+        177
+      ],
+      "modifications": "EXIF orientation; server rotation/crop; proportional resize to at most 180px; WebP quality 72"
+    },
+    {
+      "barcode": "0748485401492",
+      "source_name": "Birch Tree Fortified Milk Powder",
+      "source_brands": "Birch Tree",
+      "source_quantity": "33 g",
+      "product_url": "https://world.openfoodfacts.org/product/0748485401492",
+      "image_url": "https://images.openfoodfacts.net/images/products/074/848/540/1492/front_en.32.200.jpg",
+      "download_url": "https://openfoodfacts-images.s3.eu-west-3.amazonaws.com/data/074/848/540/1492/9.400.jpg",
+      "creator": "fooducate.697FA824-307B-4F2C-49A4-9851ECE0ADB9",
+      "image_license": "CC-BY-SA-3.0",
+      "image_asset": "assets/catalog/images/0748485401492.webp",
+      "image_bytes": 5070,
+      "image_dimensions": [
+        119,
+        180
+      ],
+      "modifications": "EXIF orientation; RGB conversion; proportional resize to at most 180px; WebP quality 72"
+    },
+    {
+      "barcode": "4809010524034",
+      "source_name": "Sugo Greaseless Salted Peanuts",
+      "source_brands": "Sugo",
+      "source_quantity": "100 g",
+      "product_url": "https://world.openfoodfacts.org/product/4809010524034",
+      "image_url": "https://images.openfoodfacts.net/images/products/480/901/052/4034/front_en.3.200.jpg",
+      "download_url": "https://openfoodfacts-images.s3.eu-west-3.amazonaws.com/data/480/901/052/4034/1.400.jpg",
+      "creator": "kiliweb",
+      "image_license": "CC-BY-SA-3.0",
+      "image_asset": "assets/catalog/images/4809010524034.webp",
+      "image_bytes": 3454,
+      "image_dimensions": [
+        90,
+        180
+      ],
+      "modifications": "EXIF orientation; RGB conversion; proportional resize to at most 180px; WebP quality 72"
+    },
+    {
+      "barcode": "4801668605967",
+      "source_name": "Datu Puti Spicy Adobo Sauce",
+      "source_brands": "Datu Puti",
+      "source_quantity": "180 mL",
+      "product_url": "https://world.openfoodfacts.org/product/4801668605967",
+      "image_url": "https://images.openfoodfacts.net/images/products/480/166/860/5967/front_en.3.200.jpg",
+      "download_url": "https://openfoodfacts-images.s3.eu-west-3.amazonaws.com/data/480/166/860/5967/1.400.jpg",
+      "creator": "foodless",
+      "image_license": "CC-BY-SA-3.0",
+      "image_asset": "assets/catalog/images/4801668605967.webp",
+      "image_bytes": 4694,
+      "image_dimensions": [
+        98,
+        180
+      ],
+      "modifications": "EXIF orientation; RGB conversion; proportional resize to at most 180px; WebP quality 72"
+    },
+    {
+      "barcode": "0748485801162",
+      "source_name": "555 Carne Norte",
+      "source_brands": "555",
+      "source_quantity": "175 g",
+      "product_url": "https://world.openfoodfacts.org/product/0748485801162",
+      "image_url": "https://images.openfoodfacts.net/images/products/074/848/580/1162/front_en.3.200.jpg",
+      "download_url": "https://openfoodfacts-images.s3.eu-west-3.amazonaws.com/data/074/848/580/1162/1.400.jpg",
+      "creator": "foodless",
+      "image_license": "CC-BY-SA-3.0",
+      "image_asset": "assets/catalog/images/0748485801162.webp",
+      "image_bytes": 3086,
+      "image_dimensions": [
+        98,
+        180
+      ],
+      "modifications": "EXIF orientation; RGB conversion; proportional resize to at most 180px; WebP quality 72"
+    },
+    {
+      "barcode": "4807770100529",
+      "source_name": "Monde Nissin Butter Coconut",
+      "source_brands": "Monde Nissin",
+      "source_quantity": "14 g",
+      "product_url": "https://world.openfoodfacts.org/product/4807770100529",
+      "image_url": "https://images.openfoodfacts.net/images/products/480/777/010/0529/front_en.11.200.jpg",
+      "download_url": "https://openfoodfacts-images.s3.eu-west-3.amazonaws.com/data/480/777/010/0529/3.400.jpg",
+      "creator": "openfoodfacts-contributors",
+      "image_license": "CC-BY-SA-3.0",
+      "image_asset": "assets/catalog/images/4807770100529.webp",
+      "image_bytes": 4300,
+      "image_dimensions": [
+        180,
+        105
+      ],
+      "modifications": "EXIF orientation; RGB conversion; proportional resize to at most 180px; WebP quality 72"
+    },
+    {
+      "barcode": "7622300808365",
+      "source_name": "Tang Four Seasons Powder Drink",
+      "source_brands": "Tang",
+      "source_quantity": "19 g",
+      "product_url": "https://world.openfoodfacts.org/product/7622300808365",
+      "image_url": "https://images.openfoodfacts.net/images/products/762/230/080/8365/front_en.9.200.jpg",
+      "download_url": "https://openfoodfacts-images.s3.eu-west-3.amazonaws.com/data/762/230/080/8365/4.400.jpg",
+      "creator": "foodless",
+      "image_license": "CC-BY-SA-3.0",
+      "image_asset": "assets/catalog/images/7622300808365.webp",
+      "image_bytes": 6176,
+      "image_dimensions": [
+        145,
+        180
+      ],
+      "modifications": "EXIF orientation; RGB conversion; proportional resize to at most 180px; WebP quality 72"
+    },
+    {
+      "barcode": "7622300868635",
+      "source_name": "Tang Orange Mango Powder Drink",
+      "source_brands": "Tang",
+      "source_quantity": "18 g",
+      "product_url": "https://world.openfoodfacts.org/product/7622300868635",
+      "image_url": "https://images.openfoodfacts.net/images/products/762/230/086/8635/front_es.16.200.jpg",
+      "download_url": "https://openfoodfacts-images.s3.eu-west-3.amazonaws.com/data/762/230/086/8635/4.400.jpg",
+      "creator": "ashleyeuge56",
+      "image_license": "CC-BY-SA-3.0",
+      "image_asset": "assets/catalog/images/7622300868635.webp",
+      "image_bytes": 7118,
+      "image_dimensions": [
+        159,
+        180
+      ],
+      "modifications": "EXIF orientation; RGB conversion; proportional resize to at most 180px; WebP quality 72"
+    },
+    {
+      "barcode": "8858705602379",
+      "source_name": "Bear Brand Milk Drink",
+      "source_brands": "Bear Brand",
+      "source_quantity": "200 mL",
+      "product_url": "https://world.openfoodfacts.org/product/8858705602379",
+      "image_url": "https://images.openfoodfacts.net/images/products/885/870/560/2379/front_en.28.200.jpg",
+      "download_url": "https://openfoodfacts-images.s3.eu-west-3.amazonaws.com/data/885/870/560/2379/8.400.jpg",
+      "creator": "macrofactor",
+      "image_license": "CC-BY-SA-3.0",
+      "image_asset": "assets/catalog/images/8858705602379.webp",
+      "image_bytes": 3506,
+      "image_dimensions": [
+        135,
+        180
+      ],
+      "modifications": "EXIF orientation; RGB conversion; proportional resize to at most 180px; WebP quality 72"
+    },
+    {
+      "barcode": "0748485100401",
+      "source_name": "Century Tuna Flakes in Oil",
+      "source_brands": "Century Tuna",
+      "source_quantity": "155 g",
+      "product_url": "https://world.openfoodfacts.org/product/0748485100401",
+      "image_url": "https://images.openfoodfacts.net/images/products/074/848/510/0401/front_en.65.200.jpg",
+      "download_url": "https://openfoodfacts-images.s3.eu-west-3.amazonaws.com/data/074/848/510/0401/9.400.jpg",
+      "creator": "foodless",
+      "image_license": "CC-BY-SA-3.0",
+      "image_asset": "assets/catalog/images/0748485100401.webp",
+      "image_bytes": 5560,
+      "image_dimensions": [
+        108,
+        180
+      ],
+      "modifications": "EXIF orientation; RGB conversion; proportional resize to at most 180px; WebP quality 72"
+    },
+    {
+      "barcode": "0750515017429",
+      "source_name": "M.Y. San Fita Crackers",
+      "source_brands": "M.Y. San",
+      "source_quantity": "30 g",
+      "product_url": "https://world.openfoodfacts.org/product/0750515017429",
+      "image_url": "https://images.openfoodfacts.net/images/products/075/051/501/7429/front_en.45.200.jpg",
+      "download_url": "https://openfoodfacts-images.s3.eu-west-3.amazonaws.com/data/075/051/501/7429/11.400.jpg",
+      "creator": "fooducate.69D5869E-A60A-19E9-417E-972C2B199C0F",
+      "image_license": "CC-BY-SA-3.0",
+      "image_asset": "assets/catalog/images/0750515017429.webp",
+      "image_bytes": 2132,
+      "image_dimensions": [
+        180,
+        65
+      ],
+      "modifications": "EXIF orientation; RGB conversion; proportional resize to at most 180px; WebP quality 72"
+    },
+    {
+      "barcode": "4800092113536",
+      "source_name": "Rebisco Combi Triple Choco Wafer",
+      "source_brands": "Rebisco",
+      "source_quantity": "30 g",
+      "product_url": "https://world.openfoodfacts.org/product/4800092113536",
+      "image_url": "https://images.openfoodfacts.net/images/products/480/009/211/3536/front_en.38.200.jpg",
+      "download_url": "https://openfoodfacts-images.s3.eu-west-3.amazonaws.com/data/480/009/211/3536/10.400.jpg",
+      "creator": "foodless",
+      "image_license": "CC-BY-SA-3.0",
+      "image_asset": "assets/catalog/images/4800092113536.webp",
+      "image_bytes": 5670,
+      "image_dimensions": [
+        180,
+        160
+      ],
+      "modifications": "EXIF orientation; RGB conversion; proportional resize to at most 180px; WebP quality 72"
+    },
+    {
+      "barcode": "4807770270024",
+      "source_name": "Lucky Me! Instant Mami Chicken",
+      "source_brands": "Lucky Me!",
+      "source_quantity": "55 g",
+      "product_url": "https://world.openfoodfacts.org/product/4807770270024",
+      "image_url": "https://images.openfoodfacts.net/images/products/480/777/027/0024/front_en.56.200.jpg",
+      "download_url": "https://openfoodfacts-images.s3.eu-west-3.amazonaws.com/data/480/777/027/0024/10.400.jpg",
+      "creator": "imeldac",
+      "image_license": "CC-BY-SA-3.0",
+      "image_asset": "assets/catalog/images/4807770270024.webp",
+      "image_bytes": 5050,
+      "image_dimensions": [
+        180,
+        120
+      ],
+      "modifications": "EXIF orientation; RGB conversion; proportional resize to at most 180px; WebP quality 72"
+    },
+    {
+      "barcode": "4800361339568",
+      "source_name": "Nescafé Classic Pure Soluble Coffee Stick",
+      "source_brands": "Nescafé",
+      "source_quantity": "1.9 g",
+      "product_url": "https://world.openfoodfacts.org/product/4800361339568",
+      "image_url": "https://images.openfoodfacts.net/images/products/480/036/133/9568/front_en.38.200.jpg",
+      "download_url": "https://openfoodfacts-images.s3.eu-west-3.amazonaws.com/data/480/036/133/9568/8.400.jpg",
+      "creator": "foodless",
+      "image_license": "CC-BY-SA-3.0",
+      "image_asset": "assets/catalog/images/4800361339568.webp",
+      "image_bytes": 2276,
+      "image_dimensions": [
+        180,
+        47
+      ],
+      "modifications": "EXIF orientation; RGB conversion; proportional resize to at most 180px; WebP quality 72"
+    },
+    {
+      "barcode": "4800016671807",
+      "source_name": "Jack 'n Jill Piattos Cheese Potato Crisps",
+      "source_brands": "Jack 'n Jill",
+      "source_quantity": "40 g",
+      "product_url": "https://world.openfoodfacts.org/product/4800016671807",
+      "image_url": "https://images.openfoodfacts.net/images/products/480/001/667/1807/front_en.26.200.jpg",
+      "download_url": "https://openfoodfacts-images.s3.eu-west-3.amazonaws.com/data/480/001/667/1807/3.400.jpg",
+      "creator": "fooducate.69A05AC2-C38F-1C4E-4BC4-A58A8338F733",
+      "image_license": "CC-BY-SA-3.0",
+      "image_asset": "assets/catalog/images/4800016671807.webp",
+      "image_bytes": 3766,
+      "image_dimensions": [
+        107,
+        180
+      ],
+      "modifications": "EXIF orientation; RGB conversion; proportional resize to at most 180px; WebP quality 72"
+    },
+    {
+      "barcode": "4800092550904",
+      "source_name": "Fudgee Barr Chocolate Cake Bar",
+      "source_brands": "Fudgee Barr",
+      "source_quantity": "42 g",
+      "product_url": "https://world.openfoodfacts.org/product/4800092550904",
+      "image_url": "https://images.openfoodfacts.net/images/products/480/009/255/0904/front_fr.37.200.jpg",
+      "download_url": "https://openfoodfacts-images.s3.eu-west-3.amazonaws.com/data/480/009/255/0904/9.400.jpg",
+      "creator": "foodless",
+      "image_license": "CC-BY-SA-3.0",
+      "image_asset": "assets/catalog/images/4800092550904.webp",
+      "image_bytes": 5504,
+      "image_dimensions": [
+        180,
+        97
+      ],
+      "modifications": "EXIF orientation; RGB conversion; proportional resize to at most 180px; WebP quality 72"
+    },
+    {
+      "barcode": "4808887119480",
+      "source_name": "Purefoods Sizzling Sisig",
+      "source_brands": "Purefoods",
+      "source_quantity": "150 g",
+      "product_url": "https://world.openfoodfacts.org/product/4808887119480",
+      "image_url": "https://images.openfoodfacts.net/images/products/480/888/711/9480/front_en.19.200.jpg",
+      "download_url": "https://openfoodfacts-images.s3.eu-west-3.amazonaws.com/data/480/888/711/9480/5.400.jpg",
+      "creator": "foodless",
+      "image_license": "CC-BY-SA-3.0",
+      "image_asset": "assets/catalog/images/4808887119480.webp",
+      "image_bytes": 5670,
+      "image_dimensions": [
+        111,
+        180
+      ],
+      "modifications": "EXIF orientation; RGB conversion; proportional resize to at most 180px; WebP quality 72"
+    },
+    {
+      "barcode": "4808887030204",
+      "source_name": "Purefoods Luncheon Meat Chinese Style",
+      "source_brands": "Purefoods",
+      "source_quantity": "165 g",
+      "product_url": "https://world.openfoodfacts.org/product/4808887030204",
+      "image_url": "https://images.openfoodfacts.net/images/products/480/888/703/0204/front_en.3.200.jpg",
+      "download_url": "https://openfoodfacts-images.s3.eu-west-3.amazonaws.com/data/480/888/703/0204/1.400.jpg",
+      "creator": "prepperapp",
+      "image_license": "CC-BY-SA-3.0",
+      "image_asset": "assets/catalog/images/4808887030204.webp",
+      "image_bytes": 4006,
+      "image_dimensions": [
+        180,
+        135
       ],
       "modifications": "EXIF orientation; RGB conversion; proportional resize to at most 180px; WebP quality 72"
     }
