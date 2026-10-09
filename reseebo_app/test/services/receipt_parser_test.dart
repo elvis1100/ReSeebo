@@ -1,6 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:reseebo_app/core/models/models.dart';
-import 'package:reseebo_app/core/services/receipt_parser.dart';
+import 'package:reseebo/core/models/models.dart';
+import 'package:reseebo/core/services/receipt_parser.dart';
 
 void main() {
   final parser = ReceiptParser();

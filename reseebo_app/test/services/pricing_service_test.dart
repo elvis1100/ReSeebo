@@ -1,7 +1,7 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:reseebo_app/core/errors/app_exception.dart';
-import 'package:reseebo_app/core/models/models.dart';
-import 'package:reseebo_app/core/services/pricing_service.dart';
+import 'package:reseebo/core/errors/app_exception.dart';
+import 'package:reseebo/core/models/models.dart';
+import 'package:reseebo/core/services/pricing_service.dart';
 
 const product = Product(
   id: 'coffee',

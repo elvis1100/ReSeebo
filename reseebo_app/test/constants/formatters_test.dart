@@ -1,6 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:reseebo_app/core/constants/formatters.dart';
-import 'package:reseebo_app/core/models/models.dart';
+import 'package:reseebo/core/constants/formatters.dart';
+import 'package:reseebo/core/models/models.dart';
 
 void main() {
   test('peso entry remains exact integer centavos', () {

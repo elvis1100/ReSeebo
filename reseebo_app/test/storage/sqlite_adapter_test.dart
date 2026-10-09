@@ -2,10 +2,10 @@ import 'dart:io';
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:path/path.dart' as p;
-import 'package:reseebo_app/core/adapters/sqlite_reseebo_data_adapter.dart';
-import 'package:reseebo_app/core/adapters/i_reseebo_data_adapter.dart';
-import 'package:reseebo_app/core/services/ocr_service.dart';
-import 'package:reseebo_app/core/database/migrations/migration_001_initial.dart';
+import 'package:reseebo/core/adapters/sqlite_reseebo_data_adapter.dart';
+import 'package:reseebo/core/adapters/i_reseebo_data_adapter.dart';
+import 'package:reseebo/core/services/ocr_service.dart';
+import 'package:reseebo/core/database/migrations/migration_001_initial.dart';
 import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 
 class FakeOcr implements OcrService {
