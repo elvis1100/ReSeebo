@@ -193,101 +193,42 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   ),
                   const SizedBox(height: AppSpacing.m),
 
-                  // Offline-First Device Status Card
-                  AppCard(
-                    padding: const EdgeInsets.all(AppSpacing.m),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Row(
-                          children: [
-                            const Icon(
-                              Icons.offline_pin_rounded,
-                              color: AppColors.primary,
-                              size: 20,
-                            ),
-                            const SizedBox(width: AppSpacing.s),
-                            Text(
-                              'Offline-First System Status',
-                              style: AppTypography.headingSmall.copyWith(
-                                fontSize: 14,
-                              ),
-                            ),
-                          ],
-                        ),
-                        const SizedBox(height: AppSpacing.s),
-                        _buildStatusRow(
-                          label: 'Storage Database',
-                          value: 'Local SQLite (On-Device)',
-                          isOk: true,
-                        ),
-                        const Divider(height: 12),
-                        _buildStatusRow(
-                          label: 'OCR Recognition',
-                          value: '100% Bundled Local Engine',
-                          isOk: true,
-                        ),
-                        const Divider(height: 12),
-                        _buildStatusRow(
-                          label: 'Cloud Dependency',
-                          value: 'None (Zero data leaves device)',
-                          isOk: true,
-                        ),
-                        const Divider(height: 12),
-                        _buildStatusRow(
-                          label: 'App Edition',
-                          value: 'Reseebo v1.0.0 (Tindahan Edition)',
-                          isOk: true,
-                        ),
-                      ],
-                    ),
-                  ),
-                  const SizedBox(height: AppSpacing.lg),
-
                   // Save changes button
                   AppButton(
                     label: _isSaving ? 'Saving Changes...' : 'Save Settings',
-                    icon: Icons.check_circle_outline_rounded,
+                    icon: Icons.check_rounded,
                     isLoading: _isSaving,
                     isFullWidth: true,
                     onPressed: _saveProfile,
+                  ),
+                  const SizedBox(height: AppSpacing.xxl),
+
+                  // Minimalist App Info Footer
+                  Center(
+                    child: Column(
+                      children: [
+                        Text(
+                          'Reseebo v1.0.0',
+                          style: AppTypography.caption.copyWith(
+                            fontWeight: FontWeight.w700,
+                            color: AppColors.textSecondary,
+                          ),
+                        ),
+                        const SizedBox(height: 2),
+                        Text(
+                          'All prices and receipts stored privately on-device',
+                          style: AppTypography.caption.copyWith(
+                            color: AppColors.textMuted,
+                            fontSize: 10,
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
                   const SizedBox(height: AppSpacing.xl),
                 ],
               ),
             ),
-    );
-  }
-
-  Widget _buildStatusRow({
-    required String label,
-    required String value,
-    required bool isOk,
-  }) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: [
-        Text(label, style: AppTypography.bodySmall),
-        Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            if (isOk)
-              const Icon(
-                Icons.check_rounded,
-                size: 14,
-                color: AppColors.primary,
-              ),
-            const SizedBox(width: 4),
-            Text(
-              value,
-              style: AppTypography.caption.copyWith(
-                fontWeight: FontWeight.w700,
-                color: isOk ? AppColors.textPrimary : AppColors.textMuted,
-              ),
-            ),
-          ],
-        ),
-      ],
     );
   }
 }
