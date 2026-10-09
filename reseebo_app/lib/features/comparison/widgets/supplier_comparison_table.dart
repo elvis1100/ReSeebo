@@ -34,7 +34,7 @@ class SupplierComparisonTable extends StatelessWidget {
                 color: AppColors.textMuted,
               ),
               const SizedBox(height: AppSpacing.s),
-              Text(
+              const Text(
                 'No supplier comparison data yet.',
                 style: AppTypography.bodySmall,
               ),
@@ -49,14 +49,15 @@ class SupplierComparisonTable extends StatelessWidget {
         return Padding(
           padding: const EdgeInsets.only(bottom: AppSpacing.s),
           child: AppCard(
-            padding: AppSpacing.compactCardPadding,
+            onTap: () => onReceiptTap?.call(row.sourceReceiptId),
+            padding: const EdgeInsets.all(AppSpacing.m),
             backgroundColor: row.isLowestPrice
                 ? AppColors.priceCheaperBg.withValues(alpha: 0.25)
                 : AppColors.surfaceCard,
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // Supplier name & Best Price pill
+                // Supplier name & lowest price pill
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
@@ -65,6 +66,7 @@ class SupplierComparisonTable extends StatelessWidget {
                         row.supplierName,
                         style: AppTypography.headingSmall.copyWith(
                           fontSize: 14,
+                          fontWeight: FontWeight.w700,
                           color: row.isLowestPrice
                               ? AppColors.primary
                               : AppColors.textPrimary,
@@ -84,25 +86,14 @@ class SupplierComparisonTable extends StatelessWidget {
                           color: AppColors.priceCheaper,
                           borderRadius: BorderRadius.circular(AppSpacing.radiusPill),
                         ),
-                        child: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            const Icon(
-                              Icons.star_rounded,
-                              size: 13,
-                              color: Colors.white,
-                            ),
-                            const SizedBox(width: 3),
-                            Text(
-                              'BEST PRICE',
-                              style: AppTypography.caption.copyWith(
-                                color: Colors.white,
-                                fontWeight: FontWeight.w800,
-                                fontSize: 10,
-                                letterSpacing: 0.5,
-                              ),
-                            ),
-                          ],
+                        child: Text(
+                          'LOWEST',
+                          style: AppTypography.caption.copyWith(
+                            color: Colors.white,
+                            fontWeight: FontWeight.w800,
+                            fontSize: 10,
+                            letterSpacing: 0.5,
+                          ),
                         ),
                       )
                     else
@@ -112,13 +103,13 @@ class SupplierComparisonTable extends StatelessWidget {
                           vertical: 2,
                         ),
                         decoration: BoxDecoration(
-                          color: AppColors.warningBg,
+                          color: AppColors.surfaceSubtle,
                           borderRadius: BorderRadius.circular(AppSpacing.radiusPill),
                         ),
                         child: Text(
                           '+${CurrencyFormatter.format(row.differenceVsBest)} / pc',
                           style: AppTypography.caption.copyWith(
-                            color: AppColors.accentDark,
+                            color: AppColors.textSecondary,
                             fontWeight: FontWeight.w700,
                             fontSize: 11,
                           ),
@@ -126,7 +117,7 @@ class SupplierComparisonTable extends StatelessWidget {
                       ),
                   ],
                 ),
-                const SizedBox(height: AppSpacing.xs),
+                const SizedBox(height: 3),
 
                 // Package and purchase date details
                 Row(
@@ -134,17 +125,20 @@ class SupplierComparisonTable extends StatelessWidget {
                   children: [
                     Text(
                       row.packageDescription,
-                      style: AppTypography.bodySmall.copyWith(fontSize: 12),
+                      style: AppTypography.bodySmall.copyWith(
+                        fontSize: 12,
+                        color: AppColors.textSecondary,
+                      ),
                     ),
                     Text(
-                      'Bought: ${DateFormatter.format(row.latestPurchaseDate)}',
+                      DateFormatter.format(row.latestPurchaseDate),
                       style: AppTypography.caption,
                     ),
                   ],
                 ),
-                const Divider(height: 12),
+                const Divider(height: 16),
 
-                // Cost per piece & source receipt link
+                // Cost per piece & tap receipt hint
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
@@ -169,33 +163,24 @@ class SupplierComparisonTable extends StatelessWidget {
                         ),
                       ],
                     ),
-                    InkWell(
-                      onTap: () => onReceiptTap?.call(row.sourceReceiptId),
-                      borderRadius: BorderRadius.circular(4),
-                      child: Padding(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 4,
-                          vertical: 2,
+                    const Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Text(
+                          'Receipt',
+                          style: TextStyle(
+                            fontSize: 11,
+                            color: AppColors.textMuted,
+                            fontWeight: FontWeight.w500,
+                          ),
                         ),
-                        child: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            const Icon(
-                              Icons.receipt_rounded,
-                              size: 14,
-                              color: AppColors.primary,
-                            ),
-                            const SizedBox(width: 4),
-                            Text(
-                              'View Receipt',
-                              style: AppTypography.caption.copyWith(
-                                color: AppColors.primary,
-                                fontWeight: FontWeight.w600,
-                              ),
-                            ),
-                          ],
+                        SizedBox(width: 2),
+                        Icon(
+                          Icons.chevron_right_rounded,
+                          size: 16,
+                          color: AppColors.textMuted,
                         ),
-                      ),
+                      ],
                     ),
                   ],
                 ),
