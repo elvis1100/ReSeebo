@@ -125,7 +125,7 @@ flowchart LR
 ### 3.5 Screen 5: Pricing & Restock Planning (`features/planner/widgets/restock_planner_card.dart`)
 - **Restock Calculator:**
   - Input: Planned restock quantity in pieces (e.g., `100 pcs`).
-  - Automatic pack calculation: Rounded to nearest whole pack (sari-sari owners cannot buy half packs).
+  - Automatic pack calculation: Rounded up to a whole pack, ensuring the purchased piece count meets or exceeds the target (sari-sari owners cannot buy fractional packs).
   - Supplier comparison totals:
     * Total purchase cost at Supplier B vs Supplier A.
     * Gross purchase savings (e.g., `Save ₱60.00`).
