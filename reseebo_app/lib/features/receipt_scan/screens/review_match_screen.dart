@@ -364,56 +364,44 @@ class _ReviewMatchScreenState extends State<ReviewMatchScreen> {
                         ),
                       ],
                     ),
-                  ],
-                ),
-              ),
-            ),
-          ),
-
-          // Total validation & Balance banner
-          SliverToBoxAdapter(
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: AppSpacing.m),
-              child: Container(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: AppSpacing.m,
-                  vertical: AppSpacing.s,
-                ),
-                decoration: BoxDecoration(
-                  color: _isBalanced
-                      ? AppColors.priceCheaperBg
-                      : AppColors.warningBg,
-                  borderRadius: BorderRadius.circular(AppSpacing.radiusS),
-                  border: Border.all(
-                    color: _isBalanced
-                        ? AppColors.priceCheaper.withValues(alpha: 0.3)
-                        : AppColors.warning,
-                  ),
-                ),
-                child: Row(
-                  children: [
-                    Icon(
-                      _isBalanced
-                          ? Icons.check_circle_rounded
-                          : Icons.info_outline_rounded,
-                      size: 18,
-                      color: _isBalanced
-                          ? AppColors.priceCheaper
-                          : AppColors.accentDark,
-                    ),
-                    const SizedBox(width: AppSpacing.s),
-                    Expanded(
-                      child: Text(
-                        _isBalanced
-                            ? 'Lines sum matches scanned total: ${CurrencyFormatter.format(_linesSum)}'
-                            : 'Lines sum: ${CurrencyFormatter.format(_linesSum)} (Scanned total: ${CurrencyFormatter.format(_scannedTotal)})',
-                        style: AppTypography.caption.copyWith(
-                          color: _isBalanced
-                              ? AppColors.priceCheaper
-                              : AppColors.accentDark,
-                          fontWeight: FontWeight.w700,
+                    const Divider(height: 16),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text(
+                          'Total: ${CurrencyFormatter.format(_linesSum)}',
+                          style: AppTypography.headingSmall.copyWith(
+                            fontSize: 14,
+                            fontWeight: FontWeight.w700,
+                          ),
                         ),
-                      ),
+                        Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Icon(
+                              _isBalanced
+                                  ? Icons.check_circle_outline_rounded
+                                  : Icons.info_outline_rounded,
+                              size: 15,
+                              color: _isBalanced
+                                  ? AppColors.priceCheaper
+                                  : AppColors.accent,
+                            ),
+                            const SizedBox(width: 4),
+                            Text(
+                              _isBalanced
+                                  ? 'Matches scanned total'
+                                  : 'Scanned: ${CurrencyFormatter.format(_scannedTotal)}',
+                              style: AppTypography.caption.copyWith(
+                                color: _isBalanced
+                                    ? AppColors.priceCheaper
+                                    : AppColors.accent,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ],
                     ),
                   ],
                 ),

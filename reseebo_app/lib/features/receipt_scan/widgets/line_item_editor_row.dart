@@ -7,8 +7,10 @@ import '../../../core/theme/app_typography.dart';
 import '../../../core/utils/currency_formatter.dart';
 import '../../../core/widgets/app_card.dart';
 
-/// Interactive line editor row supporting pack-to-piece conversions,
-/// on-the-fly unit cost calculations, and product alias reassignment.
+/// Clean, high-density line item editor following modern fintech design standards.
+///
+/// Removes arithmetic equation glyphs (`×`, `=`) and reduces visual noise,
+/// focusing on fast verification and clear price-per-piece outcomes.
 class LineItemEditorRow extends StatelessWidget {
   final ParsedLineItem line;
   final Product? matchedProduct;
@@ -38,246 +40,164 @@ class LineItemEditorRow extends StatelessWidget {
     final totalPieces = (line.quantity * (line.piecesPerPack <= 0 ? 1 : line.piecesPerPack)).round();
 
     return AppCard(
-      padding: AppSpacing.compactCardPadding,
-      backgroundColor: isAmbiguous
-          ? AppColors.warningBg.withValues(alpha: 0.3)
-          : AppColors.surfaceCard,
+      padding: const EdgeInsets.symmetric(
+        horizontal: AppSpacing.m,
+        vertical: AppSpacing.s + 2,
+      ),
+      backgroundColor: AppColors.surfaceCard,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Top bar: Raw OCR string + Ambiguity Badge + Delete button
+          // Top: Title, matched product, and line total
           Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                decoration: BoxDecoration(
-                  color: AppColors.border,
-                  borderRadius: BorderRadius.circular(4),
-                ),
-                child: Text(
-                  'OCR Line #${index + 1}',
-                  style: AppTypography.caption.copyWith(
-                    fontWeight: FontWeight.w700,
-                    color: AppColors.textSecondary,
-                  ),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    InkWell(
+                      onTap: onSelectProduct,
+                      borderRadius: BorderRadius.circular(AppSpacing.radiusXs),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Flexible(
+                            child: Text(
+                              hasProduct
+                                  ? matchedProduct!.displayTitle
+                                  : 'Tap to match product',
+                              style: AppTypography.headingSmall.copyWith(
+                                fontSize: 14,
+                                color: hasProduct
+                                    ? AppColors.textPrimary
+                                    : AppColors.accent,
+                                fontWeight: FontWeight.w700,
+                              ),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ),
+                          const SizedBox(width: 4),
+                          Icon(
+                            Icons.arrow_drop_down_rounded,
+                            size: 18,
+                            color: hasProduct
+                                ? AppColors.textSecondary
+                                : AppColors.accent,
+                          ),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(height: 1),
+                    Text(
+                      'OCR: "${line.rawDescription}"',
+                      style: AppTypography.caption.copyWith(
+                        fontSize: 11,
+                        color: AppColors.textMuted,
+                      ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ],
                 ),
               ),
               const SizedBox(width: AppSpacing.s),
-              Expanded(
-                child: Text(
-                  line.rawDescription,
-                  style: AppTypography.caption.copyWith(
-                    fontFamily: 'monospace',
-                    fontWeight: FontWeight.w600,
-                    color: AppColors.textPrimary,
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.end,
+                children: [
+                  Text(
+                    CurrencyFormatter.format(line.netAmount),
+                    style: AppTypography.tableCellNumber.copyWith(
+                      fontSize: 15,
+                      fontWeight: FontWeight.w700,
+                    ),
                   ),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                ),
+                  if (isAmbiguous)
+                    Text(
+                      'Unmatched',
+                      style: AppTypography.caption.copyWith(
+                        fontSize: 10,
+                        color: AppColors.accent,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                ],
               ),
-              if (isAmbiguous) ...[
-                Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                  decoration: BoxDecoration(
-                    color: AppColors.warningBg,
-                    borderRadius: BorderRadius.circular(4),
-                    border: Border.all(color: AppColors.warning.withValues(alpha: 0.5)),
-                  ),
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      const Icon(
-                        Icons.warning_amber_rounded,
-                        size: 12,
-                        color: AppColors.accentDark,
-                      ),
-                      const SizedBox(width: 3),
-                      Text(
-                        'Needs Review',
-                        style: AppTypography.caption.copyWith(
-                          fontSize: 10,
-                          fontWeight: FontWeight.w700,
-                          color: AppColors.accentDark,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                const SizedBox(width: AppSpacing.xs),
-              ],
+              const SizedBox(width: 4),
               IconButton(
                 padding: EdgeInsets.zero,
                 constraints: const BoxConstraints(),
                 icon: const Icon(
                   Icons.close_rounded,
-                  size: 18,
+                  size: 16,
                   color: AppColors.textMuted,
                 ),
                 onPressed: onRemove,
               ),
             ],
           ),
-          const SizedBox(height: AppSpacing.s),
+          const Divider(height: 16),
 
-          // Matched Product Selector Button
-          InkWell(
-            onTap: onSelectProduct,
-            borderRadius: BorderRadius.circular(AppSpacing.radiusS),
-            child: Container(
-              padding: const EdgeInsets.symmetric(
-                horizontal: AppSpacing.s + 2,
-                vertical: AppSpacing.s,
-              ),
-              decoration: BoxDecoration(
-                color: hasProduct
-                    ? AppColors.primarySurface
-                    : AppColors.accentLight.withValues(alpha: 0.5),
-                borderRadius: BorderRadius.circular(AppSpacing.radiusS),
-                border: Border.all(
-                  color: hasProduct
-                      ? AppColors.primary.withValues(alpha: 0.3)
-                      : AppColors.accent,
-                ),
-              ),
-              child: Row(
-                children: [
-                  Icon(
-                    hasProduct
-                        ? Icons.check_circle_rounded
-                        : Icons.help_outline_rounded,
-                    size: 18,
-                    color: hasProduct ? AppColors.primary : AppColors.accent,
-                  ),
-                  const SizedBox(width: AppSpacing.s),
-                  Expanded(
-                    child: Text(
-                      hasProduct
-                          ? matchedProduct!.displayTitle
-                          : 'Tap to match known product...',
-                      style: AppTypography.headingSmall.copyWith(
-                        fontSize: 13,
-                        color: hasProduct
-                            ? AppColors.primaryDark
-                            : AppColors.accentDark,
-                      ),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                  ),
-                  const Icon(
-                    Icons.arrow_drop_down_rounded,
-                    color: AppColors.textSecondary,
-                  ),
-                ],
-              ),
-            ),
-          ),
-          const SizedBox(height: AppSpacing.s),
-
-          // Pack math & price row
+          // Middle: Clean input fields without math symbols
           Row(
             children: [
-              // Packs count input
               Expanded(
-                flex: 3,
-                child: _buildSmallNumberField(
-                  label: 'Packs/Qty',
-                  value: line.quantity.toStringAsFixed(line.quantity.truncateToDouble() == line.quantity ? 0 : 2),
+                child: _buildCompactField(
+                  label: 'Packs / Qty',
+                  value: line.quantity.toStringAsFixed(
+                    line.quantity.truncateToDouble() == line.quantity ? 0 : 2,
+                  ),
                   onChanged: (val) {
-                    final dVal = double.tryParse(val) ?? 1.0;
-                    if (dVal > 0) onQuantityChanged(dVal);
+                    final d = double.tryParse(val) ?? 1.0;
+                    if (d > 0) onQuantityChanged(d);
                   },
-                ),
-              ),
-              const Padding(
-                padding: EdgeInsets.symmetric(horizontal: 4),
-                child: Text('×', style: TextStyle(fontWeight: FontWeight.bold)),
-              ),
-              // Pieces per pack
-              Expanded(
-                flex: 3,
-                child: _buildSmallNumberField(
-                  label: 'Pcs/Pack',
-                  value: line.piecesPerPack.toString(),
-                  onChanged: (val) {
-                    final intVal = int.tryParse(val) ?? 1;
-                    if (intVal > 0) onPiecesPerPackChanged(intVal);
-                  },
-                ),
-              ),
-              const Padding(
-                padding: EdgeInsets.symmetric(horizontal: 4),
-                child: Text('=', style: TextStyle(fontWeight: FontWeight.bold)),
-              ),
-              // Total pieces pill
-              Expanded(
-                flex: 3,
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      'Total Pcs',
-                      style: AppTypography.caption.copyWith(fontSize: 10),
-                    ),
-                    const SizedBox(height: 2),
-                    Container(
-                      height: 38,
-                      alignment: Alignment.center,
-                      decoration: BoxDecoration(
-                        color: AppColors.surfaceSubtle,
-                        borderRadius: BorderRadius.circular(AppSpacing.radiusXs),
-                        border: Border.all(color: AppColors.border),
-                      ),
-                      child: Text(
-                        '$totalPieces pcs',
-                        style: AppTypography.bodySmall.copyWith(
-                          fontWeight: FontWeight.w700,
-                          color: AppColors.textPrimary,
-                        ),
-                      ),
-                    ),
-                  ],
                 ),
               ),
               const SizedBox(width: AppSpacing.s),
-              // Line total price
               Expanded(
-                flex: 4,
-                child: _buildSmallNumberField(
-                  label: 'Total Paid (₱)',
+                child: _buildCompactField(
+                  label: 'Pcs / Pack',
+                  value: line.piecesPerPack.toString(),
+                  onChanged: (val) {
+                    final i = int.tryParse(val) ?? 1;
+                    if (i > 0) onPiecesPerPackChanged(i);
+                  },
+                ),
+              ),
+              const SizedBox(width: AppSpacing.s),
+              Expanded(
+                child: _buildCompactField(
+                  label: 'Line Total (₱)',
                   value: line.netAmount.toStringAsFixed(2),
                   isDecimal: true,
                   onChanged: (val) {
-                    final dVal = double.tryParse(val) ?? 0.0;
-                    if (dVal >= 0) onLineTotalChanged(dVal);
+                    final d = double.tryParse(val) ?? 0.0;
+                    if (d >= 0) onLineTotalChanged(d);
                   },
                 ),
               ),
             ],
           ),
-          const SizedBox(height: AppSpacing.xs),
-          const Divider(height: 12),
+          const SizedBox(height: AppSpacing.s),
 
-          // Unit cost bottom result callout
+          // Bottom: Clean calculated outcome
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(
-                'Unit Cost: ${CurrencyFormatter.format(line.netAmount)} ÷ $totalPieces pcs',
-                style: AppTypography.caption,
-              ),
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-                decoration: BoxDecoration(
-                  color: AppColors.primarySurface,
-                  borderRadius: BorderRadius.circular(AppSpacing.radiusPill),
+                '$totalPieces total pieces',
+                style: AppTypography.caption.copyWith(
+                  color: AppColors.textSecondary,
+                  fontWeight: FontWeight.w500,
                 ),
-                child: Text(
-                  '${CurrencyFormatter.format(line.estimatedCostPerPiece)} / piece',
-                  style: AppTypography.tableCellNumber.copyWith(
-                    color: AppColors.primary,
-                    fontWeight: FontWeight.w700,
-                  ),
+              ),
+              Text(
+                '${CurrencyFormatter.format(line.estimatedCostPerPiece)} / piece',
+                style: AppTypography.tableCellNumber.copyWith(
+                  color: AppColors.primary,
+                  fontWeight: FontWeight.w700,
+                  fontSize: 13,
                 ),
               ),
             ],
@@ -287,7 +207,7 @@ class LineItemEditorRow extends StatelessWidget {
     );
   }
 
-  Widget _buildSmallNumberField({
+  Widget _buildCompactField({
     required String label,
     required String value,
     bool isDecimal = false,
@@ -302,18 +222,18 @@ class LineItemEditorRow extends StatelessWidget {
         ),
         const SizedBox(height: 2),
         SizedBox(
-          height: 38,
+          height: 34,
           child: TextFormField(
             initialValue: value,
             keyboardType: TextInputType.numberWithOptions(decimal: isDecimal),
             textAlign: TextAlign.center,
-            style: AppTypography.tableCellNumber.copyWith(fontSize: 13),
+            style: AppTypography.tableCellNumber.copyWith(fontSize: 12),
             decoration: InputDecoration(
+              isDense: true,
               contentPadding: const EdgeInsets.symmetric(
                 horizontal: 4,
-                vertical: 8,
+                vertical: 6,
               ),
-              isDense: true,
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(AppSpacing.radiusXs),
               ),
