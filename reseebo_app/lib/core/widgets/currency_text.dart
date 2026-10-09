@@ -8,6 +8,7 @@ class CurrencyText extends StatelessWidget {
   final TextStyle? style;
   final Color? color;
   final bool showDifferenceSign;
+  final String prefix;
   final String? suffix;
 
   const CurrencyText(
@@ -16,8 +17,19 @@ class CurrencyText extends StatelessWidget {
     this.style,
     this.color,
     this.showDifferenceSign = false,
+    this.prefix = '',
     this.suffix,
   });
+
+  const CurrencyText.cents({
+    super.key,
+    required num cents,
+    this.style,
+    this.color,
+    this.showDifferenceSign = false,
+    this.prefix = '',
+    this.suffix,
+  }) : amount = cents / 100.0;
 
   @override
   Widget build(BuildContext context) {
@@ -28,9 +40,10 @@ class CurrencyText extends StatelessWidget {
       fontWeight: baseStyle?.fontWeight ?? FontWeight.w600,
     );
 
-    final formatted = showDifferenceSign
+    final rawFormatted = showDifferenceSign
         ? CurrencyFormatter.formatDifference(amount)
         : CurrencyFormatter.format(amount);
+    final formatted = '$prefix$rawFormatted';
 
     if (suffix == null) {
       return Text(formatted, style: effectiveStyle);

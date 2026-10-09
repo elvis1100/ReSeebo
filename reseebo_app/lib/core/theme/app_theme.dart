@@ -3,8 +3,20 @@ import 'app_colors.dart';
 import 'app_spacing.dart';
 import 'app_typography.dart';
 
+export 'app_colors.dart';
+export 'app_spacing.dart';
+export 'app_typography.dart';
+
 /// Configures the unified Material 3 theme for Reseebo.
 abstract final class AppTheme {
+  static ThemeData get light => lightTheme;
+
+  static const moneyStyle = TextStyle(
+    fontFamily: 'Inter',
+    fontFeatures: [FontFeature.tabularFigures()],
+    fontWeight: FontWeight.w700,
+  );
+
   static ThemeData get lightTheme {
     return ThemeData(
       useMaterial3: true,

@@ -36,4 +36,14 @@ abstract final class AppColors {
   static const Color warningBg = Color(0xFFFEF3C7);
   static const Color info = Color(0xFF0284C7);
   static const Color infoBg = Color(0xFFE0F2FE);
+
+  // Backward compatibility tokens
+  static const Color surface = Color(0xFFFFFFFF);
+  static const Color text = Color(0xFF0F172A);
+  static const Color muted = Color(0xFF64748B);
+  static const Color danger = Color(0xFFB91C1C);
+  static const Color amber = Color(0xFFD97706);
+  static const Color softPrimary = Color(0xFFEAF3EE);
+  static const Color softAmber = Color(0xFFFFF7ED);
+  static const Color amberText = Color(0xFF92400E);
 }
