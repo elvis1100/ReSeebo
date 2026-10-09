@@ -3,8 +3,7 @@ import '../../../core/models/product.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_spacing.dart';
 import '../../../core/theme/app_typography.dart';
-import '../../../core/widgets/app_card.dart';
-import '../../../core/widgets/currency_text.dart';
+import '../../../core/widgets/shared_widgets.dart';
 
 /// Interactive card rendering a product in the store owner's catalog.
 ///
@@ -28,20 +27,22 @@ class ProductCatalogItem extends StatelessWidget {
   Widget build(BuildContext context) {
     return AppCard(
       onTap: onTap,
-      padding: AppSpacing.compactCardPadding,
+      padding: const EdgeInsets.symmetric(
+        horizontal: AppSpacing.m,
+        vertical: AppSpacing.s + 2,
+      ),
       child: Row(
         children: [
-          Container(
-            width: 40,
-            height: 40,
-            decoration: BoxDecoration(
-              color: AppColors.surfaceSubtle,
-              borderRadius: BorderRadius.circular(AppSpacing.radiusS),
-            ),
-            child: const Icon(
-              Icons.inventory_2_outlined,
-              color: AppColors.textSecondary,
-              size: 20,
+          ClipRRect(
+            borderRadius: BorderRadius.circular(AppSpacing.radiusS),
+            child: SizedBox(
+              width: 44,
+              height: 44,
+              child: LocalPhoto(
+                path: product.photoPath,
+                size: 44,
+                icon: Icons.inventory_2_rounded,
+              ),
             ),
           ),
           const SizedBox(width: AppSpacing.m),
@@ -51,11 +52,14 @@ class ProductCatalogItem extends StatelessWidget {
               children: [
                 Text(
                   product.displayName,
-                  style: AppTypography.headingSmall.copyWith(fontSize: 15),
+                  style: AppTypography.headingSmall.copyWith(
+                    fontSize: 15,
+                    fontWeight: FontWeight.w700,
+                  ),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                 ),
-                const SizedBox(height: 2),
+                const SizedBox(height: 3),
                 Row(
                   children: [
                     if (product.category.isNotEmpty) ...[
@@ -77,11 +81,14 @@ class ProductCatalogItem extends StatelessWidget {
                           ),
                         ),
                       ),
-                      const SizedBox(width: AppSpacing.s),
+                      const SizedBox(width: AppSpacing.xs),
                     ],
                     Text(
                       product.sizeUnit,
-                      style: AppTypography.caption,
+                      style: AppTypography.caption.copyWith(
+                        color: AppColors.textSecondary,
+                        fontSize: 12,
+                      ),
                     ),
                   ],
                 ),
@@ -98,13 +105,17 @@ class ProductCatalogItem extends StatelessWidget {
                   children: [
                     Text(
                       'Cost: ',
-                      style: AppTypography.caption.copyWith(fontSize: 11),
+                      style: AppTypography.caption.copyWith(
+                        fontSize: 11,
+                        color: AppColors.textSecondary,
+                      ),
                     ),
                     CurrencyText(
                       latestUnitCost!,
                       style: AppTypography.tableCellNumber.copyWith(
                         fontSize: 14,
                         fontWeight: FontWeight.w700,
+                        color: AppColors.textPrimary,
                       ),
                     ),
                   ],
@@ -112,25 +123,33 @@ class ProductCatalogItem extends StatelessWidget {
               ],
               if (suggestedPrice != null) ...[
                 const SizedBox(height: 2),
-                Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Text(
-                      'SRP: ',
-                      style: AppTypography.caption.copyWith(
-                        fontSize: 11,
-                        color: AppColors.textSecondary,
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 1.5),
+                  decoration: BoxDecoration(
+                    color: AppColors.primarySurface,
+                    borderRadius: BorderRadius.circular(4),
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text(
+                        'SRP: ',
+                        style: AppTypography.caption.copyWith(
+                          fontSize: 10,
+                          fontWeight: FontWeight.w700,
+                          color: AppColors.primary,
+                        ),
                       ),
-                    ),
-                    CurrencyText(
-                      suggestedPrice!,
-                      style: AppTypography.tableCellNumber.copyWith(
-                        fontSize: 13,
-                        fontWeight: FontWeight.w600,
-                        color: AppColors.primary,
+                      CurrencyText(
+                        suggestedPrice!,
+                        style: AppTypography.tableCellNumber.copyWith(
+                          fontSize: 13,
+                          fontWeight: FontWeight.w800,
+                          color: AppColors.primary,
+                        ),
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
               ],
             ],

@@ -26,20 +26,27 @@ class ReceiptListItem extends StatelessWidget {
 
     return AppCard(
       onTap: onTap,
-      padding: AppSpacing.compactCardPadding,
+      padding: const EdgeInsets.symmetric(
+        horizontal: AppSpacing.m,
+        vertical: AppSpacing.s + 2,
+      ),
       child: Row(
         children: [
           Container(
-            width: 40,
-            height: 40,
+            width: 44,
+            height: 44,
             decoration: BoxDecoration(
-              color: AppColors.surfaceSubtle,
+              color: AppColors.primarySurface,
               borderRadius: BorderRadius.circular(AppSpacing.radiusS),
+              border: Border.all(
+                color: AppColors.primary.withValues(alpha: 0.15),
+                width: 1,
+              ),
             ),
             child: const Icon(
-              Icons.receipt_outlined,
-              color: AppColors.textSecondary,
-              size: 20,
+              Icons.receipt_long_rounded,
+              color: AppColors.primary,
+              size: 22,
             ),
           ),
           const SizedBox(width: AppSpacing.m),
@@ -49,28 +56,46 @@ class ReceiptListItem extends StatelessWidget {
               children: [
                 Text(
                   supplierName,
-                  style: AppTypography.headingSmall.copyWith(fontSize: 15),
+                  style: AppTypography.headingSmall.copyWith(
+                    fontSize: 15,
+                    fontWeight: FontWeight.w700,
+                  ),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                 ),
-                const SizedBox(height: 2),
+                const SizedBox(height: 3),
                 Row(
                   children: [
                     Text(
                       DateFormatter.format(receipt.purchaseDate),
-                      style: AppTypography.caption,
+                      style: AppTypography.caption.copyWith(
+                        color: AppColors.textSecondary,
+                        fontSize: 12,
+                      ),
                     ),
-                    const SizedBox(width: AppSpacing.s),
-                    Text(
-                      '•  ${receipt.itemCount} ${receipt.itemCount == 1 ? 'item' : 'items'}',
-                      style: AppTypography.caption,
+                    const SizedBox(width: 6),
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 1),
+                      decoration: BoxDecoration(
+                        color: AppColors.surfaceSubtle,
+                        borderRadius: BorderRadius.circular(4),
+                      ),
+                      child: Text(
+                        '${receipt.itemCount} ${receipt.itemCount == 1 ? 'item' : 'items'}',
+                        style: AppTypography.caption.copyWith(
+                          fontSize: 11,
+                          fontWeight: FontWeight.w600,
+                          color: AppColors.textSecondary,
+                        ),
+                      ),
                     ),
                     if (receipt.receiptNumber.isNotEmpty) ...[
-                      const SizedBox(width: AppSpacing.s),
+                      const SizedBox(width: 6),
                       Text(
                         '#${receipt.receiptNumber}',
                         style: AppTypography.caption.copyWith(
                           color: AppColors.textMuted,
+                          fontSize: 11,
                         ),
                       ),
                     ],
@@ -87,14 +112,28 @@ class ReceiptListItem extends StatelessWidget {
                 receipt.totalAmount,
                 style: AppTypography.tableCellNumber.copyWith(
                   fontSize: 16,
-                  color: AppColors.primary,
+                  fontWeight: FontWeight.w800,
+                  color: AppColors.textPrimary,
                 ),
               ),
               const SizedBox(height: 2),
-              const Icon(
-                Icons.chevron_right_rounded,
-                size: 16,
-                color: AppColors.textMuted,
+              Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(
+                    'View',
+                    style: AppTypography.caption.copyWith(
+                      color: AppColors.primary,
+                      fontWeight: FontWeight.w600,
+                      fontSize: 11,
+                    ),
+                  ),
+                  const Icon(
+                    Icons.chevron_right_rounded,
+                    size: 14,
+                    color: AppColors.primary,
+                  ),
+                ],
               ),
             ],
           ),
