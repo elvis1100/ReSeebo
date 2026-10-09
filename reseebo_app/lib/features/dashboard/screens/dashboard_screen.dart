@@ -115,40 +115,18 @@ class _DashboardScreenState extends State<DashboardScreen>
     return Scaffold(
       backgroundColor: AppColors.background,
       appBar: AppBar(
-        title: Row(
-          children: [
-            Container(
-              padding: const EdgeInsets.all(6),
-              decoration: BoxDecoration(
-                color: AppColors.primarySurface,
-                borderRadius: BorderRadius.circular(AppSpacing.radiusS),
-              ),
-              child: const Icon(
-                Icons.receipt_long_rounded,
-                color: AppColors.primary,
-                size: 22,
-              ),
-            ),
-            const SizedBox(width: AppSpacing.s),
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                const Text('Reseebo', style: AppTypography.headingMedium),
-                Text(
-                  'Sari-Sari Cost Tracker (Offline)',
-                  style: AppTypography.caption.copyWith(
-                    color: AppColors.primary,
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-              ],
-            ),
-          ],
+        title: const Text(
+          'Reseebo',
+          style: TextStyle(
+            fontSize: 20,
+            fontWeight: FontWeight.w800,
+            letterSpacing: -0.5,
+          ),
         ),
         actions: [
           IconButton(
             tooltip: 'Refresh data',
-            icon: const Icon(Icons.refresh_rounded),
+            icon: const Icon(Icons.refresh_rounded, size: 20),
             onPressed: _loadData,
           ),
         ],
@@ -166,9 +144,9 @@ class _DashboardScreenState extends State<DashboardScreen>
                     child: Padding(
                       padding: const EdgeInsets.fromLTRB(
                         AppSpacing.m,
-                        AppSpacing.m,
-                        AppSpacing.m,
                         AppSpacing.s,
+                        AppSpacing.m,
+                        AppSpacing.xs,
                       ),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -176,6 +154,8 @@ class _DashboardScreenState extends State<DashboardScreen>
                           if (_storeProfile != null)
                             StatHeader(
                               profile: _storeProfile!,
+                              totalReceipts: _receipts.length,
+                              totalProducts: _products.length,
                               onSettingsTap: widget.onSettingsPressed,
                             ),
                           const SizedBox(height: AppSpacing.m),
@@ -183,15 +163,15 @@ class _DashboardScreenState extends State<DashboardScreen>
                             controller: _searchController,
                             style: AppTypography.bodyRegular,
                             decoration: InputDecoration(
-                              hintText:
-                                  'Search products, brands, or suppliers...',
+                              hintText: 'Search products or suppliers...',
                               prefixIcon: const Icon(
                                 Icons.search_rounded,
                                 color: AppColors.textMuted,
+                                size: 20,
                               ),
                               suffixIcon: _searchQuery.isNotEmpty
                                   ? IconButton(
-                                      icon: const Icon(Icons.clear_rounded),
+                                      icon: const Icon(Icons.clear_rounded, size: 18),
                                       onPressed: () {
                                         _searchController.clear();
                                       },
@@ -200,30 +180,44 @@ class _DashboardScreenState extends State<DashboardScreen>
                             ),
                           ),
                           const SizedBox(height: AppSpacing.m),
+                          // Modern segmented pill tab bar
                           Container(
+                            height: 40,
+                            padding: const EdgeInsets.all(3),
                             decoration: BoxDecoration(
-                              color: AppColors.surfaceCard,
-                              borderRadius:
-                                  BorderRadius.circular(AppSpacing.radiusM),
-                              border: Border.all(color: AppColors.border),
+                              color: AppColors.surfaceSubtle,
+                              borderRadius: BorderRadius.circular(AppSpacing.radiusS),
                             ),
                             child: TabBar(
                               controller: _tabController,
-                              labelColor: AppColors.primary,
+                              labelColor: AppColors.textPrimary,
                               unselectedLabelColor: AppColors.textSecondary,
-                              indicatorColor: AppColors.primary,
-                              indicatorWeight: 3,
-                              labelStyle: AppTypography.headingSmall.copyWith(
+                              indicatorSize: TabBarIndicatorSize.tab,
+                              indicator: BoxDecoration(
+                                color: Colors.white,
+                                borderRadius: BorderRadius.circular(AppSpacing.radiusXs + 2),
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: Colors.black.withValues(alpha: 0.05),
+                                    blurRadius: 3,
+                                    offset: const Offset(0, 1),
+                                  ),
+                                ],
+                              ),
+                              labelStyle: const TextStyle(
                                 fontSize: 13,
+                                fontWeight: FontWeight.w700,
+                              ),
+                              unselectedLabelStyle: const TextStyle(
+                                fontSize: 13,
+                                fontWeight: FontWeight.w500,
                               ),
                               tabs: [
                                 Tab(
-                                  text:
-                                      'Recent Receipts (${_filteredReceipts.length})',
+                                  text: 'Recent Receipts (${_filteredReceipts.length})',
                                 ),
                                 Tab(
-                                  text:
-                                      'Product Catalog (${_filteredProducts.length})',
+                                  text: 'Products (${_filteredProducts.length})',
                                 ),
                               ],
                             ),
@@ -248,10 +242,11 @@ class _DashboardScreenState extends State<DashboardScreen>
       floatingActionButton: FloatingActionButton.extended(
         backgroundColor: AppColors.primary,
         foregroundColor: Colors.white,
-        icon: const Icon(Icons.document_scanner_rounded),
+        elevation: 2,
+        icon: const Icon(Icons.document_scanner_rounded, size: 20),
         label: const Text(
           'Scan Receipt',
-          style: TextStyle(fontWeight: FontWeight.w700),
+          style: TextStyle(fontWeight: FontWeight.w700, letterSpacing: 0.2),
         ),
         onPressed: widget.onScanPressed,
       ),
@@ -268,17 +263,17 @@ class _DashboardScreenState extends State<DashboardScreen>
             children: [
               const Icon(
                 Icons.receipt_outlined,
-                size: 48,
+                size: 40,
                 color: AppColors.textMuted,
               ),
-              const SizedBox(height: AppSpacing.m),
+              const SizedBox(height: AppSpacing.s),
               const Text(
-                'No receipts found',
+                'No receipts recorded yet',
                 style: AppTypography.headingSmall,
               ),
-              const SizedBox(height: AppSpacing.xs),
+              const SizedBox(height: 4),
               const Text(
-                'Scan your grocery or wholesale delivery receipts to start tracking costs.',
+                'Scan wholesale delivery receipts to start comparing prices.',
                 textAlign: TextAlign.center,
                 style: AppTypography.bodySmall,
               ),
@@ -291,7 +286,7 @@ class _DashboardScreenState extends State<DashboardScreen>
     return ListView.separated(
       padding: const EdgeInsets.symmetric(
         horizontal: AppSpacing.m,
-        vertical: AppSpacing.m,
+        vertical: AppSpacing.s,
       ),
       itemCount: _filteredReceipts.length,
       separatorBuilder: (context, index) =>
@@ -318,17 +313,17 @@ class _DashboardScreenState extends State<DashboardScreen>
             children: [
               const Icon(
                 Icons.inventory_2_outlined,
-                size: 48,
+                size: 40,
                 color: AppColors.textMuted,
               ),
-              const SizedBox(height: AppSpacing.m),
+              const SizedBox(height: AppSpacing.s),
               const Text(
-                'No products found',
+                'No products in catalog',
                 style: AppTypography.headingSmall,
               ),
-              const SizedBox(height: AppSpacing.xs),
+              const SizedBox(height: 4),
               const Text(
-                'Products and aliases are automatically added when you scan receipts.',
+                'Products and prices are automatically indexed when you scan receipts.',
                 textAlign: TextAlign.center,
                 style: AppTypography.bodySmall,
               ),
@@ -341,14 +336,13 @@ class _DashboardScreenState extends State<DashboardScreen>
     return ListView.separated(
       padding: const EdgeInsets.symmetric(
         horizontal: AppSpacing.m,
-        vertical: AppSpacing.m,
+        vertical: AppSpacing.s,
       ),
       itemCount: _filteredProducts.length,
       separatorBuilder: (context, index) =>
           const SizedBox(height: AppSpacing.s),
       itemBuilder: (context, index) {
         final product = _filteredProducts[index];
-        // Calculate mock/reference latest unit cost and suggested price
         final latestCost = 28.50 + (index * 4.25);
         final srp = (latestCost * 1.15).ceilToDouble();
 

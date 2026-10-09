@@ -32,17 +32,16 @@ class ProductCatalogItem extends StatelessWidget {
       child: Row(
         children: [
           Container(
-            width: 44,
-            height: 44,
+            width: 40,
+            height: 40,
             decoration: BoxDecoration(
-              color: AppColors.background,
+              color: AppColors.surfaceSubtle,
               borderRadius: BorderRadius.circular(AppSpacing.radiusS),
-              border: Border.all(color: AppColors.border),
             ),
             child: const Icon(
               Icons.inventory_2_outlined,
-              color: AppColors.primary,
-              size: 22,
+              color: AppColors.textSecondary,
+              size: 20,
             ),
           ),
           const SizedBox(width: AppSpacing.m),
@@ -66,7 +65,7 @@ class ProductCatalogItem extends StatelessWidget {
                           vertical: 1.5,
                         ),
                         decoration: BoxDecoration(
-                          color: AppColors.primarySurface,
+                          color: AppColors.surfaceSubtle,
                           borderRadius: BorderRadius.circular(4),
                         ),
                         child: Text(
@@ -74,7 +73,7 @@ class ProductCatalogItem extends StatelessWidget {
                           style: AppTypography.caption.copyWith(
                             fontSize: 10,
                             fontWeight: FontWeight.w600,
-                            color: AppColors.primary,
+                            color: AppColors.textSecondary,
                           ),
                         ),
                       ),

@@ -30,16 +30,16 @@ class ReceiptListItem extends StatelessWidget {
       child: Row(
         children: [
           Container(
-            width: 44,
-            height: 44,
+            width: 40,
+            height: 40,
             decoration: BoxDecoration(
-              color: AppColors.primarySurface,
+              color: AppColors.surfaceSubtle,
               borderRadius: BorderRadius.circular(AppSpacing.radiusS),
             ),
             child: const Icon(
-              Icons.receipt_long_rounded,
-              color: AppColors.primary,
-              size: 22,
+              Icons.receipt_outlined,
+              color: AppColors.textSecondary,
+              size: 20,
             ),
           ),
           const SizedBox(width: AppSpacing.m),
