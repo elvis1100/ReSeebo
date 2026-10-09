@@ -1,0 +1,27 @@
+{
+  "synthetic": true,
+  "name": "incomplete likely product remains editable",
+  "lines": [
+    {
+      "text": "SUPPLIER A"
+    },
+    {
+      "text": "2026-10-09"
+    },
+    {
+      "text": "COFFEE ORIGINAL 26G"
+    }
+  ],
+  "expected": {
+    "date": "2026-10-09",
+    "lines": [
+      {
+        "description": "COFFEE ORIGINAL 26G",
+        "quantity": null,
+        "unit": null,
+        "amount": null,
+        "warning": "incomplete"
+      }
+    ]
+  }
+}

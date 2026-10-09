@@ -8,5 +8,6 @@ class CapturePage {
   final String originalPath;
   String? originalHash;
   String? recognitionPath;
+  String? preparedPath;
   String get previewPath => recognitionPath ?? originalPath;
 }

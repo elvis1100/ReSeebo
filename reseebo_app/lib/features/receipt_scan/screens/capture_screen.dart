@@ -1,250 +1,247 @@
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
+
 import '../../../core/adapters/reseebo_data_adapter.dart';
-import '../../../core/theme/app_colors.dart';
-import '../../../core/theme/app_spacing.dart';
-import '../../../core/theme/app_typography.dart';
-import '../widgets/camera_viewfinder_guide.dart';
+import '../../../core/theme/app_theme.dart';
+import '../../../core/widgets/app_button.dart';
+import '../state/capture_state.dart';
+import '../widgets/capture_page_strip.dart';
+import '../widgets/crop_receipt_dialog.dart';
+import '../widgets/receipt_image_viewer.dart';
+import '../widgets/straighten_receipt_dialog.dart';
 
-/// Screen enabling store owners to snap photos of receipts with on-device
-/// framing assistance, gallery upload fallback, and offline OCR status.
 class CaptureScreen extends StatefulWidget {
-  final IReseeboDataAdapter dataAdapter;
-  final ValueChanged<ReceiptDraft>? onDraftReady;
-  final VoidCallback? onBack;
-
   const CaptureScreen({
     super.key,
     required this.dataAdapter,
     this.onDraftReady,
     this.onBack,
   });
-
+  final IReseeboDataAdapter dataAdapter;
+  final ValueChanged<ReceiptDraft>? onDraftReady;
+  final VoidCallback? onBack;
   @override
   State<CaptureScreen> createState() => _CaptureScreenState();
 }
 
 class _CaptureScreenState extends State<CaptureScreen> {
-  final ImagePicker _picker = ImagePicker();
-  bool _isProcessing = false;
-  String? _statusMessage;
-
-  Future<void> _captureFromCamera() async {
-    try {
-      final photo = await _picker.pickImage(
-        source: ImageSource.camera,
-        maxWidth: 1920,
-        maxHeight: 1920,
-        imageQuality: 90,
-      );
-
-      if (photo != null) {
-        await _processImagePath(photo.path);
-      }
-    } catch (_) {
-      // In desktop/simulator environments without camera, fallback gracefully
-      _useDemoReceipt();
-    }
-  }
-
-  Future<void> _pickFromGallery() async {
-    try {
-      final image = await _picker.pickImage(
-        source: ImageSource.gallery,
-        maxWidth: 1920,
-        maxHeight: 1920,
-        imageQuality: 90,
-      );
-
-      if (image != null) {
-        await _processImagePath(image.path);
-      }
-    } catch (_) {
-      _useDemoReceipt();
-    }
-  }
-
-  Future<void> _useDemoReceipt() async {
-    await _processImagePath('assets/samples/demo_puregold_receipt.jpg');
-  }
-
-  Future<void> _processImagePath(String localPath) async {
-    setState(() {
-      _isProcessing = true;
-      _statusMessage = 'Reading receipt lines...';
-    });
-
-    try {
-      final draft = await widget.dataAdapter.processReceiptImage(localPath);
-      if (mounted) {
-        setState(() {
-          _isProcessing = false;
-        });
-        widget.onDraftReady?.call(draft);
-      }
-    } catch (e) {
-      if (mounted) {
-        setState(() {
-          _isProcessing = false;
-        });
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            backgroundColor: AppColors.priceIncrease,
-            content: Text('Failed to process receipt: $e'),
-          ),
-        );
-      }
-    }
+  late final CaptureState _state;
+  @override
+  void initState() {
+    super.initState();
+    _state = CaptureState(adapter: widget.dataAdapter);
   }
 
   @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: Colors.black,
-      appBar: AppBar(
-        backgroundColor: Colors.black,
-        foregroundColor: Colors.white,
-        title: const Text(
-          'Capture Receipt',
-          style: TextStyle(color: Colors.white, fontSize: 18),
-        ),
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back_rounded, color: Colors.white),
-          onPressed: widget.onBack ?? () => Navigator.of(context).maybePop(),
-        ),
-        actions: [
-          IconButton(
-            tooltip: 'Try Demo Receipt',
-            icon: const Icon(Icons.receipt_long_rounded, color: AppColors.accentLight),
-            onPressed: _isProcessing ? null : _useDemoReceipt,
-          ),
-        ],
-      ),
-      body: Stack(
-        children: [
-          // Viewfinder background preview area
-          Container(
-            color: const Color(0xFF1E293B),
-            child: const Center(
-              child: Icon(
-                Icons.camera_alt_outlined,
-                size: 80,
-                color: Color(0xFF475569),
-              ),
-            ),
-          ),
+  void dispose() {
+    _state.dispose();
+    super.dispose();
+  }
 
-          // Framing cut-out guidelines
-          const CameraViewfinderGuide(),
+  Future<void> _crop() async {
+    final crop = await showDialog<List<double>>(
+      context: context,
+      builder: (_) => CropReceiptDialog(path: _state.previewPath!),
+    );
+    if (crop != null && mounted) await _state.transform(crop: crop);
+  }
 
-          // Bottom control toolbar
-          Positioned(
-            bottom: 0,
-            left: 0,
-            right: 0,
-            child: Container(
-              color: Colors.black.withValues(alpha: 0.8),
-              padding: const EdgeInsets.symmetric(
-                horizontal: AppSpacing.xl,
-                vertical: AppSpacing.lg,
+  Future<void> _straighten() async {
+    final angle = await showDialog<double>(
+      context: context,
+      builder: (_) => StraightenReceiptDialog(path: _state.previewPath!),
+    );
+    if (angle != null && angle != 0 && mounted) {
+      await _state.transform(angleDegrees: angle);
+    }
+  }
+
+  Future<void> _read({bool allowLowQuality = false}) async {
+    final draft = await _state.recognize(allowLowQuality: allowLowQuality);
+    if (draft != null && mounted) widget.onDraftReady?.call(draft);
+  }
+
+  @override
+  Widget build(BuildContext context) => AnimatedBuilder(
+    animation: _state,
+    builder: (context, _) {
+      final hasPhotos = _state.pages.isNotEmpty;
+      final enabled = !_state.busy;
+      return Scaffold(
+        appBar: AppBar(
+          title: const Text('Scan receipt'),
+          leading: IconButton(
+            icon: const Icon(Icons.arrow_back_rounded),
+            onPressed: enabled
+                ? (widget.onBack ?? () => Navigator.of(context).maybePop())
+                : null,
+          ),
+        ),
+        body: SafeArea(
+          child: ListView(
+            padding: const EdgeInsets.all(AppSpacing.lg),
+            children: [
+              const Text(
+                'Add clear photos in receipt order. Crop the background and straighten tilted lines. Reading and editing work offline.',
               ),
-              child: SafeArea(
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceAround,
+              const SizedBox(height: AppSpacing.md),
+              Wrap(
+                spacing: AppSpacing.sm,
+                runSpacing: AppSpacing.sm,
+                children: [
+                  AppButton(
+                    label: 'Camera',
+                    icon: Icons.camera_alt_outlined,
+                    onPressed: enabled
+                        ? () => _state.pick(ImageSource.camera)
+                        : null,
+                  ),
+                  AppButton(
+                    label: 'Gallery',
+                    icon: Icons.photo_library_outlined,
+                    variant: ButtonVariant.outlined,
+                    onPressed: enabled
+                        ? () => _state.pick(ImageSource.gallery)
+                        : null,
+                  ),
+                ],
+              ),
+              if (hasPhotos) ...[
+                const SizedBox(height: AppSpacing.md),
+                CapturePageStrip(
+                  pages: _state.pages,
+                  selectedIndex: _state.selectedIndex,
+                  onSelected: _state.selectPage,
+                  enabled: enabled,
+                ),
+                const SizedBox(height: AppSpacing.sm),
+                ReceiptImageViewer(
+                  key: ValueKey(_state.previewPath),
+                  imagePath: _state.previewPath!,
+                  imageLabel: _state.recognitionPath == null
+                      ? 'Original photo'
+                      : 'Adjusted preview',
+                  height: 280,
+                ),
+                const SizedBox(height: AppSpacing.sm),
+                Wrap(
+                  spacing: AppSpacing.xs,
                   children: [
-                    // Pick from phone gallery
-                    IconButton(
-                      iconSize: 32,
-                      tooltip: 'Choose from Gallery',
-                      icon: const Icon(
-                        Icons.photo_library_outlined,
-                        color: Colors.white,
-                      ),
-                      onPressed: _isProcessing ? null : _pickFromGallery,
+                    TextButton.icon(
+                      icon: const Icon(Icons.crop),
+                      label: const Text('Crop'),
+                      onPressed: enabled ? _crop : null,
                     ),
-
-                    // Main circular shutter capture button
-                    GestureDetector(
-                      onTap: _isProcessing ? null : _captureFromCamera,
-                      child: Container(
-                        width: 76,
-                        height: 76,
-                        decoration: BoxDecoration(
-                          shape: BoxShape.circle,
-                          border: Border.all(color: Colors.white, width: 4),
-                          color: Colors.transparent,
-                        ),
-                        child: Center(
-                          child: Container(
-                            width: 60,
-                            height: 60,
-                            decoration: const BoxDecoration(
-                              shape: BoxShape.circle,
-                              color: AppColors.primary,
-                            ),
-                            child: const Icon(
-                              Icons.camera_rounded,
-                              color: Colors.white,
-                              size: 32,
-                            ),
-                          ),
-                        ),
-                      ),
+                    TextButton.icon(
+                      icon: const Icon(Icons.rotate_right),
+                      label: const Text('Rotate'),
+                      onPressed: enabled
+                          ? () => _state.transform(rotate: true)
+                          : null,
                     ),
-
-                    // Use sample receipt shortcut
-                    IconButton(
-                      iconSize: 32,
-                      tooltip: 'Load Sample',
-                      icon: const Icon(
-                        Icons.description_outlined,
-                        color: Colors.white,
-                      ),
-                      onPressed: _isProcessing ? null : _useDemoReceipt,
+                    TextButton.icon(
+                      icon: const Icon(Icons.straighten),
+                      label: const Text('Straighten'),
+                      onPressed: enabled ? _straighten : null,
+                    ),
+                    TextButton.icon(
+                      icon: const Icon(Icons.undo),
+                      label: const Text('Reset edits'),
+                      onPressed: enabled ? _state.resetEdits : null,
                     ),
                   ],
                 ),
-              ),
-            ),
-          ),
-
-          // Processing loading overlay
-          if (_isProcessing)
-            Container(
-              color: Colors.black.withValues(alpha: 0.75),
-              child: Center(
-                child: Container(
-                  padding: const EdgeInsets.all(AppSpacing.xl),
-                  margin: const EdgeInsets.symmetric(horizontal: AppSpacing.xl),
-                  decoration: BoxDecoration(
-                    color: AppColors.surfaceCard,
-                    borderRadius: BorderRadius.circular(AppSpacing.radiusM),
+                Wrap(
+                  spacing: AppSpacing.xs,
+                  children: [
+                    TextButton.icon(
+                      icon: const Icon(Icons.arrow_back),
+                      label: const Text('Earlier'),
+                      onPressed: enabled && _state.selectedIndex > 0
+                          ? () => _state.moveSelectedPage(-1)
+                          : null,
+                    ),
+                    TextButton.icon(
+                      icon: const Icon(Icons.arrow_forward),
+                      label: const Text('Later'),
+                      onPressed:
+                          enabled &&
+                              _state.selectedIndex < _state.pages.length - 1
+                          ? () => _state.moveSelectedPage(1)
+                          : null,
+                    ),
+                    TextButton.icon(
+                      icon: const Icon(Icons.delete_outline),
+                      label: const Text('Remove page'),
+                      onPressed: enabled ? _state.removeSelectedPage : null,
+                    ),
+                  ],
+                ),
+                SwitchListTile.adaptive(
+                  contentPadding: EdgeInsets.zero,
+                  title: const Text('Enhance faded ink for reading'),
+                  subtitle: const Text(
+                    'Creates a grayscale contrast copy. Original photos stay intact.',
                   ),
+                  value: _state.enhanceForOcr,
+                  onChanged: enabled ? _state.setEnhanceForOcr : null,
+                ),
+              ],
+              if (_state.notice != null)
+                Padding(
+                  padding: const EdgeInsets.symmetric(vertical: AppSpacing.sm),
+                  child: Text(_state.notice!),
+                ),
+              if (_state.error != null)
+                Container(
+                  margin: const EdgeInsets.symmetric(vertical: AppSpacing.md),
+                  padding: const EdgeInsets.all(AppSpacing.md),
+                  decoration: BoxDecoration(
+                    color: AppColors.warningBg,
+                    borderRadius: BorderRadius.circular(AppRadii.control),
+                  ),
+                  child: Text(
+                    _state.error!,
+                    style: const TextStyle(color: AppColors.amberText),
+                  ),
+                ),
+              if (_state.busy)
+                const Padding(
+                  padding: EdgeInsets.all(AppSpacing.md),
                   child: Column(
-                    mainAxisSize: MainAxisSize.min,
                     children: [
-                      const CircularProgressIndicator(
-                        color: AppColors.primary,
-                        strokeWidth: 3.5,
-                      ),
-                      const SizedBox(height: AppSpacing.m),
-                      Text(
-                        'Processing Receipt...',
-                        style: AppTypography.headingSmall,
-                      ),
-                      const SizedBox(height: AppSpacing.xs),
-                      Text(
-                        _statusMessage ?? 'Extracting products & prices...',
-                        textAlign: TextAlign.center,
-                        style: AppTypography.bodySmall,
-                      ),
+                      LinearProgressIndicator(),
+                      SizedBox(height: AppSpacing.sm),
+                      Text('Preparing and reading photos on this device...'),
                     ],
                   ),
                 ),
+              const SizedBox(height: AppSpacing.md),
+              AppButton(
+                label: 'Read receipt',
+                icon: Icons.document_scanner_outlined,
+                isFullWidth: true,
+                onPressed: enabled && hasPhotos ? () => _read() : null,
               ),
-            ),
-        ],
-      ),
-    );
-  }
+              if (_state.qualityRejected)
+                TextButton(
+                  onPressed: enabled
+                      ? () => _read(allowLowQuality: true)
+                      : null,
+                  child: const Text('Use photo anyway'),
+                ),
+              if (hasPhotos)
+                TextButton.icon(
+                  icon: const Icon(Icons.edit_note),
+                  label: const Text('Enter manually'),
+                  onPressed: enabled
+                      ? () => widget.onDraftReady?.call(_state.manualDraft())
+                      : null,
+                ),
+            ],
+          ),
+        ),
+      );
+    },
+  );
 }

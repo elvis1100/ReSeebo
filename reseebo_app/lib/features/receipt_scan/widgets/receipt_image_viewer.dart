@@ -1,21 +1,34 @@
 import 'dart:io';
+import 'dart:ui' as ui;
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import '../../../core/models/models.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_spacing.dart';
 import '../../../core/theme/app_typography.dart';
+import 'receipt_image_geometry.dart';
 
-/// Interactive viewer for the original physical receipt image.
+/// Zoomable original or recognition image. Token coordinates must belong to
+/// the exact file at [imagePath]; overlays are never remapped across edits.
 ///
 /// Supports zoom/pan via [InteractiveViewer] and high-contrast toggle to
 /// help sari-sari store owners read faint or faded thermal prints.
 class ReceiptImageViewer extends StatefulWidget {
   final String imagePath;
   final double height;
+  final List<OcrTextToken> tokens;
+  final Set<int> selectedTokens;
+  final ValueChanged<int>? onTokenSelected;
+  final String imageLabel;
 
   const ReceiptImageViewer({
     super.key,
     required this.imagePath,
     this.height = 220.0,
+    this.tokens = const [],
+    this.selectedTokens = const {},
+    this.onTokenSelected,
+    this.imageLabel = 'Original receipt',
   });
 
   @override
@@ -26,6 +39,51 @@ class _ReceiptImageViewerState extends State<ReceiptImageViewer> {
   final TransformationController _transformController =
       TransformationController();
   bool _highContrast = false;
+  Size? _imageSize;
+  int _imageGeneration = 0;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadDimensions();
+  }
+
+  @override
+  void didUpdateWidget(covariant ReceiptImageViewer oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.imagePath != widget.imagePath) {
+      _imageSize = null;
+      _resetZoom();
+      _loadDimensions();
+    }
+  }
+
+  Future<void> _loadDimensions() async {
+    final generation = ++_imageGeneration;
+    ui.ImmutableBuffer? buffer;
+    ui.ImageDescriptor? descriptor;
+    try {
+      final bytes = widget.imagePath.startsWith('assets/')
+          ? (await rootBundle.load(widget.imagePath)).buffer.asUint8List()
+          : await File(widget.imagePath).readAsBytes();
+      buffer = await ui.ImmutableBuffer.fromUint8List(bytes);
+      // Header dimensions avoid decoding a second full receipt bitmap solely
+      // to place OCR overlays; Image.file/asset owns the display decode.
+      descriptor = await ui.ImageDescriptor.encoded(buffer);
+      final size = Size(
+        descriptor.width.toDouble(),
+        descriptor.height.toDouble(),
+      );
+      if (mounted && generation == _imageGeneration) {
+        setState(() => _imageSize = size);
+      }
+    } catch (_) {
+      // Keep the readable-text fallback available when a picker file expired.
+    } finally {
+      descriptor?.dispose();
+      buffer?.dispose();
+    }
+  }
 
   void _resetZoom() {
     _transformController.value = Matrix4.identity();
@@ -51,24 +109,81 @@ class _ReceiptImageViewerState extends State<ReceiptImageViewer> {
         children: [
           // Pinch-to-zoom interactive area
           Positioned.fill(
-            child: InteractiveViewer(
-              transformationController: _transformController,
-              minScale: 1.0,
-              maxScale: 4.5,
-              child: Center(
-                child: ColorFiltered(
-                  colorFilter: _highContrast
-                      ? const ColorFilter.matrix(<double>[
-                          1.8, 0, 0, 0, -50, // R
-                          0, 1.8, 0, 0, -50, // G
-                          0, 0, 1.8, 0, -50, // B
-                          0, 0, 0, 1, 0, // A
-                        ])
-                      : const ColorFilter.mode(
-                          Colors.transparent,
-                          BlendMode.dst,
-                        ),
-                  child: _buildImageWidget(),
+            child: LayoutBuilder(
+              builder: (context, constraints) => InteractiveViewer(
+                transformationController: _transformController,
+                minScale: 1.0,
+                maxScale: 4.5,
+                child: SizedBox.fromSize(
+                  size: constraints.biggest,
+                  child: Stack(
+                    fit: StackFit.expand,
+                    children: [
+                      ColorFiltered(
+                        colorFilter: _highContrast
+                            ? const ColorFilter.matrix(<double>[
+                                1.8, 0, 0, 0, -50, // R
+                                0, 1.8, 0, 0, -50, // G
+                                0, 0, 1.8, 0, -50, // B
+                                0, 0, 0, 1, 0, // A
+                              ])
+                            : const ColorFilter.mode(
+                                Colors.transparent,
+                                BlendMode.dst,
+                              ),
+                        child: _buildImageWidget(),
+                      ),
+                      if (_imageSize != null && widget.onTokenSelected != null)
+                        ...widget.tokens.indexed
+                            .where(
+                              (entry) =>
+                                  entry.$2.width > 0 && entry.$2.height > 0,
+                            )
+                            .map((entry) {
+                              final token = entry.$2;
+                              final selected = widget.selectedTokens.contains(
+                                entry.$1,
+                              );
+                              return Positioned.fromRect(
+                                rect: fitReceiptBounds(
+                                  Rect.fromLTWH(
+                                    token.left,
+                                    token.top,
+                                    token.width,
+                                    token.height,
+                                  ),
+                                  imageSize: _imageSize!,
+                                  viewport: constraints.biggest,
+                                ),
+                                child: Semantics(
+                                  button: true,
+                                  selected: selected,
+                                  label: 'Select receipt text ${token.text}',
+                                  child: GestureDetector(
+                                    behavior: HitTestBehavior.opaque,
+                                    onTap: () =>
+                                        widget.onTokenSelected!(entry.$1),
+                                    child: Container(
+                                      decoration: BoxDecoration(
+                                        color: selected
+                                            ? AppColors.primaryLight.withValues(
+                                                alpha: 0.25,
+                                              )
+                                            : Colors.transparent,
+                                        border: Border.all(
+                                          color: selected
+                                              ? AppColors.primaryLight
+                                              : AppColors.info,
+                                          width: selected ? 2 : 1,
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              );
+                            }),
+                    ],
+                  ),
                 ),
               ),
             ),
@@ -116,7 +231,7 @@ class _ReceiptImageViewerState extends State<ReceiptImageViewer> {
                 borderRadius: BorderRadius.circular(AppSpacing.radiusXs),
               ),
               child: Text(
-                'Pinch to zoom original receipt',
+                '${widget.imageLabel} · pinch to zoom',
                 style: AppTypography.caption.copyWith(
                   color: Colors.white70,
                   fontSize: 10,
@@ -161,7 +276,7 @@ class _ReceiptImageViewerState extends State<ReceiptImageViewer> {
         ),
         const SizedBox(height: AppSpacing.xs),
         Text(
-          'Sample Receipt Preview',
+          'Receipt image unavailable. Use recognized text or enter details.',
           style: AppTypography.caption.copyWith(color: AppColors.textMuted),
         ),
       ],
@@ -186,11 +301,7 @@ class _ReceiptImageViewerState extends State<ReceiptImageViewer> {
           borderRadius: BorderRadius.circular(AppSpacing.radiusS),
           child: Padding(
             padding: const EdgeInsets.all(6.0),
-            child: Icon(
-              icon,
-              size: 18,
-              color: Colors.white,
-            ),
+            child: Icon(icon, size: 18, color: Colors.white),
           ),
         ),
       ),

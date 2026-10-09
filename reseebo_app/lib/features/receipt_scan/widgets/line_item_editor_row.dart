@@ -1,26 +1,11 @@
 import 'package:flutter/material.dart';
-import '../../../core/models/product.dart';
-import '../../../core/models/purchase_line.dart';
+import '../../../core/models/models.dart';
+import '../../../core/constants/formatters.dart';
 import '../../../core/theme/app_colors.dart';
-import '../../../core/theme/app_spacing.dart';
-import '../../../core/theme/app_typography.dart';
-import '../../../core/utils/currency_formatter.dart';
 import '../../../core/widgets/app_card.dart';
+import '../state/receipt_review_state.dart';
 
-/// Clean, high-density line item editor following modern fintech design standards.
-///
-/// Removes arithmetic equation glyphs (`×`, `=`) and reduces visual noise,
-/// focusing on fast verification and clear price-per-piece outcomes.
-class LineItemEditorRow extends StatelessWidget {
-  final ParsedLineItem line;
-  final Product? matchedProduct;
-  final int index;
-  final VoidCallback onSelectProduct;
-  final ValueChanged<double> onQuantityChanged;
-  final ValueChanged<int> onPiecesPerPackChanged;
-  final ValueChanged<double> onLineTotalChanged;
-  final VoidCallback onRemove;
-
+class LineItemEditorRow extends StatefulWidget {
   const LineItemEditorRow({
     super.key,
     required this.line,
@@ -31,217 +16,290 @@ class LineItemEditorRow extends StatelessWidget {
     required this.onPiecesPerPackChanged,
     required this.onLineTotalChanged,
     required this.onRemove,
+    this.onFieldEdited,
+    this.onUnitChanged,
+    this.onTargetSelected,
+    this.onConfirm,
+    this.selectedField,
+    this.problem,
+    this.enabled = true,
   });
+  final ParsedLineItem line;
+  final Product? matchedProduct;
+  final int index;
+  final VoidCallback onSelectProduct, onRemove;
+  final ValueChanged<double> onQuantityChanged, onLineTotalChanged;
+  final ValueChanged<int> onPiecesPerPackChanged;
+  final void Function(ReceiptLineField, String)? onFieldEdited;
+  final ValueChanged<PurchaseUnit>? onUnitChanged;
+  final ValueChanged<ReceiptLineField>? onTargetSelected;
+  final VoidCallback? onConfirm;
+  final ReceiptLineField? selectedField;
+  final String? problem;
+  final bool enabled;
 
   @override
-  Widget build(BuildContext context) {
-    final hasProduct = matchedProduct != null;
-    final isAmbiguous = line.isAmbiguous || !hasProduct;
-    final qty = line.quantity ?? 1;
-    final pcs = (line.piecesPerPack ?? 1) <= 0 ? 1 : (line.piecesPerPack ?? 1);
-    final totalPieces = qty * pcs;
+  State<LineItemEditorRow> createState() => _LineItemEditorRowState();
+}
 
-    return AppCard(
-      padding: const EdgeInsets.symmetric(
-        horizontal: AppSpacing.m,
-        vertical: AppSpacing.s + 2,
+class _LineItemEditorRowState extends State<LineItemEditorRow> {
+  final Map<ReceiptLineField, TextEditingController> _controllers = {};
+  final Map<ReceiptLineField, FocusNode> _focus = {};
+
+  String _value(ReceiptLineField field) => switch (field) {
+    ReceiptLineField.description => widget.line.description,
+    ReceiptLineField.quantity => widget.line.quantity?.toString() ?? '',
+    ReceiptLineField.piecesPerPack =>
+      widget.line.piecesPerPack?.toString() ?? '',
+    ReceiptLineField.amount => editablePesos(widget.line.grossAmountCents),
+    ReceiptLineField.discount =>
+      widget.line.discountCents < 0
+          ? ''
+          : editablePesos(widget.line.discountCents),
+  };
+
+  @override
+  void initState() {
+    super.initState();
+    for (final field in ReceiptLineField.values) {
+      _controllers[field] = TextEditingController(text: _value(field));
+      _focus[field] = FocusNode();
+    }
+  }
+
+  @override
+  void didUpdateWidget(covariant LineItemEditorRow oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    for (final field in ReceiptLineField.values) {
+      final value = _value(field);
+      if (!_focus[field]!.hasFocus && _controllers[field]!.text != value) {
+        _controllers[field]!.text = value;
+      }
+    }
+  }
+
+  @override
+  void dispose() {
+    for (final controller in _controllers.values) {
+      controller.dispose();
+    }
+    for (final node in _focus.values) {
+      node.dispose();
+    }
+    super.dispose();
+  }
+
+  void _edit(ReceiptLineField field, String value) {
+    if (widget.onFieldEdited != null) {
+      widget.onFieldEdited!(field, value);
+      return;
+    }
+    switch (field) {
+      case ReceiptLineField.quantity:
+        final number = parseQuantity(value);
+        if (number != null) widget.onQuantityChanged(number.toDouble());
+      case ReceiptLineField.piecesPerPack:
+        final number = parseQuantity(value);
+        if (number != null) widget.onPiecesPerPackChanged(number);
+      case ReceiptLineField.amount:
+        final amount = parsePesos(value);
+        if (amount != null) widget.onLineTotalChanged(amount / 100);
+      case ReceiptLineField.description:
+      case ReceiptLineField.discount:
+        break;
+    }
+  }
+
+  bool _needsReview(ReceiptLineField field) => switch (field) {
+    ReceiptLineField.description =>
+      widget.line.description.trim().isEmpty || widget.matchedProduct == null,
+    ReceiptLineField.quantity => widget.line.quantity == null,
+    ReceiptLineField.piecesPerPack =>
+      widget.line.unit == PurchaseUnit.pack &&
+          widget.line.piecesPerPack == null,
+    ReceiptLineField.amount =>
+      widget.line.grossAmountCents == null ||
+          widget.line.grossAmountCents! <= 0,
+    ReceiptLineField.discount => widget.line.discountCents < 0,
+  };
+
+  Widget _field(ReceiptLineField field) {
+    final numeric = field != ReceiptLineField.description;
+    final amount =
+        field == ReceiptLineField.amount || field == ReceiptLineField.discount;
+    final warning = !widget.line.confirmed || _needsReview(field);
+    return TextFormField(
+      key: ValueKey(field.name),
+      controller: _controllers[field],
+      focusNode: _focus[field],
+      enabled: widget.enabled,
+      keyboardType: numeric
+          ? TextInputType.numberWithOptions(decimal: amount)
+          : TextInputType.text,
+      decoration: InputDecoration(
+        labelText: '${field.label}${amount ? ' (₱)' : ''}',
+        filled: warning,
+        fillColor: AppColors.warningBg,
+        helperText: warning ? 'Check receipt' : null,
+        border: const OutlineInputBorder(),
       ),
-      backgroundColor: AppColors.surfaceCard,
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          // Top: Title, matched product, and line total
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    InkWell(
-                      onTap: onSelectProduct,
-                      borderRadius: BorderRadius.circular(AppSpacing.radiusXs),
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Flexible(
-                            child: Text(
-                              hasProduct
-                                  ? matchedProduct!.displayTitle
-                                  : 'Tap to match product',
-                              style: AppTypography.headingSmall.copyWith(
-                                fontSize: 14,
-                                color: hasProduct
-                                    ? AppColors.textPrimary
-                                    : AppColors.accent,
-                                fontWeight: FontWeight.w700,
-                              ),
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                            ),
-                          ),
-                          const SizedBox(width: 4),
-                          Icon(
-                            Icons.arrow_drop_down_rounded,
-                            size: 18,
-                            color: hasProduct
-                                ? AppColors.textSecondary
-                                : AppColors.accent,
-                          ),
-                        ],
-                      ),
-                    ),
-                    const SizedBox(height: 1),
-                    Text(
-                      'OCR: "${line.rawDescription}"',
-                      style: AppTypography.caption.copyWith(
-                        fontSize: 11,
-                        color: AppColors.textMuted,
-                      ),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                  ],
-                ),
-              ),
-              const SizedBox(width: AppSpacing.s),
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.end,
-                children: [
-                  Text(
-                    CurrencyFormatter.format(line.netAmount),
-                    style: AppTypography.tableCellNumber.copyWith(
-                      fontSize: 15,
-                      fontWeight: FontWeight.w700,
-                    ),
-                  ),
-                  if (isAmbiguous)
-                    Text(
-                      'Unmatched',
-                      style: AppTypography.caption.copyWith(
-                        fontSize: 10,
-                        color: AppColors.accent,
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                ],
-              ),
-              const SizedBox(width: 4),
-              IconButton(
-                padding: EdgeInsets.zero,
-                constraints: const BoxConstraints(),
-                icon: const Icon(
-                  Icons.close_rounded,
-                  size: 16,
-                  color: AppColors.textMuted,
-                ),
-                onPressed: onRemove,
-              ),
-            ],
-          ),
-          const Divider(height: 16),
-
-          // Middle: Clean input fields without math symbols
-          Row(
-            children: [
-              Expanded(
-                child: _buildCompactField(
-                  label: 'Packs / Qty',
-                  value: '${line.quantity ?? 1}',
-                  onChanged: (val) {
-                    final d = double.tryParse(val) ?? 1.0;
-                    if (d > 0) onQuantityChanged(d);
-                  },
-                ),
-              ),
-              const SizedBox(width: AppSpacing.s),
-              Expanded(
-                child: _buildCompactField(
-                  label: 'Pcs / Pack',
-                  value: line.piecesPerPack.toString(),
-                  onChanged: (val) {
-                    final i = int.tryParse(val) ?? 1;
-                    if (i > 0) onPiecesPerPackChanged(i);
-                  },
-                ),
-              ),
-              const SizedBox(width: AppSpacing.s),
-              Expanded(
-                child: _buildCompactField(
-                  label: 'Line Total (₱)',
-                  value: line.netAmount.toStringAsFixed(2),
-                  isDecimal: true,
-                  onChanged: (val) {
-                    final d = double.tryParse(val) ?? 0.0;
-                    if (d >= 0) onLineTotalChanged(d);
-                  },
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: AppSpacing.s),
-
-          // Bottom: Clean calculated outcome
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text(
-                '$totalPieces total pieces',
-                style: AppTypography.caption.copyWith(
-                  color: AppColors.textSecondary,
-                  fontWeight: FontWeight.w500,
-                ),
-              ),
-              Text(
-                '${CurrencyFormatter.format(line.estimatedCostPerPiece)} / piece',
-                style: AppTypography.tableCellNumber.copyWith(
-                  color: AppColors.primary,
-                  fontWeight: FontWeight.w700,
-                  fontSize: 13,
-                ),
-              ),
-            ],
-          ),
-        ],
-      ),
+      onChanged: (value) => _edit(field, value),
     );
   }
 
-  Widget _buildCompactField({
-    required String label,
-    required String value,
-    bool isDecimal = false,
-    required ValueChanged<String> onChanged,
-  }) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          label,
-          style: AppTypography.caption.copyWith(fontSize: 10),
-        ),
-        const SizedBox(height: 2),
-        SizedBox(
-          height: 34,
-          child: TextFormField(
-            initialValue: value,
-            keyboardType: TextInputType.numberWithOptions(decimal: isDecimal),
-            textAlign: TextAlign.center,
-            style: AppTypography.tableCellNumber.copyWith(fontSize: 12),
-            decoration: InputDecoration(
-              isDense: true,
-              contentPadding: const EdgeInsets.symmetric(
-                horizontal: 4,
-                vertical: 6,
-              ),
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(AppSpacing.radiusXs),
-              ),
+  @override
+  Widget build(BuildContext context) {
+    final line = widget.line;
+    return AppCard(
+      child: Material(
+        color: Colors.transparent,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Expanded(
+                  child: Text(
+                    'Item ${widget.index + 1} · Photo ${line.sourcePage + 1}',
+                    style: Theme.of(context).textTheme.titleSmall,
+                  ),
+                ),
+                IconButton(
+                  tooltip: 'Remove item ${widget.index + 1}',
+                  onPressed: widget.enabled ? widget.onRemove : null,
+                  icon: const Icon(Icons.close),
+                ),
+              ],
             ),
-            onChanged: onChanged,
-          ),
+            ListTile(
+              contentPadding: EdgeInsets.zero,
+              title: Text(
+                widget.matchedProduct?.displayTitle ?? 'Match exact product',
+              ),
+              subtitle: Text(
+                widget.matchedProduct?.name ?? 'Check brand, variant and size',
+                style: TextStyle(
+                  color: widget.matchedProduct == null
+                      ? AppColors.amberText
+                      : null,
+                ),
+              ),
+              trailing: const Icon(Icons.arrow_forward_ios, size: 16),
+              onTap: widget.enabled ? widget.onSelectProduct : null,
+            ),
+            _field(ReceiptLineField.description),
+            const SizedBox(height: 12),
+            SegmentedButton<PurchaseUnit>(
+              segments: const [
+                ButtonSegment(value: PurchaseUnit.piece, label: Text('Pcs')),
+                ButtonSegment(value: PurchaseUnit.pack, label: Text('Packs')),
+              ],
+              emptySelectionAllowed: true,
+              selected: {if (line.unit != null) line.unit!},
+              onSelectionChanged: widget.enabled && widget.onUnitChanged != null
+                  ? (values) {
+                      if (values.isNotEmpty) {
+                        widget.onUnitChanged!(values.single);
+                      }
+                    }
+                  : null,
+            ),
+            if (line.unit == null)
+              const Padding(
+                padding: EdgeInsets.only(top: 6),
+                child: Text(
+                  'Check whether this quantity is pieces or packs.',
+                  style: TextStyle(color: AppColors.amberText),
+                ),
+              ),
+            const SizedBox(height: 12),
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Expanded(child: _field(ReceiptLineField.quantity)),
+                if (line.unit == PurchaseUnit.pack) ...[
+                  const SizedBox(width: 8),
+                  Expanded(child: _field(ReceiptLineField.piecesPerPack)),
+                ],
+              ],
+            ),
+            const SizedBox(height: 12),
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Expanded(child: _field(ReceiptLineField.amount)),
+                const SizedBox(width: 8),
+                Expanded(child: _field(ReceiptLineField.discount)),
+              ],
+            ),
+            if (widget.onTargetSelected != null) ...[
+              const SizedBox(height: 8),
+              const Text('Fill from receipt photo'),
+              Wrap(
+                spacing: 6,
+                children: ReceiptLineField.values
+                    .where(
+                      (field) =>
+                          field != ReceiptLineField.piecesPerPack ||
+                          line.unit == PurchaseUnit.pack,
+                    )
+                    .map(
+                      (field) => ChoiceChip(
+                        label: Text(field.label),
+                        selected: widget.selectedField == field,
+                        onSelected: widget.enabled
+                            ? (_) => widget.onTargetSelected!(field)
+                            : null,
+                      ),
+                    )
+                    .toList(),
+              ),
+            ],
+            if (widget.problem != null)
+              Padding(
+                padding: const EdgeInsets.symmetric(vertical: 8),
+                child: Text(
+                  widget.problem!,
+                  style: const TextStyle(color: AppColors.amberText),
+                ),
+              ),
+            if (line.warnings.isNotEmpty) ...[
+              const SizedBox(height: 8),
+              const Text(
+                'OCR review notes',
+                style: TextStyle(fontWeight: FontWeight.w600),
+              ),
+              for (final warning in line.warnings.toSet())
+                Padding(
+                  padding: const EdgeInsets.only(top: 4),
+                  child: Text(
+                    warning,
+                    style: const TextStyle(color: AppColors.amberText),
+                  ),
+                ),
+            ],
+            if (line.confirmed &&
+                widget.matchedProduct != null &&
+                widget.problem == null &&
+                line.costPerPieceCents != null)
+              Padding(
+                padding: const EdgeInsets.symmetric(vertical: 8),
+                child: Text(
+                  '${line.totalPieces} total pieces · ${pesos(line.costPerPieceCents!)} / piece',
+                ),
+              ),
+            CheckboxListTile(
+              contentPadding: EdgeInsets.zero,
+              controlAffinity: ListTileControlAffinity.leading,
+              title: const Text('I checked product, quantity and line amount'),
+              value: line.confirmed,
+              onChanged: widget.enabled && widget.onConfirm != null
+                  ? (_) => widget.onConfirm!()
+                  : null,
+            ),
+          ],
         ),
-      ],
+      ),
     );
   }
 }

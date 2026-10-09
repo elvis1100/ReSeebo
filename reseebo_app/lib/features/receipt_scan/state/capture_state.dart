@@ -31,6 +31,8 @@ class CaptureState extends ChangeNotifier {
   String? notice;
   bool busy = false;
   bool ocrFailed = false;
+  bool qualityRejected = false;
+  bool enhanceForOcr = true;
   bool _disposed = false;
   void _changed() {
     if (!_disposed) notifyListeners();
@@ -101,6 +103,7 @@ class CaptureState extends ChangeNotifier {
       _pages.add(CapturePage(originalPath: path, originalHash: hash));
       selectedIndex = _pages.length - 1;
       ocrFailed = false;
+      qualityRejected = false;
     }
     if (skipped > 0) {
       notice =
@@ -134,10 +137,15 @@ class CaptureState extends ChangeNotifier {
     error = null;
     notice = null;
     ocrFailed = false;
+    qualityRejected = false;
     _changed();
   }
 
-  Future<void> transform({bool rotate = false, List<double>? crop}) async {
+  Future<void> transform({
+    bool rotate = false,
+    List<double>? crop,
+    double angleDegrees = 0,
+  }) async {
     final page = selectedPage;
     if (busy || page == null) return;
     busy = true;
@@ -148,7 +156,11 @@ class CaptureState extends ChangeNotifier {
         page.previewPath,
         rotate: rotate,
         crop: crop,
+        angleDegrees: angleDegrees,
       );
+      page.preparedPath = null;
+      qualityRejected = false;
+      ocrFailed = false;
     } catch (failure) {
       error = userMessage(failure);
     } finally {
@@ -160,20 +172,49 @@ class CaptureState extends ChangeNotifier {
   void resetEdits() {
     if (busy || selectedPage == null) return;
     selectedPage!.recognitionPath = null;
+    selectedPage!.preparedPath = null;
+    qualityRejected = false;
     error = null;
     _changed();
   }
 
-  Future<ReceiptDraft?> recognize() async {
+  void setEnhanceForOcr(bool enabled) {
+    if (busy || enhanceForOcr == enabled) return;
+    enhanceForOcr = enabled;
+    for (final page in _pages) {
+      page.preparedPath = null;
+    }
+    _changed();
+  }
+
+  Future<ReceiptDraft?> recognize({bool allowLowQuality = false}) async {
     if (busy || _pages.isEmpty) return null;
     busy = true;
     error = null;
     ocrFailed = false;
+    qualityRejected = false;
     _changed();
     try {
+      for (var index = 0; index < _pages.length; index++) {
+        final page = _pages[index];
+        final quality = await _images.inspectQuality(page.previewPath);
+        if (quality.needsRetake && !allowLowQuality) {
+          qualityRejected = true;
+          selectedIndex = index;
+          throw AppException(
+            'Page ${index + 1} looks blurred, faint, or too small. Hold steady in brighter light, crop the receipt, or choose Use photo anyway.',
+          );
+        }
+        page.preparedPath ??= await _images.prepareRecognition(
+          page.previewPath,
+          enhance: enhanceForOcr,
+        );
+      }
       return await adapter.processReceiptImages(
         _pages.map((page) => page.originalPath).toList(),
-        recognitionImagePaths: _pages.map((page) => page.previewPath).toList(),
+        recognitionImagePaths: _pages
+            .map((page) => page.preparedPath!)
+            .toList(),
       );
     } catch (failure) {
       error = userMessage(failure);
@@ -188,9 +229,7 @@ class CaptureState extends ChangeNotifier {
   ReceiptDraft manualDraft() => ReceiptDraft(
     imagePath: _pages.first.originalPath,
     imagePaths: _pages.map((page) => page.originalPath).toList(),
-    warnings: [
-      'Recognition did not complete. Enter and confirm the information from every original page.',
-    ],
+    warnings: ['Enter and confirm the information from every original page.'],
   );
   @override
   void dispose() {

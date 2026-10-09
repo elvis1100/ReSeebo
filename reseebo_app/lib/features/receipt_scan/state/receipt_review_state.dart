@@ -1,6 +1,18 @@
 import 'package:flutter/foundation.dart';
 
 import '../../../core/adapters/i_reseebo_data_adapter.dart';
+import '../../../core/constants/formatters.dart';
+
+enum ReceiptLineField {
+  description('Description'),
+  quantity('Qty'),
+  piecesPerPack('Pcs/pack'),
+  amount('Line amount'),
+  discount('Discount');
+
+  const ReceiptLineField(this.label);
+  final String label;
+}
 
 class ReceiptReviewState extends ChangeNotifier {
   ReceiptReviewState({required this.adapter, required ReceiptDraft draft})
@@ -12,6 +24,160 @@ class ReceiptReviewState extends ChangeNotifier {
   bool loading = true;
   bool saving = false;
   String? error;
+  int selectedPage = 0;
+  String? targetLineId;
+  ReceiptLineField? targetField;
+  final Set<int> selectedTokens = {};
+
+  List<ReceiptOcrPage> get pages => draft.ocrPages.isNotEmpty
+      ? draft.ocrPages
+      : draft.imagePaths.indexed
+            .map(
+              (entry) => ReceiptOcrPage(
+                imagePath: entry.$2,
+                recognitionImagePath: entry.$1 == 0
+                    ? draft.recognitionImagePath
+                    : null,
+                textLines: draft.imagePaths.length == 1
+                    ? draft.textLines
+                    : const [],
+              ),
+            )
+            .toList();
+
+  List<OcrTextToken> get pageTokens => pages.isEmpty
+      ? const []
+      : pages[selectedPage].textLines.expand((line) => line.tokens).toList();
+  String get selectedText => _selectedText();
+
+  String _selectedText() {
+    final tokens = pageTokens;
+    final indices = selectedTokens.toList()..sort();
+    return indices
+        .where((i) => i < tokens.length)
+        .map((i) => tokens[i].text)
+        .join(' ');
+  }
+
+  void selectPage(int index) {
+    if (saving || index < 0 || index >= pages.length) return;
+    selectedPage = index;
+    selectedTokens.clear();
+    _changed();
+  }
+
+  void selectTarget(String lineId, ReceiptLineField field) {
+    if (saving) return;
+    final line = draft.lines.where((line) => line.id == lineId).firstOrNull;
+    if (line == null) return;
+    targetLineId = lineId;
+    targetField = field;
+    if (line.sourcePage >= 0 && line.sourcePage < pages.length) {
+      selectedPage = line.sourcePage;
+    }
+    selectedTokens.clear();
+    _changed();
+  }
+
+  void toggleToken(int index) {
+    if (saving ||
+        targetField == null ||
+        index < 0 ||
+        index >= pageTokens.length) {
+      return;
+    }
+    if (!selectedTokens.remove(index)) selectedTokens.add(index);
+    _changed();
+  }
+
+  /// OCR assignment accepts only an unambiguous value. Rejection does not
+  /// alter existing data or confirmation; no OCR character substitutions apply.
+  String? assignText(String text) {
+    if (saving) return 'Wait for the receipt to finish saving.';
+    final line = draft.lines
+        .where((line) => line.id == targetLineId)
+        .firstOrNull;
+    final field = targetField;
+    if (line == null || field == null) return 'Choose a field first.';
+    final value = text.trim();
+    if (field == ReceiptLineField.description) {
+      if (value.isEmpty) return 'Select the receipt description.';
+      line.description = value;
+      line.productId = null;
+    } else if (field == ReceiptLineField.quantity ||
+        field == ReceiptLineField.piecesPerPack) {
+      final quantity = parseQuantity(value);
+      if (quantity == null) {
+        return 'Select one whole number greater than zero, or type it manually.';
+      }
+      if (field == ReceiptLineField.quantity) {
+        line.quantity = quantity;
+      } else {
+        if (line.unit != PurchaseUnit.pack) {
+          return 'Choose packs before assigning pack contents.';
+        }
+        line.piecesPerPack = quantity;
+      }
+    } else {
+      final amount = parsePesos(value);
+      if (amount == null || (field == ReceiptLineField.amount && amount <= 0)) {
+        return 'Select one peso amount, or type it manually.';
+      }
+      if (field == ReceiptLineField.amount) {
+        line.grossAmountCents = amount;
+      } else {
+        if (line.grossAmountCents == null || amount >= line.grossAmountCents!) {
+          return 'Discount must be less than the line amount.';
+        }
+        line.discountCents = amount;
+      }
+    }
+    changed(
+      line: line,
+      affectsTotal:
+          field == ReceiptLineField.amount ||
+          field == ReceiptLineField.discount,
+    );
+    selectedTokens.clear();
+    return null;
+  }
+
+  void editText(ParsedLineItem line, ReceiptLineField field, String text) {
+    if (saving) return;
+    switch (field) {
+      case ReceiptLineField.description:
+        line.description = text;
+        line.productId = null;
+      case ReceiptLineField.quantity:
+        line.quantity = parseQuantity(text);
+      case ReceiptLineField.piecesPerPack:
+        line.piecesPerPack = parseQuantity(text);
+      case ReceiptLineField.amount:
+        line.grossAmountCents = parsePesos(text);
+      case ReceiptLineField.discount:
+        // Invalid discounts remain invalid at the service boundary.
+        line.discountCents = parsePesos(text) ?? -1;
+    }
+    changed(
+      line: line,
+      affectsTotal:
+          field == ReceiptLineField.amount ||
+          field == ReceiptLineField.discount,
+    );
+  }
+
+  void setUnit(ParsedLineItem line, PurchaseUnit unit) {
+    if (saving) return;
+    final previous = line.unit;
+    line.unit = unit;
+    if (unit == PurchaseUnit.piece) {
+      line.piecesPerPack = 1;
+    } else if (previous != PurchaseUnit.pack) {
+      line.piecesPerPack = null;
+    }
+    changed(line: line);
+  }
+
   bool _disposed = false;
   void _changed() {
     if (!_disposed) notifyListeners();
@@ -50,17 +216,25 @@ class ReceiptReviewState extends ChangeNotifier {
   void changed({ParsedLineItem? line, bool affectsTotal = false}) {
     if (line != null) line.confirmed = false;
     if (affectsTotal) draft.totalDifferenceConfirmed = false;
+    draft.allowDuplicate = false;
     _changed();
   }
 
   void addLine() {
     draft.lines.add(ParsedLineItem());
     draft.totalDifferenceConfirmed = false;
+    draft.allowDuplicate = false;
     _changed();
   }
 
   void removeLine(ParsedLineItem line) {
     draft.lines.remove(line);
+    draft.allowDuplicate = false;
+    if (targetLineId == line.id) {
+      targetLineId = null;
+      targetField = null;
+      selectedTokens.clear();
+    }
     for (final remaining in draft.lines) {
       if (remaining.possibleDuplicateOf == line.id) {
         remaining.possibleDuplicateOf = null;
@@ -72,6 +246,7 @@ class ReceiptReviewState extends ChangeNotifier {
   }
 
   void confirmLine(ParsedLineItem line) {
+    if (saving || lineProblem(line, requireConfirmation: false) != null) return;
     line.confirmed = true;
     _changed();
   }
@@ -121,7 +296,14 @@ class ReceiptReviewState extends ChangeNotifier {
   int? get lineTotalCents {
     var sum = 0;
     for (final line in draft.lines) {
-      if (line.netAmountCents == null || line.netAmountCents! <= 0) return null;
+      final gross = line.grossAmountCents;
+      if (gross == null ||
+          gross <= 0 ||
+          gross > maxAmountCents ||
+          line.discountCents < 0 ||
+          line.discountCents >= gross) {
+        return null;
+      }
       sum += line.netAmountCents!;
     }
     return sum;

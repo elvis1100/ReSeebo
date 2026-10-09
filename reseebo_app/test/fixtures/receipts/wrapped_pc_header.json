@@ -1,0 +1,32 @@
+{
+  "synthetic": true,
+  "name": "amount header resolves wrapped prices with tax marker",
+  "lines": [
+    {
+      "text": "SUPPLIER A"
+    },
+    {
+      "text": "2026-10-09"
+    },
+    {
+      "text": "DESCRIPTION QTY UNIT PRICE AMOUNT"
+    },
+    {
+      "text": "COFFEE ORIGINAL 26G"
+    },
+    {
+      "text": "1 PC 144.00 144.00 V"
+    }
+  ],
+  "expected": {
+    "date": "2026-10-09",
+    "lines": [
+      {
+        "description": "COFFEE ORIGINAL 26G 1 PC",
+        "quantity": 1,
+        "unit": "piece",
+        "amount": 14400
+      }
+    ]
+  }
+}

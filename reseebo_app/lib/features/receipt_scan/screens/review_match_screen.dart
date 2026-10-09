@@ -1,24 +1,17 @@
 import 'package:flutter/material.dart';
-import '../../../core/adapters/reseebo_data_adapter.dart';
+import '../../../core/adapters/i_reseebo_data_adapter.dart';
+import '../../../core/constants/formatters.dart';
 import '../../../core/theme/app_colors.dart';
-import '../../../core/theme/app_spacing.dart';
-import '../../../core/theme/app_typography.dart';
-import '../../../core/utils/currency_formatter.dart';
-import '../../../core/utils/date_formatter.dart';
-import '../../../core/widgets/app_button.dart';
-import '../widgets/alias_match_picker.dart';
+import '../../suppliers/screens/supplier_editor_screen.dart';
+import '../state/receipt_review_state.dart';
+import '../widgets/duplicate_review_dialog.dart';
 import '../widgets/line_item_editor_row.dart';
-import '../widgets/receipt_image_viewer.dart';
+import '../widgets/overlap_review_card.dart';
+import '../widgets/product_match_picker.dart';
+import '../widgets/receipt_assignment_panel.dart';
+import '../widgets/receipt_metadata_editor.dart';
 
-/// Screen allowing sari-sari store owners to inspect on-device OCR results,
-/// verify pack-to-piece conversions, associate product aliases, and commit
-/// atomically to the local SQLite ledger.
 class ReviewMatchScreen extends StatefulWidget {
-  final IReseeboDataAdapter dataAdapter;
-  final ReceiptDraft initialDraft;
-  final ValueChanged<SaveReceiptResult>? onSaved;
-  final VoidCallback? onBack;
-
   const ReviewMatchScreen({
     super.key,
     required this.dataAdapter,
@@ -26,519 +19,341 @@ class ReviewMatchScreen extends StatefulWidget {
     this.onSaved,
     this.onBack,
   });
-
+  final IReseeboDataAdapter dataAdapter;
+  final ReceiptDraft initialDraft;
+  final ValueChanged<SaveReceiptResult>? onSaved;
+  final VoidCallback? onBack;
   @override
   State<ReviewMatchScreen> createState() => _ReviewMatchScreenState();
 }
 
 class _ReviewMatchScreenState extends State<ReviewMatchScreen> {
-  late List<ParsedLineItem> _lines;
-  late DateTime _purchaseDate;
-  late TextEditingController _receiptNumberController;
-  late double _scannedTotal;
-  Supplier? _selectedSupplier;
-  List<Supplier> _allSuppliers = [];
-  List<Product> _allProducts = [];
-  Map<String, Product> _productsMap = {};
-  bool _isSaving = false;
-  bool _showReceiptImage = true;
+  late final ReceiptReviewState _review;
+  final ScrollController _scroll = ScrollController();
+  bool _showOriginal = true;
+  double _returnOffset = 0;
 
   @override
   void initState() {
     super.initState();
-    _lines = List.from(widget.initialDraft.lines);
-    _purchaseDate = widget.initialDraft.purchaseDate;
-    _receiptNumberController = TextEditingController(
-      text: widget.initialDraft.receiptNumber,
-    );
-    _scannedTotal = widget.initialDraft.totalAmount;
-    _loadSuppliersAndProducts();
+    _review = ReceiptReviewState(
+      adapter: widget.dataAdapter,
+      draft: widget.initialDraft,
+    )..addListener(_refresh);
+    _review.load();
+  }
+
+  void _refresh() {
+    if (mounted) setState(() {});
   }
 
   @override
   void dispose() {
-    _receiptNumberController.dispose();
+    _review.removeListener(_refresh);
+    _review.dispose();
+    _scroll.dispose();
     super.dispose();
   }
 
-  Future<void> _loadSuppliersAndProducts() async {
-    final suppliers = await widget.dataAdapter.getSuppliers();
-    final products = await widget.dataAdapter.getProducts();
-
-    final pMap = <String, Product>{};
-    for (final p in products) {
-      pMap[p.id] = p;
-    }
-
-    Supplier? matched;
-    if (widget.initialDraft.supplierName.isNotEmpty) {
-      final target = widget.initialDraft.supplierName.toLowerCase();
-      matched = suppliers.cast<Supplier?>().firstWhere(
-            (s) => s?.displayName.toLowerCase().contains(target) ?? false,
-            orElse: () => null,
-          );
-    }
-
-    if (mounted) {
-      setState(() {
-        _allSuppliers = suppliers;
-        _allProducts = products;
-        _productsMap = pMap;
-        _selectedSupplier = matched ?? suppliers.firstOrNull;
-      });
-    }
+  void _message(String text) {
+    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(text)));
   }
 
-  double get _linesSum =>
-      _lines.fold(0.0, (acc, item) => acc + (item.netAmount - item.discount));
-
-  bool get _isBalanced => (_linesSum - _scannedTotal).abs() < 0.10;
-
-  int get _unresolvedItemsCount =>
-      _lines.where((l) => l.matchedProductId == null || l.netAmount <= 0).length;
-
-  Future<void> _pickDate() async {
-    final picked = await showDatePicker(
+  Future<void> _match(ParsedLineItem line) async {
+    final product = await showModalBottomSheet<Product>(
       context: context,
-      initialDate: _purchaseDate,
-      firstDate: DateTime(2020),
-      lastDate: DateTime.now(),
+      isScrollControlled: true,
+      builder: (_) => SizedBox(
+        height: MediaQuery.sizeOf(context).height * .8,
+        child: ProductMatchPicker(
+          adapter: widget.dataAdapter,
+          description: line.description,
+        ),
+      ),
     );
-    if (picked != null) {
-      setState(() => _purchaseDate = picked);
-    }
-  }
-
-  Future<void> _handleMatchProduct(int index) async {
-    final currentLine = _lines[index];
-    final suggestions =
-        await widget.dataAdapter.matchAliases(currentLine.rawDescription);
-
+    if (product == null || !mounted) return;
+    await _review.load();
     if (!mounted) return;
+    line.productId = product.id;
+    _review.changed(line: line);
+  }
 
-    final currentlySelected = currentLine.matchedProductId != null
-        ? _productsMap[currentLine.matchedProductId]
-        : null;
-
-    final selected = await AliasMatchPicker.show(
+  Future<void> _editSupplier(Supplier? supplier) async {
+    final saved = await Navigator.push<bool>(
       context,
-      rawOcrText: currentLine.rawDescription,
-      availableProducts: _allProducts,
-      suggestions: suggestions,
-      currentlySelected: currentlySelected,
+      MaterialPageRoute(
+        builder: (_) => SupplierEditorScreen(
+          adapter: widget.dataAdapter,
+          supplier: supplier,
+        ),
+      ),
     );
+    if (saved == true && mounted) await _review.load();
+  }
 
-    if (selected != null && mounted) {
-      setState(() {
-        currentLine.matchedProductId = selected.id;
-        currentLine.isAmbiguous = false;
-        _productsMap[selected.id] = selected;
-      });
+  void _selectTarget(ParsedLineItem line, ReceiptLineField field) {
+    FocusScope.of(context).unfocus();
+    _returnOffset = _scroll.hasClients ? _scroll.offset : 0;
+    _showOriginal = false;
+    _review.selectTarget(line.id, field);
+    if (_scroll.hasClients) {
+      _scroll.animateTo(
+        0,
+        duration: const Duration(milliseconds: 250),
+        curve: Curves.easeOut,
+      );
     }
   }
 
-  void _addNewBlankLine() {
-    setState(() {
-      _lines.add(
-        ParsedLineItem(
-          tempId: 'manual_${DateTime.now().millisecondsSinceEpoch}',
-          rawDescription: 'MANUAL ENTRY',
-          quantity: 1,
-          piecesPerPack: 1,
-          netAmount: 0.0,
-        ),
-      );
-    });
-  }
-
-  Future<void> _saveReceipt() async {
-    if (_unresolvedItemsCount > 0) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          backgroundColor: AppColors.accent,
-          content: Text(
-            'Please match all items to a product before saving to your ledger.',
-          ),
-        ),
-      );
+  void _applySelection() {
+    final issue = _review.assignText(_review.selectedText);
+    if (issue != null) {
+      _message(issue);
       return;
     }
+    _message('Field filled. Check the item and confirm it below.');
+  }
 
-    setState(() => _isSaving = true);
-
+  Future<void> _save() async {
+    if (_review.saving) return;
+    FocusScope.of(context).unfocus();
     try {
-      final updatedDraft = ReceiptDraft(
-        localImagePath: widget.initialDraft.localImagePath,
-        supplierId: _selectedSupplier?.id,
-        supplierName: _selectedSupplier?.displayName ?? 'Saved Supplier',
-        branchLocation: _selectedSupplier?.branchLocation,
-        purchaseDate: _purchaseDate,
-        receiptNumber: _receiptNumberController.text.trim(),
-        lines: _lines,
+      final result = await _review.save();
+      if (!mounted) return;
+      _message(
+        result.alreadySaved
+            ? 'Receipt already saved.'
+            : 'Receipt saved to your ledger.',
       );
-
-      final result =
-          await widget.dataAdapter.saveConfirmedReceipt(updatedDraft);
-
-      if (mounted) {
-        setState(() => _isSaving = false);
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            backgroundColor: AppColors.primary,
-            content: Text(
-              'Receipt saved atomically! ${result.lineIds.length} prices recorded.',
-            ),
-          ),
-        );
-        widget.onSaved?.call(result);
+      widget.onSaved?.call(result);
+    } on DuplicateReceiptException catch (duplicate) {
+      if (!mounted) return;
+      final separate = await showDialog<bool>(
+        context: context,
+        builder: (_) => DuplicateReviewDialog(
+          adapter: widget.dataAdapter,
+          receiptIds: duplicate.receiptIds,
+        ),
+      );
+      if (separate == true && mounted) {
+        _review.draft.allowDuplicate = true;
+        await _save();
       }
-    } catch (e) {
-      if (mounted) {
-        setState(() => _isSaving = false);
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            backgroundColor: AppColors.priceIncrease,
-            content: Text('Failed to save receipt: $e'),
-          ),
-        );
-      }
+    } catch (error) {
+      if (mounted) _message(userMessage(error));
     }
   }
 
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: AppColors.background,
-      appBar: AppBar(
-        title: const Text('Review Scanned Receipt'),
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back_rounded),
-          onPressed: widget.onBack ?? () => Navigator.of(context).maybePop(),
-        ),
-        actions: [
-          IconButton(
-            tooltip: _showReceiptImage ? 'Hide Receipt Image' : 'Show Receipt Image',
-            icon: Icon(
-              _showReceiptImage
-                  ? Icons.photo_size_select_actual_rounded
-                  : Icons.photo_size_select_actual_outlined,
+  Widget _photos() => ReceiptAssignmentPanel(
+    review: _review,
+    showOriginal: _showOriginal,
+    onOriginalChanged: (value) => setState(() => _showOriginal = value),
+    onApply: _applySelection,
+    onReturn: () {
+      if (_scroll.hasClients) {
+        _scroll.animateTo(
+          _returnOffset.clamp(0.0, _scroll.position.maxScrollExtent),
+          duration: const Duration(milliseconds: 250),
+          curve: Curves.easeOut,
+        );
+      }
+    },
+  );
+
+  Widget _line(ParsedLineItem line, int index) {
+    final problem = _review.lineProblem(line);
+    final earlier = _review.draft.lines
+        .where((candidate) => candidate.id == line.possibleDuplicateOf)
+        .firstOrNull;
+    return Padding(
+      key: ValueKey(line.id),
+      padding: const EdgeInsets.only(bottom: 12),
+      child: Column(
+        children: [
+          if (line.possibleDuplicateOf != null)
+            OverlapReviewCard(
+              line: line,
+              earlier: earlier,
+              enabled: !_review.saving,
+              onKeepBoth: () {
+                line.possibleDuplicateOf = null;
+                _review.changed(line: line);
+              },
+              onRemove: () => _review.removeLine(line),
             ),
-            onPressed: () {
-              setState(() => _showReceiptImage = !_showReceiptImage);
+          LineItemEditorRow(
+            key: ValueKey('editor-${line.id}'),
+            line: line,
+            index: index,
+            matchedProduct: _review.productFor(line.productId),
+            problem: problem,
+            enabled: !_review.saving,
+            selectedField: _review.targetLineId == line.id
+                ? _review.targetField
+                : null,
+            onSelectProduct: () => _match(line),
+            onQuantityChanged: (quantity) => _review.editText(
+              line,
+              ReceiptLineField.quantity,
+              quantity.toInt().toString(),
+            ),
+            onPiecesPerPackChanged: (pieces) => _review.editText(
+              line,
+              ReceiptLineField.piecesPerPack,
+              pieces.toString(),
+            ),
+            onLineTotalChanged: (amount) => _review.editText(
+              line,
+              ReceiptLineField.amount,
+              amount.toStringAsFixed(2),
+            ),
+            onFieldEdited: (field, value) =>
+                _review.editText(line, field, value),
+            onUnitChanged: (unit) => _review.setUnit(line, unit),
+            onTargetSelected: (field) => _selectTarget(line, field),
+            onRemove: () => _review.removeLine(line),
+            onConfirm: () {
+              if (line.confirmed) {
+                line.confirmed = false;
+                _review.changed(line: line);
+              } else {
+                final issue = _review.lineProblem(
+                  line,
+                  requireConfirmation: false,
+                );
+                if (issue != null) {
+                  _message(issue);
+                  return;
+                }
+                _review.confirmLine(line);
+              }
             },
           ),
         ],
       ),
-      body: CustomScrollView(
-        slivers: [
-          // Receipt image view (collapsible)
-          if (_showReceiptImage)
-            SliverToBoxAdapter(
-              child: Padding(
-                padding: const EdgeInsets.fromLTRB(
-                  AppSpacing.m,
-                  AppSpacing.s,
-                  AppSpacing.m,
-                  0,
-                ),
-                child: ReceiptImageViewer(
-                  imagePath: widget.initialDraft.localImagePath,
-                  height: 200,
-                ),
-              ),
-            ),
+    );
+  }
 
-          // Header Card: Supplier, Date, Receipt Number
-          SliverToBoxAdapter(
-            child: Padding(
-              padding: const EdgeInsets.all(AppSpacing.m),
-              child: Container(
-                padding: const EdgeInsets.all(AppSpacing.m),
-                decoration: BoxDecoration(
-                  color: AppColors.surfaceCard,
-                  borderRadius: BorderRadius.circular(AppSpacing.radiusM),
-                  border: Border.all(color: AppColors.border),
-                ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      'Receipt Information',
-                      style: AppTypography.headingSmall.copyWith(fontSize: 15),
-                    ),
-                    const SizedBox(height: AppSpacing.s),
+  Widget _totals() => Column(
+    crossAxisAlignment: CrossAxisAlignment.start,
+    children: [
+      Text(
+        'Purchase total: ${_review.lineTotalCents == null ? 'Check line amounts' : pesos(_review.lineTotalCents!)}',
+        style: Theme.of(context).textTheme.titleMedium,
+      ),
+      if (_review.draft.detectedTotalCents != null)
+        Text(
+          'Detected receipt total: ${pesos(_review.draft.detectedTotalCents!)}',
+        ),
+      if (_review.hasTotalDifference)
+        CheckboxListTile(
+          contentPadding: EdgeInsets.zero,
+          controlAffinity: ListTileControlAffinity.leading,
+          title: const Text('I checked the difference from the receipt total'),
+          value: _review.draft.totalDifferenceConfirmed,
+          onChanged: _review.saving
+              ? null
+              : (value) {
+                  _review.draft.totalDifferenceConfirmed = value ?? false;
+                  _review.changed();
+                },
+        ),
+    ],
+  );
 
-                    // Supplier selector
-                    Row(
-                      children: [
-                        const Icon(
-                          Icons.storefront_rounded,
-                          size: 20,
-                          color: AppColors.primary,
-                        ),
-                        const SizedBox(width: AppSpacing.s),
-                        Expanded(
-                          child: DropdownButtonHideUnderline(
-                            child: DropdownButton<Supplier>(
-                              value: _selectedSupplier,
-                              isExpanded: true,
-                              items: _allSuppliers.map((s) {
-                                return DropdownMenuItem(
-                                  value: s,
-                                  child: Text(
-                                    s.displayName,
-                                    style: AppTypography.bodyRegular,
-                                  ),
-                                );
-                              }).toList(),
-                              onChanged: (val) {
-                                setState(() => _selectedSupplier = val);
-                              },
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                    const Divider(height: 16),
-
-                    // Date & Receipt number row
-                    Row(
-                      children: [
-                        Expanded(
-                          child: InkWell(
-                            onTap: _pickDate,
-                            borderRadius:
-                                BorderRadius.circular(AppSpacing.radiusS),
-                            child: Row(
-                              children: [
-                                const Icon(
-                                  Icons.calendar_today_rounded,
-                                  size: 18,
-                                  color: AppColors.textSecondary,
-                                ),
-                                const SizedBox(width: AppSpacing.s),
-                                Text(
-                                  DateFormatter.format(_purchaseDate),
-                                  style: AppTypography.bodySmall.copyWith(
-                                    fontWeight: FontWeight.w600,
-                                    color: AppColors.textPrimary,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                        ),
-                        const SizedBox(width: AppSpacing.m),
-                        Expanded(
-                          child: Row(
-                            children: [
-                              const Icon(
-                                Icons.tag_rounded,
-                                size: 18,
-                                color: AppColors.textSecondary,
-                              ),
-                              const SizedBox(width: 4),
-                              Expanded(
-                                child: TextField(
-                                  controller: _receiptNumberController,
-                                  style: AppTypography.bodySmall,
-                                  decoration: const InputDecoration(
-                                    hintText: 'Receipt #',
-                                    isDense: true,
-                                    contentPadding: EdgeInsets.symmetric(
-                                      horizontal: 6,
-                                      vertical: 6,
-                                    ),
-                                    border: InputBorder.none,
-                                  ),
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ],
-                    ),
-                    const Divider(height: 16),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Text(
-                          'Total: ${CurrencyFormatter.format(_linesSum)}',
-                          style: AppTypography.headingSmall.copyWith(
-                            fontSize: 14,
-                            fontWeight: FontWeight.w700,
-                          ),
-                        ),
-                        Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Icon(
-                              _isBalanced
-                                  ? Icons.check_circle_outline_rounded
-                                  : Icons.info_outline_rounded,
-                              size: 15,
-                              color: _isBalanced
-                                  ? AppColors.priceCheaper
-                                  : AppColors.accent,
-                            ),
-                            const SizedBox(width: 4),
-                            Text(
-                              _isBalanced
-                                  ? 'Matches scanned total'
-                                  : 'Scanned: ${CurrencyFormatter.format(_scannedTotal)}',
-                              style: AppTypography.caption.copyWith(
-                                color: _isBalanced
-                                    ? AppColors.priceCheaper
-                                    : AppColors.accent,
-                                fontWeight: FontWeight.w600,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
-              ),
-            ),
-          ),
-
-          // Section header for lines
-          SliverToBoxAdapter(
-            child: Padding(
-              padding: const EdgeInsets.fromLTRB(
-                AppSpacing.m,
-                AppSpacing.m,
-                AppSpacing.m,
-                AppSpacing.s,
-              ),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+  @override
+  Widget build(BuildContext context) {
+    final draft = _review.draft;
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Review Scanned Receipt'),
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back),
+          onPressed: _review.saving
+              ? null
+              : widget.onBack ?? () => Navigator.maybePop(context),
+        ),
+      ),
+      body: _review.loading
+          ? const Center(child: CircularProgressIndicator())
+          : _review.error != null
+          ? Center(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
                 children: [
-                  Text(
-                    'Line Items (${_lines.length})',
-                    style: AppTypography.headingSmall,
-                  ),
-                  TextButton.icon(
-                    icon: const Icon(Icons.add_rounded, size: 16),
-                    label: const Text('Add Item'),
-                    onPressed: _addNewBlankLine,
+                  Text(_review.error!),
+                  TextButton(
+                    onPressed: _review.load,
+                    child: const Text('Retry'),
                   ),
                 ],
               ),
-            ),
-          ),
-
-          // Line items list
-          SliverPadding(
-            padding: const EdgeInsets.symmetric(horizontal: AppSpacing.m),
-            sliver: SliverList(
-              delegate: SliverChildBuilderDelegate(
-                (context, index) {
-                  final line = _lines[index];
-                  final matchedProd = line.matchedProductId != null
-                      ? _productsMap[line.matchedProductId]
-                      : null;
-
-                  return Padding(
-                    padding: const EdgeInsets.only(bottom: AppSpacing.s),
-                    child: LineItemEditorRow(
-                      line: line,
-                      matchedProduct: matchedProd,
-                      index: index,
-                      onSelectProduct: () => _handleMatchProduct(index),
-                      onQuantityChanged: (q) {
-                        setState(() {
-                          line.quantity = q.round();
-                        });
-                      },
-                      onPiecesPerPackChanged: (pcs) {
-                        setState(() {
-                          line.piecesPerPack = pcs;
-                        });
-                      },
-                      onLineTotalChanged: (total) {
-                        setState(() {
-                          line.netAmount = total;
-                        });
-                      },
-                      onRemove: () {
-                        setState(() => _lines.removeAt(index));
-                      },
+            )
+          : ListView(
+              controller: _scroll,
+              padding: const EdgeInsets.all(16),
+              children: [
+                _photos(),
+                for (final warning in draft.warnings)
+                  Padding(
+                    padding: const EdgeInsets.only(bottom: 8),
+                    child: Text(
+                      warning,
+                      style: const TextStyle(color: AppColors.amberText),
                     ),
-                  );
-                },
-                childCount: _lines.length,
-              ),
-            ),
-          ),
-
-          const SliverToBoxAdapter(child: SizedBox(height: 100)),
-        ],
-      ),
-
-      // Bottom bar action guard
-      bottomNavigationBar: Container(
-        padding: const EdgeInsets.all(AppSpacing.m),
-        decoration: BoxDecoration(
-          color: AppColors.surfaceCard,
-          border: const Border(top: BorderSide(color: AppColors.border)),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withValues(alpha: 0.04),
-              offset: const Offset(0, -4),
-              blurRadius: 8,
-            ),
-          ],
-        ),
-        child: SafeArea(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              if (_unresolvedItemsCount > 0) ...[
+                  ),
+                ReceiptMetadataEditor(
+                  draft: draft,
+                  suppliers: _review.suppliers,
+                  enabled: !_review.saving,
+                  onChanged: () => _review.changed(),
+                  onEditSupplier: _editSupplier,
+                ),
+                const SizedBox(height: 20),
                 Row(
                   children: [
-                    const Icon(
-                      Icons.warning_amber_rounded,
-                      size: 16,
-                      color: AppColors.accent,
-                    ),
-                    const SizedBox(width: 6),
-                    Text(
-                      '$_unresolvedItemsCount unconfirmed or unassigned ${(_unresolvedItemsCount == 1) ? 'item' : 'items'}',
-                      style: AppTypography.caption.copyWith(
-                        color: AppColors.accentDark,
-                        fontWeight: FontWeight.w700,
+                    Expanded(
+                      child: Text(
+                        'Line Items (${draft.lines.length})',
+                        style: Theme.of(context).textTheme.titleLarge,
                       ),
+                    ),
+                    TextButton.icon(
+                      onPressed: _review.saving ? null : _review.addLine,
+                      icon: const Icon(Icons.add),
+                      label: const Text('Add Item'),
                     ),
                   ],
                 ),
-                const SizedBox(height: AppSpacing.s),
+                ...draft.lines.indexed.map(
+                  (entry) => _line(entry.$2, entry.$1),
+                ),
+                _totals(),
+                const SizedBox(height: 24),
               ],
-              Row(
-                children: [
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        const Text('Total Amount', style: AppTypography.caption),
-                        Text(
-                          CurrencyFormatter.format(_linesSum),
-                          style: AppTypography.priceHighlight,
-                        ),
-                      ],
-                    ),
+            ),
+      bottomNavigationBar: SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.all(16),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              if (!_review.loading && _review.problem != null)
+                Padding(
+                  padding: const EdgeInsets.only(bottom: 8),
+                  child: Text(
+                    _review.problem!,
+                    style: const TextStyle(color: AppColors.amberText),
                   ),
-                  Expanded(
-                    child: AppButton(
-                      label: _isSaving ? 'Saving...' : 'Save to Ledger',
-                      icon: Icons.save_alt_rounded,
-                      isLoading: _isSaving,
-                      onPressed: _saveReceipt,
-                    ),
-                  ),
-                ],
+                ),
+              FilledButton.icon(
+                onPressed:
+                    _review.saving || _review.loading || _review.error != null
+                    ? null
+                    : _save,
+                icon: const Icon(Icons.save_alt),
+                label: Text(_review.saving ? 'Saving...' : 'Save to Ledger'),
               ),
             ],
           ),

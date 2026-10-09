@@ -29,6 +29,16 @@ class MlKitOcrService implements OcrService {
             top: line.boundingBox.top,
             width: line.boundingBox.width,
             height: line.boundingBox.height,
+            tokens: List.unmodifiable([
+              for (final element in line.elements)
+                OcrTextToken(
+                  text: element.text,
+                  left: element.boundingBox.left,
+                  top: element.boundingBox.top,
+                  width: element.boundingBox.width,
+                  height: element.boundingBox.height,
+                ),
+            ]),
           ),
     ];
     if (lines.isEmpty) {

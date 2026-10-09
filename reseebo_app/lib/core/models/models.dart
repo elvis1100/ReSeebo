@@ -25,13 +25,15 @@ class StoreProfile {
     String? photoPath,
     double? defaultMarkupPercent,
     double? defaultMarkupPercentage,
-  }) =>
-      StoreProfile(
-        name: storeName ?? name ?? this.name,
-        ownerName: ownerName ?? this.ownerName,
-        photoPath: photoPath ?? this.photoPath,
-        defaultMarkupPercent: defaultMarkupPercentage ?? defaultMarkupPercent ?? this.defaultMarkupPercent,
-      );
+  }) => StoreProfile(
+    name: storeName ?? name ?? this.name,
+    ownerName: ownerName ?? this.ownerName,
+    photoPath: photoPath ?? this.photoPath,
+    defaultMarkupPercent:
+        defaultMarkupPercentage ??
+        defaultMarkupPercent ??
+        this.defaultMarkupPercent,
+  );
 }
 
 class Product {
@@ -77,19 +79,18 @@ class Product {
     String? photoPath,
     double? markupPercent,
     int? sellingPriceCents,
-  }) =>
-      Product(
-        id: id ?? this.id,
-        name: name ?? this.name,
-        brand: brand ?? this.brand,
-        variant: variant ?? this.variant,
-        size: size ?? this.size,
-        category: category ?? this.category,
-        barcode: barcode ?? this.barcode,
-        photoPath: photoPath ?? this.photoPath,
-        markupPercent: markupPercent ?? this.markupPercent,
-        sellingPriceCents: sellingPriceCents ?? this.sellingPriceCents,
-      );
+  }) => Product(
+    id: id ?? this.id,
+    name: name ?? this.name,
+    brand: brand ?? this.brand,
+    variant: variant ?? this.variant,
+    size: size ?? this.size,
+    category: category ?? this.category,
+    barcode: barcode ?? this.barcode,
+    photoPath: photoPath ?? this.photoPath,
+    markupPercent: markupPercent ?? this.markupPercent,
+    sellingPriceCents: sellingPriceCents ?? this.sellingPriceCents,
+  );
 }
 
 class Supplier {
@@ -133,8 +134,10 @@ class ProductMatchSuggestion {
 
 enum PurchaseUnit { piece, pack }
 
-class OcrTextLine {
-  const OcrTextLine({
+/// A recognized word in pixel coordinates of its page's recognition image.
+/// These bounds must never be overlaid on a differently cropped original.
+class OcrTextToken {
+  const OcrTextToken({
     required this.text,
     this.left = 0,
     this.top = 0,
@@ -148,6 +151,32 @@ class OcrTextLine {
   final double height;
 }
 
+class OcrTextLine {
+  const OcrTextLine({
+    required this.text,
+    this.left = 0,
+    this.top = 0,
+    this.width = 0,
+    this.height = 0,
+    this.tokens = const [],
+  });
+  final String text;
+  final double left;
+  final double top;
+  final double width;
+  final double height;
+  final List<OcrTextToken> tokens;
+
+  OcrTextLine snapshot() => OcrTextLine(
+    text: text,
+    left: left,
+    top: top,
+    width: width,
+    height: height,
+    tokens: List.unmodifiable(tokens),
+  );
+}
+
 const maxReceiptPages = 20;
 
 class ReceiptOcrPage {
@@ -159,6 +188,12 @@ class ReceiptOcrPage {
   final String imagePath;
   final String? recognitionImagePath;
   final List<OcrTextLine> textLines;
+
+  ReceiptOcrPage snapshot() => ReceiptOcrPage(
+    imagePath: imagePath,
+    recognitionImagePath: recognitionImagePath,
+    textLines: List.unmodifiable(textLines.map((line) => line.snapshot())),
+  );
 }
 
 /// A draft is intentionally editable. Services snapshot it before any awaited
@@ -182,7 +217,9 @@ class ParsedLineItem {
     List<String>? warnings,
   }) : id = tempId ?? id ?? const Uuid().v4(),
        description = rawDescription ?? description,
-       grossAmountCents = netAmount != null ? (netAmount * 100).round() : grossAmountCents,
+       grossAmountCents = netAmount != null
+           ? (netAmount * 100).round()
+           : grossAmountCents,
        warnings = warnings ?? [];
   final String id;
   String description;
@@ -277,15 +314,19 @@ class ReceiptDraft {
     this.totalDifferenceConfirmed = false,
     this.allowDuplicate = false,
     List<OcrTextLine>? textLines,
+    List<ReceiptOcrPage>? ocrPages,
     List<ParsedLineItem>? lines,
     List<String>? warnings,
   }) : imagePath = localImagePath ?? imagePath ?? '',
        supplierBranch = branchLocation ?? supplierBranch ?? '',
        purchasedAt = purchaseDate ?? purchasedAt,
-       imagePaths = List.unmodifiable(imagePaths ?? [localImagePath ?? imagePath ?? '']),
+       imagePaths = List.unmodifiable(
+         imagePaths ?? [localImagePath ?? imagePath ?? ''],
+       ),
        operationId = operationId ?? const Uuid().v4(),
        lines = lines ?? [],
        textLines = textLines ?? [],
+       ocrPages = ocrPages ?? [],
        warnings = warnings ?? [];
   final String operationId;
   final String imagePath;
@@ -305,6 +346,7 @@ class ReceiptDraft {
   bool totalDifferenceConfirmed;
   bool allowDuplicate;
   final List<OcrTextLine> textLines;
+  final List<ReceiptOcrPage> ocrPages;
   final List<ParsedLineItem> lines;
   final List<String> warnings;
 
@@ -330,7 +372,8 @@ class ReceiptDraft {
     detectedTotalCents: detectedTotalCents,
     totalDifferenceConfirmed: totalDifferenceConfirmed,
     allowDuplicate: allowDuplicate,
-    textLines: List.of(textLines),
+    textLines: textLines.map((line) => line.snapshot()).toList(),
+    ocrPages: ocrPages.map((page) => page.snapshot()).toList(),
     lines: lines.map((line) => line.snapshot()).toList(),
     warnings: List.of(warnings),
   );
@@ -485,8 +528,7 @@ class PriceHistoryRecord {
       ? null
       : changeCents! / previousCostPerPieceCents! * 100;
 
-  double? get changeAmount =>
-      changeCents != null ? changeCents! / 100.0 : null;
+  double? get changeAmount => changeCents != null ? changeCents! / 100.0 : null;
   double? get changeFromPreviousPesos => changeAmount;
   double? get changeFromPreviousPercent => changePercent;
   double get unitCost => purchase.costPerPieceCents / 100.0;
@@ -589,13 +631,17 @@ class RestockSupplierEstimate {
   int get totalPurchasedPieces => purchasedPieces;
   int get totalPiecesPurchased => purchasedPieces;
   double get calculatedSubtotal => subtotalCents / 100.0;
-  double get totalEstimatedCost => (subtotalCents + additionalCostCents) / 100.0;
+  double get totalEstimatedCost =>
+      (subtotalCents + additionalCostCents) / 100.0;
   double get totalPurchaseCost => subtotalCents / 100.0;
   double get travelCost => additionalCostCents / 100.0;
-  double get totalCostWithTravel => (subtotalCents + additionalCostCents) / 100.0;
+  double get totalCostWithTravel =>
+      (subtotalCents + additionalCostCents) / 100.0;
   double? get netSavingsAfterTravel => null;
   double get packCost =>
-      (purchase.netAmountCents / (purchase.quantity > 0 ? purchase.quantity : 1)) / 100.0;
+      (purchase.netAmountCents /
+          (purchase.quantity > 0 ? purchase.quantity : 1)) /
+      100.0;
 
   double get subtotal => subtotalCents / 100.0;
   double get totalWithFare => (subtotalCents + additionalCostCents) / 100.0;

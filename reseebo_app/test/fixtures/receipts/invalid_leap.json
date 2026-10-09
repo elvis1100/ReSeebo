@@ -1,0 +1,16 @@
+{
+  "synthetic": true,
+  "name": "invalid leap days cannot normalize",
+  "lines": [
+    {
+      "text": "SUPPLIER A"
+    },
+    {
+      "text": "DATE 29.02.25"
+    }
+  ],
+  "expected": {
+    "date": null,
+    "lines": []
+  }
+}

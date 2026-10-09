@@ -1,0 +1,128 @@
+{
+  "synthetic": true,
+  "name": "element bounds identify amount within a whole OCR line",
+  "lines": [
+    {
+      "text": "SUPPLIER A"
+    },
+    {
+      "text": "2026-10-09"
+    },
+    {
+      "text": "DESCRIPTION QTY PCS UNIT PRICE AMOUNT",
+      "top": 30,
+      "height": 12,
+      "tokens": [
+        {
+          "text": "DESCRIPTION",
+          "left": 0,
+          "top": 30,
+          "height": 12,
+          "width": 30
+        },
+        {
+          "text": "QTY",
+          "left": 200,
+          "top": 30,
+          "height": 12,
+          "width": 30
+        },
+        {
+          "text": "PCS",
+          "left": 240,
+          "top": 30,
+          "height": 12,
+          "width": 30
+        },
+        {
+          "text": "UNIT",
+          "left": 280,
+          "top": 30,
+          "height": 12,
+          "width": 30
+        },
+        {
+          "text": "PRICE",
+          "left": 315,
+          "top": 30,
+          "height": 12,
+          "width": 30
+        },
+        {
+          "text": "AMOUNT",
+          "left": 380,
+          "top": 30,
+          "height": 12,
+          "width": 30
+        }
+      ]
+    },
+    {
+      "text": "COFFEE ORIGINAL 26G 2 84.00 168.00 V",
+      "top": 50,
+      "height": 12,
+      "tokens": [
+        {
+          "text": "COFFEE",
+          "left": 0,
+          "top": 50,
+          "height": 12,
+          "width": 30
+        },
+        {
+          "text": "ORIGINAL",
+          "left": 60,
+          "top": 50,
+          "height": 12,
+          "width": 30
+        },
+        {
+          "text": "26G",
+          "left": 150,
+          "top": 50,
+          "height": 12,
+          "width": 30
+        },
+        {
+          "text": "2",
+          "left": 200,
+          "top": 50,
+          "height": 12,
+          "width": 30
+        },
+        {
+          "text": "84.00",
+          "left": 280,
+          "top": 50,
+          "height": 12,
+          "width": 30
+        },
+        {
+          "text": "168.00",
+          "left": 380,
+          "top": 50,
+          "height": 12,
+          "width": 30
+        },
+        {
+          "text": "V",
+          "left": 435,
+          "top": 50,
+          "height": 12,
+          "width": 30
+        }
+      ]
+    }
+  ],
+  "expected": {
+    "date": "2026-10-09",
+    "lines": [
+      {
+        "description": "2 pcs COFFEE ORIGINAL 26G",
+        "quantity": 2,
+        "unit": "piece",
+        "amount": 16800
+      }
+    ]
+  }
+}

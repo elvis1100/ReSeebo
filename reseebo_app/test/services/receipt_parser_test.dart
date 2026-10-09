@@ -1,9 +1,126 @@
+import 'dart:convert';
+import 'dart:io';
+
 import 'package:flutter_test/flutter_test.dart';
 import 'package:reseebo_app/core/models/models.dart';
 import 'package:reseebo_app/core/services/receipt_parser.dart';
 
 void main() {
   final parser = ReceiptParser();
+
+  final fixtures =
+      Directory('test/fixtures/receipts')
+          .listSync()
+          .whereType<File>()
+          .where((file) => file.path.endsWith('.json'))
+          .toList()
+        ..sort((a, b) => a.path.compareTo(b.path));
+  for (final file in fixtures) {
+    final fixture = jsonDecode(file.readAsStringSync()) as Map<String, dynamic>;
+    test('synthetic fixture: ${fixture['name']}', () {
+      final lines = (fixture['lines'] as List).map((entry) {
+        final row = entry as Map<String, dynamic>;
+        double bound(String key) => (row[key] as num? ?? 0).toDouble();
+        return OcrTextLine(
+          text: row['text'] as String,
+          left: bound('left'),
+          top: bound('top'),
+          width: bound('width'),
+          height: bound('height'),
+          tokens: (row['tokens'] as List? ?? []).map((entry) {
+            final token = entry as Map<String, dynamic>;
+            double value(String key) => (token[key] as num? ?? 0).toDouble();
+            return OcrTextToken(
+              text: token['text'] as String,
+              left: value('left'),
+              top: value('top'),
+              width: value('width'),
+              height: value('height'),
+            );
+          }).toList(),
+        );
+      }).toList();
+      final draft = parser.parse(imagePath: '/original.jpg', textLines: lines);
+      final expected = fixture['expected'] as Map<String, dynamic>;
+      expect(
+        draft.purchasedAt,
+        expected['date'] == null
+            ? null
+            : DateTime.parse(expected['date'] as String),
+      );
+      expect(draft.dateConfirmed, isFalse);
+      expect(draft.textLines, orderedEquals(lines));
+      for (final source in lines) {
+        expect(draft.rawText, contains(source.text));
+      }
+      if (expected['warning'] != null) {
+        expect(
+          draft.warnings.any(
+            (warning) => warning.contains(expected['warning'] as String),
+          ),
+          isTrue,
+        );
+      }
+      final items = expected['lines'] as List;
+      expect(draft.lines, hasLength(items.length));
+      for (var index = 0; index < items.length; index++) {
+        final item = items[index] as Map<String, dynamic>;
+        final actual = draft.lines[index];
+        expect(actual.description, item['description']);
+        expect(actual.quantity, item['quantity']);
+        expect(actual.unit?.name, item['unit']);
+        expect(actual.grossAmountCents, item['amount']);
+        expect(actual.confirmed, isFalse);
+        if (item['warning'] != null) {
+          expect(
+            actual.warnings.any(
+              (warning) => warning.contains(item['warning'] as String),
+            ),
+            isTrue,
+          );
+        }
+      }
+    });
+  }
+
+  test('retains original and recognition evidence for every ordered photo', () {
+    final pages = [
+      const ReceiptOcrPage(
+        imagePath: '/a.jpg',
+        recognitionImagePath: '/a-crop.jpg',
+        textLines: [
+          OcrTextLine(text: 'Supplier A'),
+          OcrTextLine(text: '1 pcs Coffee 84.00'),
+        ],
+      ),
+      const ReceiptOcrPage(
+        imagePath: '/b.jpg',
+        recognitionImagePath: '/b-rotate.jpg',
+        textLines: [
+          OcrTextLine(text: 'Supplier A'),
+          OcrTextLine(text: '1 pcs Milk 40.00'),
+        ],
+      ),
+    ];
+    final draft = parser.parsePages(pages: pages);
+    expect(draft.ocrPages.map((page) => page.imagePath), ['/a.jpg', '/b.jpg']);
+    expect(draft.ocrPages.map((page) => page.recognitionImagePath), [
+      '/a-crop.jpg',
+      '/b-rotate.jpg',
+    ]);
+    expect(
+      draft.ocrPages[1].textLines
+          .singleWhere((line) => line.text.contains('Milk'))
+          .text,
+      '1 pcs Milk 40.00',
+    );
+    final single = parser.parse(
+      imagePath: '/a.jpg',
+      recognitionImagePath: '/a-crop.jpg',
+      textLines: pages.first.textLines,
+    );
+    expect(single.ocrPages.single.recognitionImagePath, '/a-crop.jpg');
+  });
 
   test('aligns separately recognized item columns by text bounds', () {
     final lines = [
@@ -103,6 +220,38 @@ void main() {
     imagePath: '/original.jpg',
     textLines: rows.map((text) => OcrTextLine(text: text)).toList(),
   );
+
+  for (final count in ['2.00', '2.50']) {
+    test(
+      'a labeled amount table retains the product after $count pack count',
+      () {
+        final draft = parseRows([
+          'SUPPLIER A',
+          'QTY DESCRIPTION UNIT PRICE AMOUNT',
+          '$count packs Coffee Original 26G 84.00 168.00',
+        ]);
+        expect(draft.lines, hasLength(1));
+        expect(
+          draft.lines.single.description,
+          '$count packs Coffee Original 26G',
+        );
+        expect(draft.lines.single.quantity, count == '2.00' ? 2 : null);
+        expect(
+          draft.lines.single.unit,
+          count == '2.00' ? PurchaseUnit.pack : null,
+        );
+        expect(
+          draft.lines.single.grossAmountCents,
+          count == '2.00' ? 16800 : null,
+        );
+        expect(draft.lines.single.confirmed, isFalse);
+        expect(
+          draft.rawText,
+          contains('$count packs Coffee Original 26G 84.00 168.00'),
+        );
+      },
+    );
+  }
 
   test(
     'maps wrapped description and whole decimal quantities without losing raw OCR',

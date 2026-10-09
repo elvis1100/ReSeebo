@@ -1,0 +1,16 @@
+{
+  "synthetic": true,
+  "name": "short year 00 is a valid leap year in 2000",
+  "lines": [
+    {
+      "text": "SUPPLIER A"
+    },
+    {
+      "text": "DATE 29/02/00"
+    }
+  ],
+  "expected": {
+    "date": "2000-02-29",
+    "lines": []
+  }
+}
