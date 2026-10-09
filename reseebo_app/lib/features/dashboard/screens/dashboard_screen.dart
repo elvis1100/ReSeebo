@@ -38,6 +38,7 @@ class _DashboardScreenState extends State<DashboardScreen>
   List<Receipt> _receipts = [];
   List<Product> _products = [];
   Map<String, Supplier> _suppliersMap = {};
+  Map<String, LatestProductCost> _latestCosts = {};
   bool _isLoading = true;
   String _searchQuery = '';
 
@@ -69,6 +70,9 @@ class _DashboardScreenState extends State<DashboardScreen>
     final receipts = await widget.dataAdapter.getRecentReceipts();
     final products = await widget.dataAdapter.getProducts();
     final suppliers = await widget.dataAdapter.getSuppliers();
+    final costs = await widget.dataAdapter.getLatestProductCosts(
+      products.map((p) => p.id),
+    );
 
     final map = <String, Supplier>{};
     for (final s in suppliers) {
@@ -81,6 +85,7 @@ class _DashboardScreenState extends State<DashboardScreen>
         _receipts = receipts;
         _products = products;
         _suppliersMap = map;
+        _latestCosts = costs;
         _isLoading = false;
       });
     }
@@ -114,16 +119,21 @@ class _DashboardScreenState extends State<DashboardScreen>
         title: const Text(
           'Reseebo',
           style: TextStyle(
-            fontSize: 20,
-            fontWeight: FontWeight.w800,
-            letterSpacing: -0.5,
+            fontSize: 22,
+            fontWeight: FontWeight.w900,
+            color: AppColors.primary,
+            letterSpacing: -0.6,
           ),
         ),
         actions: [
           IconButton(
-            tooltip: 'Refresh data',
-            icon: const Icon(Icons.refresh_rounded, size: 20),
-            onPressed: _loadData,
+            tooltip: 'Store Settings',
+            icon: const Icon(
+              Icons.settings_outlined,
+              color: AppColors.textPrimary,
+              size: 22,
+            ),
+            onPressed: widget.onSettingsPressed,
           ),
         ],
       ),
@@ -167,7 +177,10 @@ class _DashboardScreenState extends State<DashboardScreen>
                               ),
                               suffixIcon: _searchQuery.isNotEmpty
                                   ? IconButton(
-                                      icon: const Icon(Icons.clear_rounded, size: 18),
+                                      icon: const Icon(
+                                        Icons.clear_rounded,
+                                        size: 18,
+                                      ),
                                       onPressed: () {
                                         _searchController.clear();
                                       },
@@ -178,11 +191,12 @@ class _DashboardScreenState extends State<DashboardScreen>
                           const SizedBox(height: AppSpacing.m),
                           // Modern segmented pill tab bar
                           Container(
-                            height: 40,
+                            height: 42,
                             padding: const EdgeInsets.all(3),
                             decoration: BoxDecoration(
                               color: AppColors.surfaceSubtle,
-                              borderRadius: BorderRadius.circular(AppSpacing.radiusS),
+                              borderRadius:
+                                  BorderRadius.circular(AppSpacing.radiusS),
                             ),
                             child: TabBar(
                               controller: _tabController,
@@ -191,12 +205,14 @@ class _DashboardScreenState extends State<DashboardScreen>
                               indicatorSize: TabBarIndicatorSize.tab,
                               indicator: BoxDecoration(
                                 color: Colors.white,
-                                borderRadius: BorderRadius.circular(AppSpacing.radiusXs + 2),
+                                borderRadius: BorderRadius.circular(
+                                  AppSpacing.radiusXs + 2,
+                                ),
                                 boxShadow: [
                                   BoxShadow(
-                                    color: Colors.black.withValues(alpha: 0.05),
-                                    blurRadius: 3,
-                                    offset: const Offset(0, 1),
+                                    color: Colors.black.withValues(alpha: 0.06),
+                                    blurRadius: 4,
+                                    offset: const Offset(0, 1.5),
                                   ),
                                 ],
                               ),
@@ -210,7 +226,8 @@ class _DashboardScreenState extends State<DashboardScreen>
                               ),
                               tabs: [
                                 Tab(
-                                  text: 'Recent Receipts (${_filteredReceipts.length})',
+                                  text:
+                                      'Recent Receipts (${_filteredReceipts.length})',
                                 ),
                                 Tab(
                                   text: 'Products (${_filteredProducts.length})',
@@ -235,16 +252,16 @@ class _DashboardScreenState extends State<DashboardScreen>
                 ],
               ),
             ),
-      floatingActionButton: FloatingActionButton.extended(
+      floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
+      floatingActionButton: FloatingActionButton(
+        onPressed: widget.onScanPressed,
+        elevation: 6,
+        highlightElevation: 10,
+        shape: const CircleBorder(),
         backgroundColor: AppColors.primary,
         foregroundColor: Colors.white,
-        elevation: 2,
-        icon: const Icon(Icons.document_scanner_rounded, size: 20),
-        label: const Text(
-          'Scan Receipt',
-          style: TextStyle(fontWeight: FontWeight.w700, letterSpacing: 0.2),
-        ),
-        onPressed: widget.onScanPressed,
+        tooltip: 'Scan Receipt',
+        child: const Icon(Icons.camera_alt_rounded, size: 28),
       ),
     );
   }
@@ -258,8 +275,8 @@ class _DashboardScreenState extends State<DashboardScreen>
             mainAxisSize: MainAxisSize.min,
             children: [
               const Icon(
-                Icons.receipt_outlined,
-                size: 40,
+                Icons.receipt_long_outlined,
+                size: 44,
                 color: AppColors.textMuted,
               ),
               const SizedBox(height: AppSpacing.s),
@@ -280,9 +297,11 @@ class _DashboardScreenState extends State<DashboardScreen>
     }
 
     return ListView.separated(
-      padding: const EdgeInsets.symmetric(
-        horizontal: AppSpacing.m,
-        vertical: AppSpacing.s,
+      padding: const EdgeInsets.fromLTRB(
+        AppSpacing.m,
+        AppSpacing.s,
+        AppSpacing.m,
+        96,
       ),
       itemCount: _filteredReceipts.length,
       separatorBuilder: (context, index) =>
@@ -309,7 +328,7 @@ class _DashboardScreenState extends State<DashboardScreen>
             children: [
               const Icon(
                 Icons.inventory_2_outlined,
-                size: 40,
+                size: 44,
                 color: AppColors.textMuted,
               ),
               const SizedBox(height: AppSpacing.s),
@@ -330,17 +349,27 @@ class _DashboardScreenState extends State<DashboardScreen>
     }
 
     return ListView.separated(
-      padding: const EdgeInsets.symmetric(
-        horizontal: AppSpacing.m,
-        vertical: AppSpacing.s,
+      padding: const EdgeInsets.fromLTRB(
+        AppSpacing.m,
+        AppSpacing.s,
+        AppSpacing.m,
+        96,
       ),
       itemCount: _filteredProducts.length,
       separatorBuilder: (context, index) =>
           const SizedBox(height: AppSpacing.s),
       itemBuilder: (context, index) {
         final product = _filteredProducts[index];
-        final latestCost = 28.50 + (index * 4.25);
-        final srp = (latestCost * 1.15).ceilToDouble();
+        final costInfo = _latestCosts[product.id];
+        final latestCost =
+            costInfo != null ? costInfo.costPerPieceCents / 100.0 : null;
+        final markup =
+            product.markupPercent ??
+            _storeProfile?.defaultMarkupPercent ??
+            15.0;
+        final srp = latestCost != null
+            ? (latestCost * (1 + markup / 100)).ceilToDouble()
+            : null;
 
         return ProductCatalogItem(
           product: product,
