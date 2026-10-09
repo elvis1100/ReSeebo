@@ -112,9 +112,11 @@ class ReceiptParser {
       if (!RegExp(r'[a-z]', caseSensitive: false).hasMatch(description)) {
         continue;
       }
+      final printedDescription = description;
       int? quantity;
       PurchaseUnit? unit;
       int? piecesPerPack;
+      RegExpMatch? leadingQuantity;
       // Whole decimal counts are valid OCR output; a fractional suffix must
       // never become a separate quantity (for example, 2.50 becoming 50).
       final packCount = RegExp(
@@ -145,14 +147,27 @@ class ReceiptParser {
           caseSensitive: false,
         ).firstMatch(description);
         if (leading != null) {
+          leadingQuantity = leading;
           quantity = parseQuantity(leading.group(1)!);
           description = description.substring(leading.end).trim();
         }
       }
       final warnings = <String>['Confirm the exact brand, variant and size.'];
-      final multipleAmounts = RegExp(
-        r'\b\d[\d,]*\.\d{2}\b',
-      ).allMatches(description).isNotEmpty;
+      final quantityFields = [
+        packCount,
+        pieceCount,
+        conversion,
+        leadingQuantity,
+      ].whereType<RegExpMatch>();
+      // Printed whole-decimal counts are not monetary columns. Ignore only
+      // their recognized field spans, retaining other prices for owner review.
+      final multipleAmounts = RegExp(r'\b\d[\d,]*\.\d{2}\b')
+          .allMatches(printedDescription)
+          .any(
+            (amount) => !quantityFields.any(
+              (field) => amount.start >= field.start && amount.end <= field.end,
+            ),
+          );
       if (multipleAmounts) {
         warnings.add(
           'Multiple prices appear on this row. Confirm the total line amount, not the unit price.',

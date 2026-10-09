@@ -285,7 +285,9 @@ void main() {
             imagePath: '/second.jpg',
             textLines: [
               OcrTextLine(text: 'Supplier A'),
-              OcrTextLine(text: '2 packs BRAND X COFFEE ORIGINAL 26G 168.00'),
+              OcrTextLine(
+                text: '2.00 packs BRAND X COFFEE ORIGINAL 26G 168.00',
+              ),
             ],
           ),
         ],
@@ -298,7 +300,11 @@ void main() {
       );
       expect(
         draft.lines.last.description,
-        '2 packs BRAND X COFFEE ORIGINAL 26G',
+        '2.00 packs BRAND X COFFEE ORIGINAL 26G',
+      );
+      expect(
+        draft.lines.every((line) => line.grossAmountCents == 16800),
+        isTrue,
       );
       expect(draft.lines.every((line) => !line.confirmed), isTrue);
     },
@@ -349,12 +355,21 @@ void main() {
       ]);
       expect(draft.lines[0].quantity, 2);
       expect(draft.lines[0].unit, PurchaseUnit.pack);
+      expect(draft.lines[0].grossAmountCents, 16800);
       expect(draft.lines[0].description, contains('Coffee Original 26G'));
       expect(draft.lines[1].quantity, 3);
       expect(draft.lines[1].unit, PurchaseUnit.piece);
+      expect(draft.lines[1].grossAmountCents, 12000);
       expect(draft.lines[1].description, contains('Milk Original 500G'));
       expect(draft.lines[2].quantity, 2);
       expect(draft.lines[2].piecesPerPack, 10);
+      expect(draft.lines[2].grossAmountCents, 16800);
+      final ambiguous = parseRows([
+        'Supplier A',
+        '2.00 packs Coffee Original 26G 84.00 168.00',
+      ]);
+      expect(ambiguous.lines.single.quantity, 2);
+      expect(ambiguous.lines.single.grossAmountCents, isNull);
     },
   );
 
