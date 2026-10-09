@@ -99,7 +99,7 @@ abstract final class AppTheme {
         backgroundColor: AppColors.surfaceCard,
         selectedItemColor: AppColors.primary,
         unselectedItemColor: AppColors.textMuted,
-        elevation: 8.0,
+        elevation: 0.0,
         type: BottomNavigationBarType.fixed,
       ),
     );
