@@ -205,24 +205,12 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
                   // Minimalist App Info Footer
                   Center(
-                    child: Column(
-                      children: [
-                        Text(
-                          'Reseebo v1.0.0',
-                          style: AppTypography.caption.copyWith(
-                            fontWeight: FontWeight.w700,
-                            color: AppColors.textSecondary,
-                          ),
-                        ),
-                        const SizedBox(height: 2),
-                        Text(
-                          'All prices and receipts stored privately on-device',
-                          style: AppTypography.caption.copyWith(
-                            color: AppColors.textMuted,
-                            fontSize: 10,
-                          ),
-                        ),
-                      ],
+                    child: Text(
+                      'Reseebo v1.0.0',
+                      style: AppTypography.caption.copyWith(
+                        fontWeight: FontWeight.w600,
+                        color: AppColors.textMuted,
+                      ),
                     ),
                   ),
                   const SizedBox(height: AppSpacing.xl),
