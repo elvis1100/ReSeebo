@@ -43,7 +43,7 @@ class ReceiptItemEvidence {
     // Long code-shaped prefixes are evidence separate from the editable name.
     // Do not strip short numerals, promotional counts, or numeric brands.
     final code = RegExp(
-      r'^([\dDOIl]{7,14})\s+(?=\S*[a-z])',
+      r'^(?=\S*\d{3})([\dDOIl]{7,14})\s+(?=\S*[a-z])',
       caseSensitive: false,
     ).firstMatch(description);
     if (code != null) description = description.substring(code.end).trim();

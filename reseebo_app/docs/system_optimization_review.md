@@ -3,6 +3,10 @@
 Applied `3. System_Optimization_Prompt.md` to the current app, preserving existing
 staged and unstaged receipt, catalog, and insights work.
 
+This review is a historical snapshot of the cleanup and checks below. Its final
+parser caveat records the state before the typed receipt-item parser was added;
+the current parser replay is documented in `receipt_accuracy_investigation.md`.
+
 ## Changes
 
 - Removed 17 unreferenced Dart files: superseded controllers, old receipt cards,
@@ -49,6 +53,8 @@ Routine app code has no receipt-content print/debugPrint logging.
 - Fresh-install first launch, a full app restart, real-receipt accuracy, and the
   complete offline comparison/calculation UI were not newly verified here.
 
-This cleanup does not fix the measured Wellbest cross-item association or DALI
-money-marker rejection documented in `receipt_accuracy_investigation.md`.
-OCR comparison and product matching do not substitute for those parser fixes.
+At the time of this cleanup review, the measured Wellbest cross-item
+association and DALI money-marker rejection were still open. The later bounded
+typed-item parser fixes those associations in local replay; see
+`receipt_accuracy_investigation.md` for before/after results and remaining OCR
+errors. Device verification of that parser change is pending final checks.

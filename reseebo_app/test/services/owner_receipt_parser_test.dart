@@ -276,6 +276,7 @@ void main() {
     final draft = parser.parse(
       imagePath: '/bounded-footer.jpg',
       textLines: [
+        const OcrTextLine(text: 'Supplier A', top: -50, width: 100, height: 10),
         const OcrTextLine(
           text: 'Coffee 26G',
           left: 40,

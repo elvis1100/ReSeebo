@@ -1,6 +1,53 @@
 # Receipt accuracy investigation — 10 October 2026
 
-## Decision
+## Implementation replay update — 10 October 2026
+
+The bounded typed-item parser is now implemented. The local before/after replay
+used the same eight owner OCR captures (four readings of each of two receipts);
+these are repeated views of two receipts, not eight independent examples.
+
+| Capture group | Before parser fix | After parser fix |
+| --- | --- | --- |
+| Owner DALI, ML Kit (original and enhanced) | 1/3 and 0/3 rows aligned; 1/3 and 0/3 line amounts correct | 3/3 rows aligned and 3/3 line amounts correct in both; counts 2/3, with the OCR-only `PC`/`T PC` count left unknown; receipt total correct in both |
+| Owner DALI, PP-OCRv5 (original and enhanced) | 1/3 rows and line amounts correct in each | 3/3 rows aligned and 3/3 line amounts correct in both; unreadable first/Zippy counts remain unresolved; receipt total correct in both |
+| Wellbest, ML Kit (original and enhanced) | 1/2 and 2/2 rows aligned; original count/amount association was wrong; total unresolved in both | 2/2 rows and counts in both; receipt total correct in both; Birch amount stays unresolved because `10 × 13.75` conflicts with `157.50` |
+| Wellbest, PP-OCRv5 (original and enhanced) | 2/2 rows aligned, but counts and total were wrong or unresolved | 2/2 rows and counts in both; receipt total correct in both; original Ariel amount remains unresolved because its right-side OCR price is malformed; enhanced line amounts are 2/2 |
+
+The implementation groups bounded description, count, and candidate-price
+evidence, keeps printed item codes in `printedItemCode`, accepts `P`-prefixed
+totals, and preserves unknown terminal letters as marker evidence with a review
+warning. It does not correct OCR text or choose a new OCR model. Product-name
+recognition errors remain, and some DALI counts remain unknown. These replay
+results are limited to the two owner receipts and do not establish general
+supplier accuracy.
+
+The changed production adapter passed the exact-photo Android regression on
+Samsung SM-A576B with Wi-Fi and mobile data disabled: both original and enhanced
+passes retained Wellbest's two item counts and total, kept Birch's contradictory
+amount unresolved, and retained DALI's three amounts while leaving its first
+count unknown. Testing used the separate verification app; phone connectivity
+was restored. The owner's main installed app was not replaced. This test does
+not measure general receipt accuracy or exercise a fresh installation, purchase
+saving, or full-process-restart persistence.
+
+
+Final local checks: `flutter analyze --no-pub` reported no issues; all **296**
+Flutter tests passed, including exact captures, coordinate-scale invariance,
+code snapshots, footer barriers, numeric brands, and malformed/uncertain money.
+All 32 synthetic benchmark cases had zero field failures. Existing non-owner
+benchmark results were unchanged. All eight complete private captures produced
+the same item/total results as their sanitized fixtures. Original capture and
+truth JSONs were not modified. `git diff --check` passed. A normal debug APK
+was built from `lib/main.dart` and its application ID verified as
+`com.reseebo.reseebo`; it has not been installed over the owner's app.
+
+## Historical baseline investigation — before the parser fix
+
+The findings and decision below describe the investigation before the typed
+parser implementation. In particular, “No production extraction behavior ...
+was changed” is a historical statement about that investigation only.
+
+### Decision at the time
 
 Keep the current bundled ML Kit engine while fixing measured association and
 monetary-token failures. The exact owner Wellbest and DALI photos now confirm
@@ -10,7 +57,7 @@ This is evidence against a blind engine replacement, not proof that ML Kit is
 the best engine for all suppliers.
 
 No production extraction behavior, model packaging, catalog, or SQLite schema
-was changed in this investigation.
+was changed during that baseline investigation.
 
 ## Measured results
 
@@ -166,7 +213,7 @@ alternative-engine comparisons. Capture reruns retain separate directories;
 Python refuses output collisions. Never install over or clear the owner's
 ordinary com.reseebo.reseebo app.
 
-## Next implementation decision
+## Implementation direction proposed at baseline at the time
 
 The next implementation should fix association and monetary-token handling
 before selecting an engine. Preserve descriptions with unresolved fields; keep
