@@ -70,12 +70,6 @@ class ReseeboRootNavigation extends StatefulWidget {
 }
 
 class _ReseeboRootNavigationState extends State<ReseeboRootNavigation> {
-  int _currentIndex = 0;
-
-  void _navigateToTab(int index) {
-    setState(() => _currentIndex = index);
-  }
-
   void _openCaptureScreen() {
     Navigator.of(context).push(
       MaterialPageRoute(
@@ -89,12 +83,22 @@ class _ReseeboRootNavigationState extends State<ReseeboRootNavigation> {
                   initialDraft: draft,
                   onSaved: (result) {
                     Navigator.of(context).pop();
-                    setState(() => _currentIndex = 0);
                   },
                 ),
               ),
             );
           },
+        ),
+      ),
+    );
+  }
+
+  void _openSettings() {
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (context) => ProfileScreen(
+          dataAdapter: widget.dataAdapter,
+          onBack: () => Navigator.of(context).pop(),
         ),
       ),
     );
@@ -141,40 +145,12 @@ class _ReseeboRootNavigationState extends State<ReseeboRootNavigation> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: IndexedStack(
-        index: _currentIndex,
-        children: [
-          DashboardScreen(
-            dataAdapter: widget.dataAdapter,
-            onScanPressed: _openCaptureScreen,
-            onSettingsPressed: () => _navigateToTab(1),
-            onProductSelected: _openProductComparison,
-            onReceiptSelected: _openReceiptDetail,
-          ),
-          ProfileScreen(
-            dataAdapter: widget.dataAdapter,
-          ),
-        ],
-      ),
-      bottomNavigationBar: BottomNavigationBar(
-        currentIndex: _currentIndex,
-        selectedItemColor: AppColors.primary,
-        unselectedItemColor: AppColors.textMuted,
-        onTap: _navigateToTab,
-        items: const [
-          BottomNavigationBarItem(
-            icon: Icon(Icons.storefront_outlined),
-            activeIcon: Icon(Icons.storefront_rounded),
-            label: 'Tindahan',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.settings_outlined),
-            activeIcon: Icon(Icons.settings_rounded),
-            label: 'Settings',
-          ),
-        ],
-      ),
+    return DashboardScreen(
+      dataAdapter: widget.dataAdapter,
+      onScanPressed: _openCaptureScreen,
+      onSettingsPressed: _openSettings,
+      onProductSelected: _openProductComparison,
+      onReceiptSelected: _openReceiptDetail,
     );
   }
 }
