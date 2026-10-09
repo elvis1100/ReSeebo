@@ -246,6 +246,9 @@ This guarantees:
 - [x] **Root Navigation & Tests:**
   - Root bottom navigation connecting Tindahan, Scan, and Settings.
   - Full unit test coverage for ceil rounding, profit margins, and formatting.
+- [x] **UI/UX Pro Max Refactoring:**
+  - Eliminated "AI-generated" tropes: stripped prompt-justifying checklists, decorative badge inflation, math equation glyphs (`×`, `=`, `÷`), and nested cards.
+  - Aligned with high-density, sleek production standard (Linear / Apple Wallet / Stripe design style).
 
 ### Phase 3: Integration with Local SQLite & OCR Services (Hours 10–14)
 - [ ] Inspect implemented SQLite DAO and OCR service contracts from Backend/Integration owner.
