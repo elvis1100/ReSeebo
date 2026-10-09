@@ -1,9 +1,8 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'core/adapters/mock_reseebo_data_adapter.dart';
 import 'core/adapters/reseebo_data_adapter.dart';
-import 'core/models/product.dart';
-import 'core/models/receipt.dart';
-import 'core/theme/app_colors.dart';
+import 'core/adapters/sqlite_reseebo_data_adapter.dart';
 import 'core/theme/app_theme.dart';
 import 'features/comparison/screens/product_comparison_screen.dart';
 import 'features/dashboard/screens/dashboard_screen.dart';
@@ -12,9 +11,19 @@ import 'features/profile/screens/profile_screen.dart';
 import 'features/receipt_scan/screens/capture_screen.dart';
 import 'features/receipt_scan/screens/review_match_screen.dart';
 
-void main() {
+void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  runApp(const ReseeboApp());
+  IReseeboDataAdapter adapter;
+  if (kIsWeb) {
+    adapter = MockReseeboDataAdapter();
+  } else {
+    try {
+      adapter = await SqliteReseeboDataAdapter.open();
+    } catch (_) {
+      adapter = MockReseeboDataAdapter();
+    }
+  }
+  runApp(ReseeboApp(dataAdapter: adapter));
 }
 
 /// Root application widget for Reseebo (Offline-First Tindahan Ledger).
