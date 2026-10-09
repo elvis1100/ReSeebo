@@ -1,9 +1,11 @@
+import '../models/models.dart';
+
 /// Receipt date/time evidence stays an editable suggestion. Numeric month/day
 /// order is accepted only when unambiguous; a clock needs a date or time label
 /// or an adjacent date row. Unrelated product/card dates are excluded.
 class ReceiptPurchaseDateTime {
   static final _unrelated = RegExp(
-    r'\b(?:exp(?:iry|iration|ire[sd]?)?|mfg|manufacture|manufactured|manufacturing|production|packed|card|birthday|dob|opening|closing|delivery|printed|reprint)\b|\b(?:best\s*before|use\s*by|valid\s*(?:thru|until|through))\b',
+    r'\b(?:exp(?:iry|iration|ire[sd]?)?|mfg|manufacture|manufactured|manufacturing|production|packed|card|birthday|dob|opening|closing|delivery|printed|reprint|accred(?:itation)?|permit|ptu|issued?)\b|\b(?:best\s*before|use\s*by|valid\s*(?:thru|until|through))\b',
     caseSensitive: false,
   );
   static const _month =
@@ -30,13 +32,19 @@ class ReceiptPurchaseDateTime {
 
   /// [rows] must retain printed row order. Empty rows can separate photos so
   /// an unlabeled clock cannot gain an accidental neighbor on another page.
-  PurchaseDateTimeSuggestion suggest(List<String> rows) {
+  PurchaseDateTimeSuggestion suggest(
+    List<String> rows, {
+    NumericDateOrder? dateOrder,
+  }) {
+    var ambiguousDate = false;
     final dates = <DateTime>{};
     final dateRows = <int>{};
     final warnings = <String>{};
     for (var index = 0; index < rows.length; index++) {
       final text = rows[index];
-      if (_unrelated.hasMatch(text)) continue;
+      if (_unrelated.hasMatch(text) ||
+          (index > 0 && _unrelated.hasMatch(rows[index - 1]) &&
+           RegExp(r'^[\d./:\s-]+$').hasMatch(text))) continue;
       void accept(DateTime? date, {bool ambiguous = false}) {
         if (date != null) {
           dates.add(date);
@@ -85,10 +93,36 @@ class ReceiptPurchaseDateTime {
           accept(_validDate(year, second, first));
         } else if (second > 12 || first == second) {
           accept(_validDate(year, first, second));
+        } else if (dateOrder != null) {
+          accept(
+            dateOrder == NumericDateOrder.dayFirst
+                ? _validDate(year, second, first)
+                : _validDate(year, first, second),
+          );
         } else {
-          accept(null, ambiguous: first > 0 && second > 0);
+          ambiguousDate = first > 0 && second > 0;
+          accept(null, ambiguous: ambiguousDate);
         }
       }
+    }
+    if (ambiguousDate && dateOrder == null) {
+      final candidates = <PurchaseDateCandidate>[];
+      for (final order in NumericDateOrder.values) {
+        final suggestion = suggest(rows, dateOrder: order);
+        if (suggestion.purchasedAt != null) {
+          candidates.add(
+            PurchaseDateCandidate(
+              suggestion.purchasedAt!,
+              order,
+              suggestion.hasPurchaseTime,
+            ),
+          );
+        }
+      }
+      return PurchaseDateTimeSuggestion(
+        candidates: candidates,
+        warnings: warnings.toList(),
+      );
     }
     if (dates.length > 1) {
       warnings.add(
@@ -103,7 +137,9 @@ class ReceiptPurchaseDateTime {
     final times = <(int, int, int)>{};
     for (var index = 0; index < rows.length; index++) {
       final text = rows[index];
-      if (_unrelated.hasMatch(text)) continue;
+      if (_unrelated.hasMatch(text) ||
+          (index > 0 && _unrelated.hasMatch(rows[index - 1]) &&
+           RegExp(r'^[\d./:\s-]+$').hasMatch(text))) continue;
       final matches = _clock.allMatches(text).toList();
       final labeled = _timeLabel.hasMatch(text);
       final adjacent =
@@ -213,9 +249,11 @@ class PurchaseDateTimeSuggestion {
     this.purchasedAt,
     this.hasPurchaseTime = false,
     this.warnings = const [],
+    this.candidates = const [],
   });
 
   final DateTime? purchasedAt;
   final bool hasPurchaseTime;
   final List<String> warnings;
+  final List<PurchaseDateCandidate> candidates;
 }

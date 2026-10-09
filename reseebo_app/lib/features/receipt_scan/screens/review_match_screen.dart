@@ -76,6 +76,7 @@ class _ReviewMatchScreenState extends State<ReviewMatchScreen> {
     await _review.load();
     if (!mounted) return;
     line.productId = product.id;
+    line.matchOrigin = null;
     _review.changed(line: line);
   }
 
@@ -322,6 +323,9 @@ class _ReviewMatchScreenState extends State<ReviewMatchScreen> {
                 AppCard(
                   child: ReceiptMetadataEditor(
                     draft: draft,
+                    onSupplierChanged: _review.refreshDateSuggestion,
+                    onDateCandidate: (candidate, remember) =>
+                        _review.chooseDateCandidate(candidate, remember: remember),
                     suppliers: _review.suppliers,
                     enabled: !_review.saving,
                     onChanged: () => _review.changed(),

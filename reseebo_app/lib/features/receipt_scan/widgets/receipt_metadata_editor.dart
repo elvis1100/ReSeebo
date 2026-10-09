@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'purchase_date_candidates.dart';
 
 import '../../../core/adapters/i_reseebo_data_adapter.dart';
 import '../../../core/constants/formatters.dart';
@@ -13,12 +14,16 @@ class ReceiptMetadataEditor extends StatefulWidget {
     required this.onChanged,
     required this.onEditSupplier,
     this.enabled = true,
+    this.onDateCandidate,
+    this.onSupplierChanged,
   });
   final ReceiptDraft draft;
   final List<Supplier> suppliers;
   final VoidCallback onChanged;
   final ValueChanged<Supplier?> onEditSupplier;
   final bool enabled;
+  final Future<void> Function(PurchaseDateCandidate, bool)? onDateCandidate;
+  final VoidCallback? onSupplierChanged;
   @override
   State<ReceiptMetadataEditor> createState() => _ReceiptMetadataEditorState();
 }
@@ -89,6 +94,7 @@ class _ReceiptMetadataEditorState extends State<ReceiptMetadataEditor> {
       widget.draft.supplierId = supplier.id;
       widget.draft.supplierBranch = supplier.branch;
       widget.draft.supplierNotes = '';
+      widget.onSupplierChanged?.call();
       widget.onChanged();
     }
   }
@@ -110,6 +116,8 @@ class _ReceiptMetadataEditorState extends State<ReceiptMetadataEditor> {
       widget.draft.hasPurchaseTime ? previous?.minute ?? 0 : 0,
     );
     widget.draft.dateConfirmed = false;
+    widget.draft.dateManuallyEdited = true;
+    widget.draft.dateFromReceipt = false;
     widget.onChanged();
   }
 
@@ -166,6 +174,7 @@ class _ReceiptMetadataEditorState extends State<ReceiptMetadataEditor> {
             onChanged: (value) {
               _clearSupplierSelection();
               draft.supplierName = value;
+              widget.onSupplierChanged?.call();
               widget.onChanged();
             },
             validator: (value) =>
@@ -203,10 +212,21 @@ class _ReceiptMetadataEditorState extends State<ReceiptMetadataEditor> {
               ),
             ),
           ),
-          const Padding(
-            padding: EdgeInsets.only(top: AppSpacing.sm),
+          if (draft.purchasedAt == null &&
+              draft.dateCandidates.isNotEmpty &&
+              widget.onDateCandidate != null)
+            PurchaseDateCandidates(
+              candidates: draft.dateCandidates,
+              canRemember: draft.supplierId != null,
+              enabled: widget.enabled,
+              onChoose: widget.onDateCandidate!,
+            ),
+          Padding(
+            padding: const EdgeInsets.only(top: AppSpacing.sm),
             child: Text(
-              'Check the purchase date.',
+              draft.dateFromReceipt
+                  ? 'Filled from receipt — check the purchase date.'
+                  : 'Check the purchase date.',
               style: TextStyle(color: AppColors.textSecondary),
             ),
           ),

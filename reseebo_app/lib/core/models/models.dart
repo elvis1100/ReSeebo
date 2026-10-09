@@ -104,13 +104,24 @@ class Product {
   );
 }
 
+enum NumericDateOrder { monthFirst, dayFirst }
+
+class PurchaseDateCandidate {
+  const PurchaseDateCandidate(this.date, this.order, this.hasTime);
+  final DateTime date;
+  final NumericDateOrder order;
+  final bool hasTime;
+}
+
 class Supplier {
   const Supplier({
     required this.id,
     required this.name,
     this.branch = '',
     this.notes = '',
+    this.dateOrder,
   });
+  final NumericDateOrder? dateOrder;
   final String id;
   final String name;
   final String branch;
@@ -216,6 +227,11 @@ class ParsedLineItem {
     String description = '',
     String? rawDescription,
     this.productId,
+    this.matchOrigin,
+    this.extractedQuantity,
+    this.extractedAmountCents,
+    this.quantityEdited = false,
+    this.amountEdited = false,
     this.quantity,
     this.unit,
     this.piecesPerPack,
@@ -235,6 +251,11 @@ class ParsedLineItem {
   final String id;
   String description;
   String? productId;
+  String? matchOrigin;
+  final int? extractedQuantity;
+  final int? extractedAmountCents;
+  bool quantityEdited;
+  bool amountEdited;
   int? quantity;
   PurchaseUnit? unit;
   int? piecesPerPack;
@@ -290,6 +311,11 @@ class ParsedLineItem {
     id: id,
     description: description,
     productId: productId,
+    matchOrigin: matchOrigin,
+    extractedQuantity: extractedQuantity,
+    extractedAmountCents: extractedAmountCents,
+    quantityEdited: quantityEdited,
+    amountEdited: amountEdited,
     quantity: quantity,
     unit: unit,
     piecesPerPack: piecesPerPack,
@@ -318,6 +344,9 @@ class ReceiptDraft {
     DateTime? purchaseDate,
     this.hasPurchaseTime = false,
     this.dateConfirmed = false,
+    this.dateManuallyEdited = false,
+    this.dateFromReceipt = false,
+    this.dateCandidates = const [],
     this.receiptNumber = '',
     this.notes = '',
     this.rawText = '',
@@ -350,6 +379,9 @@ class ReceiptDraft {
   DateTime? purchasedAt;
   bool hasPurchaseTime;
   bool dateConfirmed;
+  bool dateManuallyEdited;
+  bool dateFromReceipt;
+  List<PurchaseDateCandidate> dateCandidates;
   String receiptNumber;
   String notes;
   String rawText;
@@ -377,6 +409,9 @@ class ReceiptDraft {
     purchasedAt: purchasedAt,
     hasPurchaseTime: hasPurchaseTime,
     dateConfirmed: dateConfirmed,
+    dateManuallyEdited: dateManuallyEdited,
+    dateFromReceipt: dateFromReceipt,
+    dateCandidates: List.of(dateCandidates),
     receiptNumber: receiptNumber,
     notes: notes,
     rawText: rawText,

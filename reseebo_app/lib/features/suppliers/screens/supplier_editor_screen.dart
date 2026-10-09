@@ -20,10 +20,12 @@ class _SupplierEditorScreenState extends State<SupplierEditorScreen> {
   late final TextEditingController _name;
   late final TextEditingController _notes;
   late final String _id;
+  NumericDateOrder? _dateOrder;
   late final LocalEditorController<Supplier> _editor;
   late final List<String> _initial;
   List<TextEditingController> get _fields => [_name, _notes];
   bool get _dirty =>
+      _dateOrder != widget.supplier?.dateOrder ||
       _fields.indexed.any((entry) => entry.$2.text != _initial[entry.$1]);
   void _changed() {
     if (mounted) setState(() {});
@@ -32,6 +34,7 @@ class _SupplierEditorScreenState extends State<SupplierEditorScreen> {
   @override
   void initState() {
     super.initState();
+    _dateOrder = widget.supplier?.dateOrder;
     _id = widget.supplier?.id ?? const Uuid().v4();
     _name = TextEditingController(text: widget.supplier?.name);
     _notes = TextEditingController(text: widget.supplier?.notes);
@@ -52,6 +55,7 @@ class _SupplierEditorScreenState extends State<SupplierEditorScreen> {
         name: _name.text.trim(),
         branch: widget.supplier?.branch ?? '',
         notes: _notes.text.trim(),
+        dateOrder: _dateOrder,
       ),
     );
     if (mounted && saved) Navigator.pop(context, true);
@@ -93,6 +97,34 @@ class _SupplierEditorScreenState extends State<SupplierEditorScreen> {
               minLines: 3,
               maxLines: 5,
               label: 'Notes (optional)',
+            ),
+            const SizedBox(height: 16),
+            DropdownButtonFormField<String>(
+              initialValue: _dateOrder?.name ?? 'ask',
+              decoration: const InputDecoration(
+                labelText: 'Receipt date format',
+              ),
+              items: const [
+                DropdownMenuItem(
+                  value: 'ask',
+                  child: Text('Ask when ambiguous'),
+                ),
+                DropdownMenuItem(
+                  value: 'dayFirst',
+                  child: Text('Day / month / year'),
+                ),
+                DropdownMenuItem(
+                  value: 'monthFirst',
+                  child: Text('Month / day / year'),
+                ),
+              ],
+              onChanged: _editor.saving
+                  ? null
+                  : (value) => setState(() {
+                      _dateOrder = value == 'ask'
+                          ? null
+                          : NumericDateOrder.values.byName(value!);
+                    }),
             ),
             const SizedBox(height: 24),
             if (_editor.error != null) ...[

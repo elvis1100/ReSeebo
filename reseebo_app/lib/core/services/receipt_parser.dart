@@ -32,16 +32,21 @@ class ReceiptParser {
     );
     draft.purchasedAt = purchase.purchasedAt;
     draft.hasPurchaseTime = purchase.hasPurchaseTime;
+    draft.dateCandidates = purchase.candidates;
+    draft.dateFromReceipt = purchase.purchasedAt != null;
     draft.warnings.addAll(purchase.warnings);
     final amountPattern = RegExp(
-      r'(?:₱|PHP\s*)?(-?\d[\d,]*\.\d{2})\s*(?:[A-Z*])?\s*$',
+      r'(?:₱|PHP\s*)?(-?\d[\d,]*\.\d{2})\s*(?:(?:VE|[A-Z*]))?\s*$',
       caseSensitive: false,
     );
+    int? printedUnitCount;
     var reachedTotal = false;
     var inItemTable = false;
     for (var index = 0; index < rows.length; index++) {
       final text = rows[index].trim();
       if (text.isEmpty) continue;
+      final count = RegExp(r'^(?:total\s+items|items\s+purchased)\s*:?\s*(\d+)$|^(\d+)\s+item(?:\(s\)|s)?$', caseSensitive: false).firstMatch(text);
+      if (count != null) printedUnitCount = int.tryParse(count[1] ?? count[2]!);
       if (RegExp(
             r'\b(?:description|item|product)\b',
             caseSensitive: false,
@@ -63,7 +68,7 @@ class ReceiptParser {
         draft.receiptNumber = (number.group(1) ?? number.group(2))!;
       }
       if (RegExp(
-        r'^(?:cash|change|tender|payment|balance)\b',
+        r'^\d+\s+(?:x\s+)?item|^(?:cash|change|tender|payment|balance|items\s+purchased|total\s+items)\b',
         caseSensitive: false,
       ).hasMatch(text)) {
         reachedTotal = true;
@@ -76,9 +81,18 @@ class ReceiptParser {
             (_likelyIncompleteItem(text) ||
                 (inItemTable &&
                     RegExp(r'[a-z]', caseSensitive: false).hasMatch(text)))) {
+          final count = RegExp(r'(?<![\d.])\b(\d+)(?:\.0+)?\s*(pcs?|pieces?|packs?|pk)\b', caseSensitive: false).firstMatch(text);
+          final leading = RegExp(r'^(\d{1,3})\s+(?:[x×]\s+)?(?=[a-z])', caseSensitive: false).firstMatch(text);
+          final quantity = count != null ? parseQuantity(count[1]!) :
+              leading != null && !RegExp(r'^(?:7\s+up|100\s+plus)\b', caseSensitive: false).hasMatch(text) ? parseQuantity(leading[1]!) : null;
+          final unit = count == null ? null : RegExp(r'^(?:pack|pk)', caseSensitive: false).hasMatch(count[2]!) ? PurchaseUnit.pack : PurchaseUnit.piece;
           draft.lines.add(
             ParsedLineItem(
               description: text,
+              quantity: quantity,
+              extractedQuantity: quantity,
+              unit: unit,
+              piecesPerPack: unit == PurchaseUnit.piece ? 1 : null,
               warnings: [
                 'This item row is incomplete. Check the original receipt and enter the missing fields.',
                 'Confirm the exact brand, variant and size.',
@@ -210,12 +224,28 @@ class ReceiptParser {
         ParsedLineItem(
           description: description,
           quantity: quantity,
+          extractedQuantity: quantity,
+          extractedAmountCents: multipleAmounts ? null : cents,
           unit: unit,
           piecesPerPack: piecesPerPack,
           grossAmountCents: multipleAmounts ? null : cents,
           warnings: warnings,
         ),
       );
+    }
+    if (draft.detectedTotalCents != null && draft.lines.isNotEmpty &&
+        draft.lines.every((line) => line.netAmountCents != null)) {
+      final sum = draft.lines.fold<int>(0, (sum, line) => sum + line.netAmountCents!);
+      if (sum != draft.detectedTotalCents) {
+        draft.warnings.add('Item amounts differ from the receipt total. Check missing items and discounts.');
+      }
+    }
+    if (printedUnitCount != null && draft.lines.isNotEmpty &&
+        draft.lines.every((line) => line.quantity != null)) {
+      final count = draft.lines.fold<int>(0, (sum, line) => sum + line.quantity!);
+      if (count != printedUnitCount) {
+        draft.warnings.add('Purchased quantities differ from the printed item count. Check missing items and purchase units.');
+      }
     }
     if (draft.purchasedAt == null) {
       draft.warnings.add('Choose and confirm the purchase date.');
@@ -234,14 +264,14 @@ class ReceiptParser {
   bool _metadata(String text) =>
       _purchaseDateTime.isMetadata(text) ||
       RegExp(
-        r'^(?:date|time|tin|address|branch|page|qty|quantity|description|item|product)\b|\b(?:sub\s*total|vat|tax|cash|change|tender|payment|balance|total|amount\s+due|receipt|invoice|tel|phone)\b',
+        r'^(?:date|time|tin|address|branch|page|qty|quantity|description|item|product|pos|serial|s/n|sn|s/n:|min|ptu|accred|cust|str|trx|ref)\b|\b(?:sub\s*total|vat|tax|cash|change|tender|payment|balance|total|amount\s+due|receipt|invoice|tel|phone)\b',
         caseSensitive: false,
       ).hasMatch(text);
 
   bool _likelyIncompleteItem(String text) =>
       RegExp(r'[a-z]', caseSensitive: false).hasMatch(text) &&
       RegExp(
-        r'\b\d+(?:\.\d+)?\s*(?:g|kg|ml|l|oz|pcs?|pieces?|packs?|pk)\b',
+        r'\d+(?:\.\d+)?\s*(?:g|kg|ml|l|oz|pcs?|pieces?|packs?|pk)\b|@\s*\d',
         caseSensitive: false,
       ).hasMatch(text);
 
@@ -300,6 +330,8 @@ class ReceiptParser {
     ]);
     result.purchasedAt = purchase.purchasedAt;
     result.hasPurchaseTime = purchase.hasPurchaseTime;
+    result.dateCandidates = purchase.candidates;
+    result.dateFromReceipt = purchase.purchasedAt != null;
     result.warnings.addAll(purchase.warnings);
     final numbers = drafts
         .map((draft) => draft.receiptNumber)

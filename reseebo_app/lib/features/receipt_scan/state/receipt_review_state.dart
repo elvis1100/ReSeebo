@@ -2,6 +2,9 @@ import 'package:flutter/foundation.dart';
 
 import '../../../core/adapters/i_reseebo_data_adapter.dart';
 import '../../../core/constants/formatters.dart';
+import '../../../core/services/exact_product_match.dart';
+import '../../../core/services/receipt_purchase_datetime.dart';
+import '../../../core/services/receipt_layout.dart';
 
 enum ReceiptLineField {
   description('Description'),
@@ -72,12 +75,15 @@ class ReceiptReviewState extends ChangeNotifier {
       case ReceiptLineField.description:
         line.description = text;
         line.productId = null;
+        line.matchOrigin = null;
       case ReceiptLineField.quantity:
         line.quantity = parseQuantity(text);
+        line.quantityEdited = true;
       case ReceiptLineField.piecesPerPack:
         line.piecesPerPack = parseQuantity(text);
       case ReceiptLineField.amount:
         line.grossAmountCents = parsePesos(text);
+        line.amountEdited = true;
     }
     changed(line: line, affectsTotal: field == ReceiptLineField.amount);
   }
@@ -125,6 +131,7 @@ class ReceiptReviewState extends ChangeNotifier {
           break;
         }
       }
+      refreshDateSuggestion();
       // Only a unique mapping previously confirmed by the owner may prefill
       // product identity. Similar catalog names still need an explicit choice.
       final aliases = <String, List<ProductMatchSuggestion>>{};
@@ -141,7 +148,15 @@ class ReceiptReviewState extends ChangeNotifier {
             .toSet();
         if (exactIds.length == 1) {
           line.productId = exactIds.single;
+          line.matchOrigin = 'Previously matched';
           line.confirmed = false;
+        } else if (exactIds.isEmpty) {
+          final product = exactProductMatch(line.description, products);
+          if (product != null) {
+            line.productId = product.id;
+            line.matchOrigin = 'Matched from receipt';
+            line.confirmed = false;
+          }
         }
       }
     } catch (failure) {
@@ -150,6 +165,63 @@ class ReceiptReviewState extends ChangeNotifier {
       loading = false;
       _changed();
     }
+  }
+
+  /// Re-evaluate only OCR-derived dates. An owner edit always wins over reload
+  /// or a changed supplier preference; no saved purchase is modified here.
+  void refreshDateSuggestion() {
+    if (draft.dateManuallyEdited || draft.dateConfirmed) return;
+    final source = pages
+        .expand(
+          (page) => [...recognizedReceiptText(page.textLines).split('\n'), ''],
+        )
+        .toList();
+    if (source.every((row) => row.trim().isEmpty)) return;
+    final supplier = suppliers
+        .where((value) => value.id == draft.supplierId)
+        .firstOrNull;
+    final suggestion = ReceiptPurchaseDateTime().suggest(
+      source,
+      dateOrder: supplier?.dateOrder,
+    );
+    draft.purchasedAt = suggestion.purchasedAt;
+    draft.hasPurchaseTime = suggestion.hasPurchaseTime;
+    draft.dateFromReceipt = suggestion.purchasedAt != null;
+    draft.dateCandidates = suggestion.candidates;
+  }
+
+  Future<void> chooseDateCandidate(
+    PurchaseDateCandidate candidate, {
+    bool remember = false,
+  }) async {
+    if (saving || loading || !draft.dateCandidates.contains(candidate)) return;
+    final supplierId = draft.supplierId;
+    if (remember) {
+      final supplier = suppliers
+          .where((value) => value.id == supplierId)
+          .firstOrNull;
+      if (supplier == null) {
+        throw const ValidationException('Select a saved supplier first.');
+      }
+      await adapter.saveSupplier(
+        Supplier(
+          id: supplier.id,
+          name: supplier.name,
+          branch: supplier.branch,
+          notes: supplier.notes,
+          dateOrder: candidate.order,
+        ),
+      );
+    }
+    if (_disposed || draft.supplierId != supplierId || draft.dateManuallyEdited) {
+      return;
+    }
+    draft.purchasedAt = candidate.date;
+    draft.hasPurchaseTime = candidate.hasTime;
+    draft.dateFromReceipt = true;
+    draft.dateManuallyEdited = true;
+    draft.dateConfirmed = false;
+    changed();
   }
 
   static String _key(String value) =>

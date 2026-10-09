@@ -1,5 +1,7 @@
 # Frontend Implementation Plan: Reseebo (Sari-Sari Store Receipt & Price Comparison App)
 
+Receipt extraction improvements are tracked in [Receipt Autofill Improvement Plan](RECEIPT_AUTOFILL_PLAN.md).
+
 > **Context & Baseline:** Reseebo is an offline-first Flutter application designed for Philippine sari-sari store owners to scan receipts via on-device OCR, track price histories across suppliers, and calculate suggested retail prices (SRP) and estimated profit (*tubo*).
 
 ---

@@ -135,7 +135,7 @@ void main() {
         'receipt_images',
         'catalog_seed_entries',
       });
-      expect(await db.getVersion(), 4);
+      expect(await db.getVersion(), 5);
       expect(
         (await db.rawQuery('PRAGMA foreign_keys')).single.values.single,
         1,
@@ -144,6 +144,33 @@ void main() {
       expect((await adapter.getStoreProfile()).defaultMarkupPercent, 20);
     },
   );
+
+  test('version 4 upgrade retains receipts and branch date preferences persist', () async {
+    final saved = await adapter.saveConfirmedReceipt(await draft(operation: 'v4-date'));
+    final receiptBefore = await adapter.getReceipt(saved.receiptId);
+    await db.execute('ALTER TABLE suppliers DROP COLUMN date_order');
+    await db.setVersion(4);
+    await adapter.close();
+    adapter = await openAdapter();
+    db = await databaseFactoryFfi.openDatabase(databasePath);
+    expect(await db.getVersion(), 5);
+    final supplier = (await adapter.getSuppliers()).single;
+    expect(supplier.dateOrder, isNull);
+    await adapter.saveSupplier(Supplier(id: supplier.id, name: supplier.name,
+      branch: supplier.branch, notes: supplier.notes, dateOrder: NumericDateOrder.dayFirst));
+    await adapter.close();
+    adapter = await openAdapter();
+    db = await databaseFactoryFfi.openDatabase(databasePath);
+    expect((await adapter.getSuppliers()).single.dateOrder, NumericDateOrder.dayFirst);
+    final after = await adapter.getReceipt(saved.receiptId);
+    expect(after.receipt.purchasedAt, receiptBefore.receipt.purchasedAt);
+    expect(after.lines.single.netAmountCents, receiptBefore.lines.single.netAmountCents);
+    expect(await File(after.receipt.imagePath).exists(), isTrue);
+    await adapter.saveSupplier(Supplier(id: supplier.id, name: supplier.name,
+      branch: supplier.branch, notes: supplier.notes));
+    expect((await adapter.getSuppliers()).single.dateOrder, isNull);
+    expect(await db.rawQuery('PRAGMA foreign_key_check'), isEmpty);
+  });
 
   test(
     'all receipt pages save atomically, reopen and retain their order',
@@ -331,7 +358,8 @@ void main() {
         for (final row in await db.query(table)) {
           final values = Map<String, Object?>.of(row)
             ..remove('source_page')
-            ..remove('name_only');
+            ..remove('name_only')
+            ..remove('date_order');
           await legacy.insert(table, values);
         }
       }
@@ -398,7 +426,8 @@ void main() {
         for (final row in await db.query(table)) {
           await legacy.insert(
             table,
-            Map<String, Object?>.of(row)..remove('name_only'),
+            Map<String, Object?>.of(row)..remove('name_only')
+            ..remove('date_order'),
           );
         }
       }
@@ -412,7 +441,7 @@ void main() {
       );
       try {
         final connection = await databaseFactoryFfi.openDatabase(legacyPath);
-        expect(await connection.getVersion(), 4);
+        expect(await connection.getVersion(), 5);
         expect(await connection.rawQuery('PRAGMA foreign_key_check'), isEmpty);
         expect(
           (await connection.rawQuery(
@@ -445,6 +474,7 @@ void main() {
       // Remove only the v3 ledger and mark the existing real database as v2,
       // retaining its actual receipts, purchase lines, files and owner profile.
       await db.execute('DROP TABLE catalog_seed_entries');
+      await db.execute('ALTER TABLE suppliers DROP COLUMN date_order');
       await db.setVersion(2);
       await adapter.close();
       adapter = await SqliteReseeboDataAdapter.open(
@@ -454,7 +484,7 @@ void main() {
         ocrService: FakeOcr(),
       );
       db = await databaseFactoryFfi.openDatabase(databasePath);
-      expect(await db.getVersion(), 4);
+      expect(await db.getVersion(), 5);
       expect((await adapter.getProducts()).length, greaterThan(200));
       expect((await adapter.getStoreProfile()).name, 'My existing shop');
       expect((await adapter.getStoreProfile()).defaultMarkupPercent, 17);

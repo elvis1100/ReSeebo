@@ -12,8 +12,7 @@ are conservative pixel heuristics and still need calibration on real phones.
 
 Review shows original photos and read-only recognized text for reference.
 Fields are corrected directly; the copy-from-receipt controls are removed.
-Amounts represent the final amount paid for the complete purchase line, not the unit price. New reviews do not expose a discount deduction. Pieces default for unspecified units; the owner still confirms every item and changes to packs where appropriate. Product
-selection, quantity units, pack contents, dates and lines require confirmation.
+Amounts represent the final amount paid for the complete purchase line, not the unit price. New reviews do not expose a discount deduction. Pieces default for unspecified units; the owner still confirms every item and changes to packs where appropriate. Product matching is optional. Confirmed unmatched names create photo-free catalog entries in the same SQLite transaction as the receipt; repeated names in one receipt share an entry. Brand, variant, and size remain unknown until edited. Quantity units, pack contents, dates and lines require confirmation.
 Relevant edits clear confirmation. Missing and conflicting readings remain
 editable; the SQLite validator is the final save boundary.
 
@@ -31,14 +30,16 @@ including source-inspired format cases. They are not captured ML Kit output and
 do not measure recognition accuracy. The suite also checks real SQLite atomic
 saves, original-image retention, duplicate handling and database reopening.
 
-On 10 October 2026, `flutter test --no-pub --reporter expanded --timeout 60s` passed all 186
+On 10 October 2026, `flutter test --no-pub --reporter expanded --timeout 60s` passed all 189
 local tests, and `flutter analyze --no-pub` reported no issues. The corpus
-contains 23 synthetic JSON fixtures. These results cover
+contains 23 synthetic JSON fixtures. A subsequent focused run passed all 27 SQLite tests, including version-3 upgrade preservation, atomic name-only catalog creation, rollback, retry safety, and adding product photos later. These results cover
 parser, image, review UI/state, SQLite behavior, raised Scan navigation, and
 pull-to-refresh. Photo tests use actual rendered before/after images to check
 the comparison divider and shared zoom, plus real-image gestures to verify
 one-finger page scrolling and two-finger photo zoom. They do not substitute for
 the native and physical-phone checks below.
+
+On 10 October 2026, an isolated Samsung phone test with Wi-Fi and mobile data disabled also verified name-only imports using the native SQLite adapter: 265 bundled starter products on first launch, a confirmed unmatched product created without a photo, preserved receipt media, idempotent retry, and later product-photo persistence. A separate process restart retained the same 266 products, one receipt, and media. Connectivity was restored and only the verification app was removed. This verifies native storage, not the full matching UI or OCR accuracy.
 
 ## Native offline smoke test
 

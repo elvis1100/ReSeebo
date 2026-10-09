@@ -1,6 +1,6 @@
 {
   "synthetic": true,
-  "name": "wrapped explicit PC counts retain ambiguous prices",
+  "name": "wrapped explicit PC count resolves matching unit price and total",
   "lines": [
     {
       "text": "SUPPLIER A"
@@ -19,11 +19,10 @@
     "date": "2026-10-09",
     "lines": [
       {
-        "description": "COFFEE ORIGINAL 26G 1 PC 144.00",
+        "description": "COFFEE ORIGINAL 26G 1 PC",
         "quantity": 1,
         "unit": "piece",
-        "amount": null,
-        "warning": "Multiple prices"
+        "amount": 14400
       }
     ]
   }

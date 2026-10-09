@@ -124,7 +124,16 @@ class _LineItemEditorRowState extends State<LineItemEditorRow> {
             : field.label,
         filled: true,
         fillColor: AppColors.fieldSurface,
-        helperText: amount ? 'Total for this item' : null,
+        helperText: amount
+            ? (!widget.line.amountEdited &&
+                      widget.line.extractedAmountCents != null
+                  ? 'Filled from receipt · total for this item'
+                  : 'Total for this item')
+            : field == ReceiptLineField.quantity &&
+                  !widget.line.quantityEdited &&
+                  widget.line.extractedQuantity != null
+            ? 'Filled from receipt'
+            : null,
       ),
       onChanged: (value) => _edit(field, value),
     );
@@ -157,6 +166,11 @@ class _LineItemEditorRowState extends State<LineItemEditorRow> {
                 ),
               ],
             ),
+            if (line.matchOrigin != null && widget.matchedProduct != null)
+              Padding(
+                padding: const EdgeInsets.only(bottom: 8),
+                child: Text(line.matchOrigin!),
+              ),
             SizedBox(
               width: double.infinity,
               child: FilledButton(

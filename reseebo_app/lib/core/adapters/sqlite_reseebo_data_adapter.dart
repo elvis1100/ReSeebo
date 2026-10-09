@@ -290,6 +290,7 @@ class SqliteReseeboDataAdapter implements IReseeboDataAdapter {
       'name': supplier.name.trim(),
       'branch': supplier.branch.trim(),
       'notes': supplier.notes.trim(),
+      'date_order': supplier.dateOrder?.name,
       'name_key': _key(supplier.name),
       'branch_key': _key(supplier.branch),
       'updated_at': now,
