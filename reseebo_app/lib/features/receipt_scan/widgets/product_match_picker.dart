@@ -59,6 +59,37 @@ class _ProductMatchPickerState extends State<ProductMatchPicker> {
     if (mounted) setState(() => _adding = false);
   }
 
+  Widget _productTile(Product product) {
+    final title = product.displayName.trim();
+    String normalized(String value) =>
+        value.toLowerCase().replaceAll(RegExp(r'[^a-z0-9]+'), ' ').trim();
+    final titleWords = ' ${normalized(title)} ';
+    final details = <String>[];
+    final seen = <String>{};
+    // Custom names may omit identity details that still distinguish exact items.
+    for (final value in [product.brand, product.variant, product.size]) {
+      final detail = value.trim();
+      final words = normalized(detail);
+      if (words.isNotEmpty &&
+          !titleWords.contains(' $words ') &&
+          seen.add(words)) {
+        details.add(detail);
+      }
+    }
+    return ListTile(
+      contentPadding: EdgeInsets.zero,
+      leading: LocalPhoto(
+        path: product.photoPath,
+        size: 48,
+        icon: Icons.inventory_2_outlined,
+      ),
+      title: Text(title),
+      subtitle: details.isEmpty ? null : Text(details.join(' · ')),
+      trailing: const Icon(Icons.chevron_right),
+      onTap: () => Navigator.pop(context, product),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final suggestedIds = _suggestions
@@ -128,23 +159,10 @@ class _ProductMatchPickerState extends State<ProductMatchPicker> {
               if (_query.isEmpty && _suggestions.isNotEmpty) ...[
                 const Padding(
                   padding: EdgeInsets.symmetric(vertical: 8),
-                  child: Text('Suggested matches · check before choosing'),
+                  child: Text('Suggested matches'),
                 ),
                 ..._suggestions.map(
-                  (suggestion) => ListTile(
-                    contentPadding: EdgeInsets.zero,
-                    leading: LocalPhoto(
-                      path: suggestion.product.photoPath,
-                      size: 48,
-                      icon: Icons.inventory_2_outlined,
-                    ),
-                    title: Text(suggestion.product.name),
-                    subtitle: Text(
-                      '${suggestion.product.identity}\n${suggestion.reason}',
-                    ),
-                    isThreeLine: true,
-                    onTap: () => Navigator.pop(context, suggestion.product),
-                  ),
+                  (suggestion) => _productTile(suggestion.product),
                 ),
                 const Divider(),
               ],
@@ -164,20 +182,7 @@ class _ProductMatchPickerState extends State<ProductMatchPicker> {
                     (product) =>
                         _query.isNotEmpty || !suggestedIds.contains(product.id),
                   )
-                  .map(
-                    (product) => ListTile(
-                      contentPadding: EdgeInsets.zero,
-                      leading: LocalPhoto(
-                        path: product.photoPath,
-                        size: 48,
-                        icon: Icons.inventory_2_outlined,
-                      ),
-                      title: Text(product.name),
-                      subtitle: Text(product.identity),
-                      trailing: const Icon(Icons.chevron_right),
-                      onTap: () => Navigator.pop(context, product),
-                    ),
-                  ),
+                  .map(_productTile),
             ],
           ],
         ),

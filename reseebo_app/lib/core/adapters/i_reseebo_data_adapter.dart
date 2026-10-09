@@ -21,6 +21,7 @@ abstract class IReseeboDataAdapter {
     final list = await getSuppliers();
     return list.where((s) => s.id == id).firstOrNull;
   }
+
   Future<void> saveSupplier(Supplier supplier);
   Future<List<ProductMatchSuggestion>> matchAliases(String rawOcrDescription);
   Future<List<ProductAlias>> getAliases(String productId);
@@ -55,6 +56,8 @@ abstract class IReseeboDataAdapter {
   /// DuplicateReceiptException unless the owner explicitly confirms them.
   /// A selected supplier ID must match the confirmed name/branch. Draft supplier
   /// notes initialize new suppliers only; existing notes use saveSupplier.
+  /// Confirmed lines without a product ID create name-only catalog products
+  /// without photos, atomically with receipt lines. Matching remains optional.
   Future<SaveReceiptResult> saveConfirmedReceipt(ReceiptDraft confirmedDraft);
   Future<ProductComparisonData> getProductComparison(String productId);
 

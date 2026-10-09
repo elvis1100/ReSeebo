@@ -167,9 +167,7 @@ class SqliteReseeboDataAdapter implements IReseeboDataAdapter {
     if ([
       product.id,
       product.name,
-      product.brand,
-      product.variant,
-      product.size,
+      if (!product.nameOnly) ...[product.brand, product.variant, product.size],
     ].any((value) => value.trim().isEmpty)) {
       throw const ValidationException(
         'Enter the product name, brand, variant and size. Use a clear variant such as Original when applicable.',
@@ -185,7 +183,13 @@ class SqliteReseeboDataAdapter implements IReseeboDataAdapter {
       whereArgs: [product.id],
     );
     final old = oldRows.isEmpty ? null : productFromRow(oldRows.first);
+    if (old != null && !old.nameOnly && product.nameOnly) {
+      throw const ValidationException(
+        'Keep the confirmed product identity. Create a separate product for a different item.',
+      );
+    }
     if (old != null &&
+        !old.nameOnly &&
         (_key(old.brand) != _key(product.brand) ||
             _key(old.variant) != _key(product.variant) ||
             _key(old.size) != _key(product.size))) {
@@ -215,6 +219,7 @@ class SqliteReseeboDataAdapter implements IReseeboDataAdapter {
       final now = _now;
       final values = <String, Object?>{
         'name': product.name.trim(),
+        'name_only': product.nameOnly ? 1 : 0,
         'brand': product.brand.trim(),
         'variant': product.variant.trim(),
         'size': product.size.trim(),
@@ -602,7 +607,11 @@ class SqliteReseeboDataAdapter implements IReseeboDataAdapter {
             alreadySaved: true,
           );
         }
-        for (final id in draft.lines.map((line) => line.productId!).toSet()) {
+        for (final id
+            in draft.lines
+                .map((line) => line.productId)
+                .whereType<String>()
+                .toSet()) {
           final products = await txn.query(
             'products',
             where: 'id = ?',
@@ -700,14 +709,36 @@ class SqliteReseeboDataAdapter implements IReseeboDataAdapter {
             'image_hash': copies[page].hash,
           });
         }
+        // Resolve only within this transaction. The caller snapshot and digest
+        // retain null IDs so retrying the same operation remains idempotent.
+        final importedIds = <String, String>{};
         final lineIds = <String>[];
         final costs = <double>[];
         for (final line in draft.lines) {
+          var productId = line.productId;
+          if (productId == null) {
+            final key = _key(line.description);
+            productId = importedIds[key];
+            if (productId == null) {
+              productId = const Uuid().v4();
+              importedIds[key] = productId;
+              await txn.insert('products', {
+                'id': productId,
+                'name': line.description.trim(),
+                'brand': '',
+                'variant': '',
+                'size': '',
+                'name_only': 1,
+                'created_at': now,
+                'updated_at': now,
+              });
+            }
+          }
           final lineId = const Uuid().v4();
           await txn.insert('purchase_lines', {
             'id': lineId,
             'receipt_id': receiptId,
-            'product_id': line.productId,
+            'product_id': productId,
             'source_page': line.sourcePage,
             'original_description': line.description.trim(),
             'quantity': line.quantity,
@@ -722,7 +753,7 @@ class SqliteReseeboDataAdapter implements IReseeboDataAdapter {
           });
           await txn.insert('product_aliases', {
             'id': const Uuid().v4(),
-            'product_id': line.productId,
+            'product_id': productId,
             'description': line.description.trim(),
             'description_key': _key(line.description),
             'created_at': now,

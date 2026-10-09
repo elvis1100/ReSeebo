@@ -26,7 +26,7 @@ void main() {
     expect(find.text('Cost (₱)'), findsOneWidget);
     expect(find.text('Discount (₱)'), findsNothing);
     expect(find.byKey(const ValueKey('discount')), findsNothing);
-    expect(find.text('Receipt details'), findsOneWidget);
+    expect(find.text('Product name'), findsOneWidget);
     expect(find.byType(ExpansionTile), findsNothing);
     expect(find.text('Check brand, variant and size'), findsNothing);
     final description = tester.getRect(
@@ -109,11 +109,11 @@ void main() {
       );
       final quantity = quantityField();
       expect(quantity.decoration!.filled, isTrue);
-    expect(quantity.decoration!.fillColor, AppColors.fieldSurface);
+      expect(quantity.decoration!.fillColor, AppColors.fieldSurface);
       line.confirmed = true;
       await tester.pumpWidget(host());
       expect(quantityField().decoration!.filled, isTrue);
-    expect(quantityField().decoration!.fillColor, AppColors.fieldSurface);
+      expect(quantityField().decoration!.fillColor, AppColors.fieldSurface);
     },
   );
   testWidgets('external draft update refreshes an unfocused quantity editor', (

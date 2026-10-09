@@ -43,6 +43,7 @@ class Product {
     required this.brand,
     required this.variant,
     required this.size,
+    this.nameOnly = false,
     this.category = '',
     this.barcode = '',
     this.photoPath,
@@ -54,14 +55,22 @@ class Product {
   final String brand;
   final String variant;
   final String size;
+
+  /// Receipt-created entries have no inferred brand, variant, or size.
+  /// Completing those details converts the entry to a fixed product identity.
+  final bool nameOnly;
   final String category;
   final String barcode;
   final String? photoPath;
   final double? markupPercent;
   final int? sellingPriceCents;
-  String get identity => '$brand · $variant · $size';
+  String get identity => [
+    brand,
+    variant,
+    size,
+  ].where((value) => value.trim().isNotEmpty).join(' · ');
 
-  String get displayTitle => '$brand $variant $size'.trim();
+  String get displayTitle => nameOnly ? name : '$brand $variant $size'.trim();
   String get displayName => name.isNotEmpty ? name : displayTitle;
   String get sizeUnit => size;
   double? get markupPercentageOverride => markupPercent;
@@ -74,6 +83,7 @@ class Product {
     String? brand,
     String? variant,
     String? size,
+    bool? nameOnly,
     String? category,
     String? barcode,
     String? photoPath,
@@ -85,6 +95,7 @@ class Product {
     brand: brand ?? this.brand,
     variant: variant ?? this.variant,
     size: size ?? this.size,
+    nameOnly: nameOnly ?? this.nameOnly,
     category: category ?? this.category,
     barcode: barcode ?? this.barcode,
     photoPath: photoPath ?? this.photoPath,

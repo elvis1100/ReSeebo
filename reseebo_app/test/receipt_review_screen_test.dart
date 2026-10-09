@@ -65,6 +65,7 @@ void main() {
     addTearDown(tester.view.resetPhysicalSize);
     addTearDown(tester.view.resetDevicePixelRatio);
     final draft = _validDraft();
+    draft.warnings.add('Confirm the purchase date against the receipt.');
     draft.lines.single.unit = PurchaseUnit.pack;
     draft.lines.single.piecesPerPack = 10;
     await tester.pumpWidget(
@@ -83,6 +84,11 @@ void main() {
     );
     await tester.pumpAndSettle();
     expect(tester.takeException(), isNull);
+    expect(find.text('Please check'), findsOneWidget);
+    expect(
+      find.text('Confirm the purchase date against the receipt.'),
+      findsOneWidget,
+    );
     await tester.scrollUntilVisible(
       find.byKey(const ValueKey('piecesPerPack')),
       250,
@@ -273,7 +279,7 @@ void main() {
     },
   );
   testWidgets(
-    'missing product has no passive instructions but still blocks saving',
+    'matching is optional but unmatched items need owner confirmation',
     (tester) async {
       final adapter = _ReviewAdapter();
       final draft = _validDraft();
@@ -292,13 +298,32 @@ void main() {
         200,
         scrollable: find.byType(Scrollable).first,
       );
-      expect(find.text('Match exact product'), findsOneWidget);
+      expect(
+        find.text('Unmatched items are added to your catalog when saved.'),
+        findsOneWidget,
+      );
+      expect(find.text('Match exact product (optional)'), findsOneWidget);
       expect(find.text('Check brand, variant and size'), findsNothing);
       expect(find.byKey(const ValueKey('description')), findsOneWidget);
       await tester.tap(find.text('Save receipt'));
       await tester.pumpAndSettle();
       expect(adapter.saved, isNull);
-      expect(find.textContaining('Select a product.'), findsOneWidget);
+      expect(
+        find.textContaining('Check and confirm this product'),
+        findsWidgets,
+      );
+      await tester.scrollUntilVisible(
+        find.text('I checked this item'),
+        200,
+        scrollable: find.byType(Scrollable).first,
+      );
+      await tester.tap(find.text('I checked this item'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Save receipt'));
+      await tester.pumpAndSettle();
+      expect(adapter.saved, isNotNull);
+      expect(adapter.saved!.lines.single.productId, isNull);
+      expect(adapter.saved!.lines.single.description, 'Coffee');
     },
   );
 }

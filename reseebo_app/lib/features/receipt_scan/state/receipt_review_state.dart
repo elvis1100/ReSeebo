@@ -200,10 +200,10 @@ class ReceiptReviewState extends ChangeNotifier {
       return 'Resolve the possible overlap with the previous photo.';
     }
     if (line.description.trim().isEmpty) {
-      return 'Enter the receipt description.';
+      return 'Enter the product name.';
     }
-    if (productFor(line.productId) == null) {
-      return 'Select a product.';
+    if (line.productId != null && productFor(line.productId) == null) {
+      return 'This product is no longer available. Choose another product.';
     }
     if (line.quantity == null ||
         line.quantity! <= 0 ||

@@ -329,6 +329,41 @@ void main() {
     expect(line.piecesPerPack, isNull);
     state.dispose();
   });
+  test(
+    'unmatched complete item confirms without inventing product identity',
+    () async {
+      final state = ReceiptReviewState(
+        adapter: _AutofillAdapter(),
+        draft: ReceiptDraft(
+          lines: [
+            ParsedLineItem(
+              description: 'Mystery coffee',
+              quantity: 2,
+              unit: PurchaseUnit.piece,
+              piecesPerPack: 1,
+              grossAmountCents: 2000,
+            ),
+          ],
+        ),
+      );
+      await state.load();
+      final line = state.draft.lines.single;
+      // This is deliberately unmatched; assigning a known identity is optional.
+      line.productId = null;
+      state.confirmLine(line);
+      expect(line.confirmed, isTrue);
+      expect(line.productId, isNull);
+      expect(state.lineProblem(line), isNull);
+      line.productId = 'deleted-product';
+      expect(state.lineProblem(line), contains('no longer available'));
+      line.productId = null;
+      state.editText(line, ReceiptLineField.description, '');
+      expect(state.lineProblem(line), 'Enter the product name.');
+      state.confirmLine(line);
+      expect(line.confirmed, isFalse);
+      state.dispose();
+    },
+  );
 }
 
 class _AutofillAdapter extends MockReseeboDataAdapter {

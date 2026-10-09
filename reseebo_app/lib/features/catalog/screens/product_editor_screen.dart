@@ -80,6 +80,9 @@ class _ProductEditorScreenState extends State<ProductEditorScreen> {
       Product(
         id: _id,
         name: _name.text.trim(),
+        nameOnly:
+            widget.product?.nameOnly == true &&
+            [_brand, _variant, _size].any((field) => field.text.trim().isEmpty),
         brand: _brand.text.trim(),
         variant: _variant.text.trim(),
         size: _size.text.trim(),
@@ -128,7 +131,11 @@ class _ProductEditorScreenState extends State<ProductEditorScreen> {
       label: label,
       helper: helper,
       hint: hint,
-      validator: (value) => value!.trim().isEmpty ? 'Enter $label.' : null,
+      validator: (value) =>
+          value!.trim().isEmpty &&
+              (controller == _name || widget.product?.nameOnly != true)
+          ? 'Enter $label.'
+          : null,
     ),
   );
 

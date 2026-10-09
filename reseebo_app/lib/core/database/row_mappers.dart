@@ -10,6 +10,7 @@ StoreProfile profileFromRow(Map<String, Object?> row) => StoreProfile(
 Product productFromRow(Map<String, Object?> row) => Product(
   id: row['id'] as String,
   name: row['name'] as String,
+  nameOnly: row['name_only'] == 1,
   brand: row['brand'] as String,
   variant: row['variant'] as String,
   size: row['size'] as String,

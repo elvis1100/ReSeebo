@@ -6,6 +6,8 @@ import 'package:reseebo_app/core/adapters/sqlite_reseebo_data_adapter.dart';
 import 'package:reseebo_app/core/adapters/i_reseebo_data_adapter.dart';
 import 'package:reseebo_app/core/services/ocr_service.dart';
 import 'package:reseebo_app/core/database/migrations/migration_001_initial.dart';
+import 'package:reseebo_app/core/database/migrations/migration_002_receipt_pages.dart';
+import 'package:reseebo_app/core/database/migrations/migration_003_starter_catalog.dart';
 import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 
 class FakeOcr implements OcrService {
@@ -133,7 +135,7 @@ void main() {
         'receipt_images',
         'catalog_seed_entries',
       });
-      expect(await db.getVersion(), 3);
+      expect(await db.getVersion(), 4);
       expect(
         (await db.rawQuery('PRAGMA foreign_keys')).single.values.single,
         1,
@@ -327,7 +329,9 @@ void main() {
         'product_aliases',
       ]) {
         for (final row in await db.query(table)) {
-          final values = Map<String, Object?>.of(row)..remove('source_page');
+          final values = Map<String, Object?>.of(row)
+            ..remove('source_page')
+            ..remove('name_only');
           await legacy.insert(table, values);
         }
       }
@@ -360,6 +364,75 @@ void main() {
   );
 
   test(
+    'version 3 upgrade preserves product IDs, aliases, history and foreign keys',
+    () async {
+      final saved = await adapter.saveConfirmedReceipt(
+        await draft(operation: 'v3-history'),
+      );
+      final legacyPath = p.join(root.path, 'version3.sqlite');
+      final legacy = await databaseFactoryFfi.openDatabase(
+        legacyPath,
+        options: OpenDatabaseOptions(
+          version: 3,
+          onCreate: (connection, _) async {
+            for (final sql in [
+              ...initialSchema,
+              ...receiptPagesSchema,
+              ...starterCatalogSchema,
+            ]) {
+              await connection.execute(sql);
+            }
+          },
+        ),
+      );
+      for (final table in [
+        'store_profiles',
+        'products',
+        'suppliers',
+        'receipts',
+        'purchase_lines',
+        'product_aliases',
+        'receipt_images',
+        'catalog_seed_entries',
+      ]) {
+        for (final row in await db.query(table)) {
+          await legacy.insert(
+            table,
+            Map<String, Object?>.of(row)..remove('name_only'),
+          );
+        }
+      }
+      await legacy.close();
+      final upgraded = await SqliteReseeboDataAdapter.open(
+        databaseFactory: databaseFactoryFfi,
+        databasePath: legacyPath,
+        mediaDirectory: media,
+        ocrService: FakeOcr(),
+        starterProducts: const [],
+      );
+      try {
+        final connection = await databaseFactoryFfi.openDatabase(legacyPath);
+        expect(await connection.getVersion(), 4);
+        expect(await connection.rawQuery('PRAGMA foreign_key_check'), isEmpty);
+        expect(
+          (await connection.rawQuery(
+            'PRAGMA foreign_keys',
+          )).single.values.single,
+          1,
+        );
+        expect((await upgraded.getProductById('coffee'))!.nameOnly, isFalse);
+        expect(
+          (await upgraded.getReceipt(saved.receiptId)).lines.single.productId,
+          'coffee',
+        );
+        expect(await upgraded.getAliases('coffee'), hasLength(1));
+      } finally {
+        await upgraded.close();
+      }
+    },
+  );
+
+  test(
     'version 2 upgrade adds starter catalog while preserving owner records',
     () async {
       await adapter.updateStoreProfile(
@@ -381,7 +454,7 @@ void main() {
         ocrService: FakeOcr(),
       );
       db = await databaseFactoryFfi.openDatabase(databasePath);
-      expect(await db.getVersion(), 3);
+      expect(await db.getVersion(), 4);
       expect((await adapter.getProducts()).length, greaterThan(200));
       expect((await adapter.getStoreProfile()).name, 'My existing shop');
       expect((await adapter.getStoreProfile()).defaultMarkupPercent, 17);
@@ -467,7 +540,7 @@ void main() {
         (input) => input.dateConfirmed = false,
         (input) => input.supplierName = '',
         (input) => input.lines.single.confirmed = false,
-        (input) => input.lines.single.productId = null,
+        (input) => input.lines.single.description = '',
         (input) => input.lines.single.quantity = 0,
         (input) => input.lines.single.unit = null,
         (input) => input.lines.single.piecesPerPack = null,
@@ -501,6 +574,89 @@ void main() {
       );
       expect(await count('suppliers'), 0);
       expect(await persistentFiles(), isEmpty);
+    },
+  );
+
+  test(
+    'unmatched names create photo-free products atomically and retries reuse them',
+    () async {
+      final input = await draft(
+        operation: 'name-only',
+        description: 'Coffee 26g',
+      );
+      input.lines.single.productId = null;
+      final repeated = input.snapshot().lines.single;
+      repeated.description = ' coffee 26g ';
+      input.lines.add(repeated);
+      final before = await count('products');
+      final result = await adapter.saveConfirmedReceipt(input);
+      expect(input.lines.every((line) => line.productId == null), isTrue);
+      expect(await count('products'), before + 1);
+      final rows = await db.query('products', where: 'name_only = 1');
+      final id = rows.single['id'] as String;
+      final product = (await adapter.getProductById(id))!;
+      expect(product.name, 'Coffee 26g');
+      expect(product.displayTitle, 'Coffee 26g');
+      expect(product.nameOnly, isTrue);
+      expect(product.brand, isEmpty);
+      expect(product.variant, isEmpty);
+      expect(product.size, isEmpty);
+      expect(product.photoPath, isNull);
+      final lines = await db.query(
+        'purchase_lines',
+        where: 'receipt_id = ?',
+        whereArgs: [result.receiptId],
+      );
+      expect(lines.every((line) => line['product_id'] == id), isTrue);
+      await adapter.close();
+      adapter = await openAdapter();
+      db = await databaseFactoryFfi.openDatabase(databasePath);
+      final retry = await adapter.saveConfirmedReceipt(input);
+      expect(retry.alreadySaved, isTrue);
+      expect(retry.receiptId, result.receiptId);
+      expect(await count('products'), before + 1);
+      final photo = File(p.join(root.path, 'product-photo.jpg'));
+      await photo.writeAsString('product photo bytes');
+      await adapter.saveProduct(product.copyWith(photoPath: photo.path));
+      expect((await adapter.getProductById(id))!.photoPath, isNotNull);
+      await adapter.saveProduct(
+        product.copyWith(
+          nameOnly: false,
+          brand: 'Coffee Brand',
+          variant: 'Original',
+          size: '26g',
+        ),
+      );
+      expect((await adapter.getProductById(id))!.nameOnly, isFalse);
+      await expectLater(
+        adapter.saveProduct(product.copyWith(nameOnly: true)),
+        throwsA(isA<ValidationException>()),
+      );
+      expect((await db.query('purchase_lines')).length, lines.length);
+    },
+  );
+
+  test(
+    'late receipt failure rolls back imported products and original copies',
+    () async {
+      final before = await count('products');
+      await db.execute(
+        "CREATE TRIGGER fail_import BEFORE INSERT ON purchase_lines BEGIN SELECT RAISE(ABORT, 'test save failure'); END",
+      );
+      final input = await draft(
+        operation: 'rollback-name',
+        description: 'New grocery',
+      );
+      input.lines.single.productId = null;
+      await expectLater(
+        adapter.saveConfirmedReceipt(input),
+        throwsA(isA<DatabaseException>()),
+      );
+      expect(await count('products'), before);
+      expect(await count('receipts'), 0);
+      expect(await count('suppliers'), 0);
+      expect(await persistentFiles(), isEmpty);
+      expect(await db.rawQuery('PRAGMA foreign_key_check'), isEmpty);
     },
   );
 

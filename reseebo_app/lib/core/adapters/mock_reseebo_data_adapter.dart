@@ -1,4 +1,6 @@
 import 'dart:math';
+import 'package:uuid/uuid.dart';
+import '../services/receipt_validator.dart';
 import '../services/latest_product_cost_service.dart';
 import '../services/pricing_service.dart';
 import 'i_reseebo_data_adapter.dart';
@@ -169,7 +171,8 @@ class MockReseeboDataAdapter implements IReseeboDataAdapter {
 
   @override
   Future<List<ProductMatchSuggestion>> matchAliases(
-      String rawOcrDescription) async {
+    String rawOcrDescription,
+  ) async {
     final desc = rawOcrDescription.toLowerCase();
     final suggestions = <ProductMatchSuggestion>[];
 
@@ -224,11 +227,18 @@ class MockReseeboDataAdapter implements IReseeboDataAdapter {
   }
 
   @override
-  Future<List<Receipt>> getRecentReceipts({int limit = 200, String? query}) async {
+  Future<List<Receipt>> getRecentReceipts({
+    int limit = 200,
+    String? query,
+  }) async {
     var sorted = List<Receipt>.from(_receipts)
       ..sort((a, b) => b.purchasedAt.compareTo(a.purchasedAt));
     if (query != null && query.isNotEmpty) {
-      sorted = sorted.where((r) => r.supplierName.toLowerCase().contains(query.toLowerCase())).toList();
+      sorted = sorted
+          .where(
+            (r) => r.supplierName.toLowerCase().contains(query.toLowerCase()),
+          )
+          .toList();
     }
     return sorted.take(limit).toList();
   }
@@ -281,7 +291,33 @@ class MockReseeboDataAdapter implements IReseeboDataAdapter {
 
   @override
   Future<SaveReceiptResult> saveConfirmedReceipt(
-      ReceiptDraft confirmedDraft) async {
+    ReceiptDraft confirmedDraft,
+  ) async {
+    confirmedDraft = confirmedDraft.snapshot();
+    ReceiptValidator.validate(confirmedDraft);
+    final imported = <String, String>{};
+    for (final line in confirmedDraft.lines) {
+      if (line.productId != null) continue;
+      final key = line.description.trim().toLowerCase().replaceAll(
+        RegExp(r'\s+'),
+        ' ',
+      );
+      final id = imported.putIfAbsent(key, () {
+        final id = const Uuid().v4();
+        _products.add(
+          Product(
+            id: id,
+            name: line.description.trim(),
+            brand: '',
+            variant: '',
+            size: '',
+            nameOnly: true,
+          ),
+        );
+        return id;
+      });
+      line.productId = id;
+    }
     final newId = 'rec_${DateTime.now().millisecondsSinceEpoch}';
     final supplier = _suppliers.firstWhere(
       (s) => s.id == (confirmedDraft.supplierId ?? 'sup_a'),
@@ -296,8 +332,12 @@ class MockReseeboDataAdapter implements IReseeboDataAdapter {
       imagePath: confirmedDraft.imagePath,
       receiptNumber: confirmedDraft.receiptNumber,
       notes: confirmedDraft.notes,
-      totalCents: confirmedDraft.detectedTotalCents ??
-          confirmedDraft.lines.fold<int>(0, (sum, l) => sum + (l.netAmountCents ?? 0)),
+      totalCents:
+          confirmedDraft.detectedTotalCents ??
+          confirmedDraft.lines.fold<int>(
+            0,
+            (sum, l) => sum + (l.netAmountCents ?? 0),
+          ),
       lineCount: confirmedDraft.lines.length,
     );
     _receipts.insert(0, receipt);
@@ -305,7 +345,9 @@ class MockReseeboDataAdapter implements IReseeboDataAdapter {
     return SaveReceiptResult(
       receiptId: newId,
       lineIds: confirmedDraft.lines.map((l) => l.id).toList(),
-      unitCostsCents: confirmedDraft.lines.map((l) => l.costPerPieceCents ?? 0.0).toList(),
+      unitCostsCents: confirmedDraft.lines
+          .map((l) => l.costPerPieceCents ?? 0.0)
+          .toList(),
       alreadySaved: false,
     );
   }
@@ -382,18 +424,9 @@ class MockReseeboDataAdapter implements IReseeboDataAdapter {
       product: product,
       profile: _profile,
       latestPrices: [
-        SupplierPriceRow(
-          purchase: pWholesaler,
-          bestCostPerPieceCents: 820.0,
-        ),
-        SupplierPriceRow(
-          purchase: pPuregold,
-          bestCostPerPieceCents: 820.0,
-        ),
-        SupplierPriceRow(
-          purchase: pMegamart,
-          bestCostPerPieceCents: 820.0,
-        ),
+        SupplierPriceRow(purchase: pWholesaler, bestCostPerPieceCents: 820.0),
+        SupplierPriceRow(purchase: pPuregold, bestCostPerPieceCents: 820.0),
+        SupplierPriceRow(purchase: pMegamart, bestCostPerPieceCents: 820.0),
       ],
       history: [
         PriceHistoryRecord(
@@ -431,7 +464,8 @@ class MockReseeboDataAdapter implements IReseeboDataAdapter {
       return PricingService.estimatePurchase(
         row.purchase,
         targetPieces,
-        additionalCostCents: additionalCostsCents[row.purchase.supplier.id] ?? additionalCents,
+        additionalCostCents:
+            additionalCostsCents[row.purchase.supplier.id] ?? additionalCents,
       );
     }).toList();
 

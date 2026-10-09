@@ -301,7 +301,7 @@ class _ReviewMatchScreenState extends State<ReviewMatchScreen> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         const Text(
-                          'A few details need checking',
+                          'Please check',
                           style: TextStyle(fontWeight: FontWeight.w600),
                         ),
                         for (final warning in draft.warnings)
@@ -351,6 +351,13 @@ class _ReviewMatchScreenState extends State<ReviewMatchScreen> {
                     style: const TextStyle(color: AppColors.textSecondary),
                   ),
                 ),
+                const Padding(
+                  padding: EdgeInsets.only(bottom: 16),
+                  child: Text(
+                    'Unmatched items are added to your catalog when saved.',
+                    style: TextStyle(color: AppColors.textSecondary),
+                  ),
+                ),
                 if (draft.lines.isEmpty)
                   const AppCard(
                     child: Column(
@@ -389,9 +396,7 @@ class _ReviewMatchScreenState extends State<ReviewMatchScreen> {
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              if (!_review.loading &&
-                  _review.problem != null &&
-                  !_review.problem!.endsWith('Select a product.'))
+              if (!_review.loading && _review.problem != null)
                 Padding(
                   padding: const EdgeInsets.only(bottom: 8),
                   child: Text(

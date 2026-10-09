@@ -118,7 +118,7 @@ class _LineItemEditorRowState extends State<LineItemEditorRow> {
                   ? 'Number of packs'
                   : 'Number of pieces')
             : field == ReceiptLineField.description
-            ? 'Receipt details'
+            ? 'Product name'
             : amount
             ? 'Cost (₱)'
             : field.label,
@@ -194,7 +194,7 @@ class _LineItemEditorRowState extends State<LineItemEditorRow> {
                           ],
                           Text(
                             widget.matchedProduct?.displayTitle ??
-                                'Match exact product',
+                                'Match exact product (optional)',
                             style: const TextStyle(fontWeight: FontWeight.w600),
                           ),
                         ],
@@ -245,7 +245,7 @@ class _LineItemEditorRowState extends State<LineItemEditorRow> {
               const SizedBox(height: 12),
               _field(ReceiptLineField.piecesPerPack),
             ],
-            if (widget.problem != null && widget.problem != 'Select a product.')
+            if (widget.problem != null)
               Padding(
                 padding: const EdgeInsets.symmetric(vertical: 8),
                 child: Text(
@@ -254,7 +254,6 @@ class _LineItemEditorRowState extends State<LineItemEditorRow> {
                 ),
               ),
             if (line.confirmed &&
-                widget.matchedProduct != null &&
                 widget.problem == null &&
                 line.costPerPieceCents != null)
               Padding(
