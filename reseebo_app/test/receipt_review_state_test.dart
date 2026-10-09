@@ -115,7 +115,7 @@ void main() {
     expect(state.draft.allowDuplicate, isFalse);
     state.dispose();
   });
-  test('multiple amounts and tax suffixes require manual correction', () {
+  test('invalid manual amounts clear stale values and confirmation', () {
     final state = ReceiptReviewState(
       adapter: MockReseeboDataAdapter(),
       draft: ReceiptDraft(
@@ -131,16 +131,15 @@ void main() {
       ),
     );
     final line = state.draft.lines.single;
-    state.selectTarget(line.id, ReceiptLineField.amount);
     for (final text in ['84.00 168.00', '168.00V', '168.OO', '-168.00']) {
-      expect(state.assignText(text), isNotNull, reason: text);
-      expect(line.grossAmountCents, 16800);
-      expect(line.confirmed, isTrue);
+      state.editText(line, ReceiptLineField.amount, text);
+      expect(line.grossAmountCents, isNull, reason: text);
+      expect(line.confirmed, isFalse);
     }
     state.dispose();
   });
   test(
-    'page switching clears token selection and keeps recognition provenance',
+    'page switching retains read-only original and recognition provenance',
     () {
       final state = ReceiptReviewState(
         adapter: MockReseeboDataAdapter(),
@@ -171,26 +170,24 @@ void main() {
           lines: [ParsedLineItem(description: 'Coffee', sourcePage: 1)],
         ),
       );
-      state.selectTarget(
-        state.draft.lines.single.id,
-        ReceiptLineField.quantity,
-      );
+      state.selectPage(1);
       expect(state.selectedPage, 1);
+      expect(state.pages[state.selectedPage].imagePath, 'original-b');
       expect(state.pages[state.selectedPage].recognitionImagePath, 'rotated-b');
-      state.toggleToken(0);
-      expect(state.selectedText, '10');
       state.selectPage(0);
-      expect(state.selectedText, isEmpty);
+      expect(state.pages[state.selectedPage].imagePath, 'original-a');
       expect(state.pages[state.selectedPage].recognitionImagePath, 'cropped-a');
-      state.toggleToken(0);
-      expect(state.assignText(state.selectedText), isNull);
-      expect(state.draft.lines.single.quantity, 2);
+      expect(
+        state.pages[state.selectedPage].textLines.single.tokens.single.text,
+        '2',
+      );
+      expect(state.draft.lines.single.quantity, isNull);
       state.dispose();
     },
   );
 
   test(
-    'description assignment removes stale product identity and confirmation',
+    'manual description edits remove stale product identity and confirmation',
     () {
       final state = ReceiptReviewState(
         adapter: MockReseeboDataAdapter(),
@@ -205,8 +202,11 @@ void main() {
         ),
       );
       final line = state.draft.lines.single;
-      state.selectTarget(line.id, ReceiptLineField.description);
-      expect(state.assignText('Brand X Original 26g'), isNull);
+      state.editText(
+        line,
+        ReceiptLineField.description,
+        'Brand X Original 26g',
+      );
       expect(line.description, 'Brand X Original 26g');
       expect(line.productId, isNull);
       expect(line.confirmed, isFalse);
@@ -236,27 +236,21 @@ void main() {
     state.dispose();
   });
 
-  test(
-    'removing the assignment target clears it and leaves other rows intact',
-    () {
-      final state = ReceiptReviewState(
-        adapter: MockReseeboDataAdapter(),
-        draft: ReceiptDraft(
-          lines: [
-            ParsedLineItem(description: 'Coffee', quantity: 2),
-            ParsedLineItem(description: 'Milk', quantity: 12),
-          ],
-        ),
-      );
-      final removed = state.draft.lines.first;
-      state.selectTarget(removed.id, ReceiptLineField.quantity);
-      state.removeLine(removed);
-      expect(state.targetLineId, isNull);
-      expect(state.assignText('8'), isNotNull);
-      expect(state.draft.lines.single.quantity, 12);
-      state.dispose();
-    },
-  );
+  test('removing a line leaves unrelated rows intact', () {
+    final state = ReceiptReviewState(
+      adapter: MockReseeboDataAdapter(),
+      draft: ReceiptDraft(
+        lines: [
+          ParsedLineItem(description: 'Coffee', quantity: 2),
+          ParsedLineItem(description: 'Milk', quantity: 12),
+        ],
+      ),
+    );
+    final removed = state.draft.lines.first;
+    state.removeLine(removed);
+    expect(state.draft.lines.single.quantity, 12);
+    state.dispose();
+  });
   test('invalid purchase cannot be confirmed', () {
     final state = ReceiptReviewState(
       adapter: MockReseeboDataAdapter(),
@@ -267,7 +261,7 @@ void main() {
     state.dispose();
   });
 
-  test('assignment clears confirmation and total acknowledgement', () {
+  test('manual amount edit clears confirmation and total acknowledgement', () {
     final source = ParsedLineItem(
       description: 'Coffee',
       quantity: 2,
@@ -281,8 +275,7 @@ void main() {
       draft: ReceiptDraft(lines: [source], totalDifferenceConfirmed: true),
     );
     final line = state.draft.lines.single;
-    state.selectTarget(line.id, ReceiptLineField.amount);
-    expect(state.assignText('168.00'), isNull);
+    state.editText(line, ReceiptLineField.amount, '168.00');
     expect(line.grossAmountCents, 16800);
     expect(line.confirmed, isFalse);
     expect(state.draft.totalDifferenceConfirmed, isFalse);
@@ -290,7 +283,7 @@ void main() {
     state.dispose();
   });
 
-  test('ambiguous quantity leaves existing value and confirmation intact', () {
+  test('ambiguous manual quantities clear stale values and confirmation', () {
     final state = ReceiptReviewState(
       adapter: MockReseeboDataAdapter(),
       draft: ReceiptDraft(
@@ -306,11 +299,10 @@ void main() {
       ),
     );
     final line = state.draft.lines.single;
-    state.selectTarget(line.id, ReceiptLineField.quantity);
     for (final text in ['2 10', '2.5', 'O2', '2 pcs', '0', '1000001']) {
-      expect(state.assignText(text), isNotNull, reason: text);
-      expect(line.quantity, 2);
-      expect(line.confirmed, isTrue);
+      state.editText(line, ReceiptLineField.quantity, text);
+      expect(line.quantity, isNull, reason: text);
+      expect(line.confirmed, isFalse);
     }
     state.dispose();
   });

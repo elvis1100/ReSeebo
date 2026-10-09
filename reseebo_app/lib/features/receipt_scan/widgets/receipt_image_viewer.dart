@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:io';
 import 'dart:ui' as ui;
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import '../../../core/models/models.dart';
@@ -26,6 +27,10 @@ class ReceiptImageViewer extends StatefulWidget {
   final bool isEnhanced;
   final Widget? topOverlay;
 
+  /// In the capture list one finger scrolls the page; two fingers zoom/pan.
+  /// Full-screen and text-selection viewers keep normal image gestures.
+  final bool scrollPageWithOneFinger;
+
   /// Reports raw touch ownership so a surrounding scroll view can suspend
   /// its drag recognizer before it competes with a staggered two-finger pinch.
   final ValueChanged<bool>? onInteractionActiveChanged;
@@ -42,6 +47,7 @@ class ReceiptImageViewer extends StatefulWidget {
     this.displayCacheWidth,
     this.isEnhanced = false,
     this.topOverlay,
+    this.scrollPageWithOneFinger = false,
     this.onInteractionActiveChanged,
   });
 
@@ -56,6 +62,83 @@ class _ReceiptImageViewerState extends State<ReceiptImageViewer> {
   Size? _imageSize;
   int _imageGeneration = 0;
   final Set<int> _activePointers = {};
+  double _lastGestureScale = 1;
+  int _lastPointerCount = 0;
+  bool _pinched = false;
+  Drag? _pageDrag;
+
+  void _captureGestureStart(ScaleStartDetails details) {
+    _lastGestureScale = 1;
+    _lastPointerCount = details.pointerCount;
+    _pinched = details.pointerCount > 1;
+    if (!_pinched) {
+      _pageDrag = Scrollable.maybeOf(context)?.position.drag(
+        DragStartDetails(globalPosition: details.focalPoint),
+        () => _pageDrag = null,
+      );
+    }
+  }
+
+  void _captureGestureUpdate(ScaleUpdateDetails details, Size viewport) {
+    if (details.pointerCount > 1) {
+      _pinched = true;
+      _pageDrag?.cancel();
+      _pageDrag = null;
+      if (_lastPointerCount != details.pointerCount) {
+        _lastGestureScale = details.scale;
+        _lastPointerCount = details.pointerCount;
+        return;
+      }
+      final current = _transformController.value;
+      final currentScale = current.getMaxScaleOnAxis();
+      final nextScale = (currentScale * details.scale / _lastGestureScale)
+          .clamp(1.0, 4.5);
+      final factor = nextScale / currentScale;
+      final focal = details.localFocalPoint;
+      final previous = focal - details.focalPointDelta;
+      final next =
+          Matrix4.translationValues(focal.dx, focal.dy, 0) *
+          Matrix4.diagonal3Values(factor, factor, 1) *
+          Matrix4.translationValues(-previous.dx, -previous.dy, 0) *
+          current;
+      next.setEntry(
+        0,
+        3,
+        next.entry(0, 3).clamp(viewport.width * (1 - nextScale), 0.0),
+      );
+      next.setEntry(
+        1,
+        3,
+        next.entry(1, 3).clamp(viewport.height * (1 - nextScale), 0.0),
+      );
+      _transformController.value = next;
+    } else if (!_pinched) {
+      _pageDrag?.update(
+        DragUpdateDetails(
+          globalPosition: details.focalPoint,
+          delta: Offset(0, details.focalPointDelta.dy),
+          primaryDelta: details.focalPointDelta.dy,
+        ),
+      );
+    }
+    _lastGestureScale = details.scale;
+    _lastPointerCount = details.pointerCount;
+  }
+
+  void _captureGestureEnd(ScaleEndDetails details) {
+    _pageDrag?.end(
+      DragEndDetails(
+        velocity: Velocity(
+          pixelsPerSecond: Offset(0, details.velocity.pixelsPerSecond.dy),
+        ),
+        primaryVelocity: details.velocity.pixelsPerSecond.dy,
+      ),
+    );
+    _pageDrag = null;
+    _lastPointerCount = 0;
+    _lastGestureScale = 1;
+    _pinched = false;
+  }
 
   void _pointerDown(PointerDownEvent event) {
     if (_activePointers.add(event.pointer) && _activePointers.length == 1) {
@@ -118,6 +201,7 @@ class _ReceiptImageViewerState extends State<ReceiptImageViewer> {
 
   @override
   void dispose() {
+    _pageDrag?.cancel();
     if (_activePointers.isNotEmpty) {
       final release = widget.onInteractionActiveChanged;
       // A keyed image can be replaced during a rebuild. Release the parent's
@@ -147,82 +231,93 @@ class _ReceiptImageViewerState extends State<ReceiptImageViewer> {
               onPointerUp: _pointerEnd,
               onPointerCancel: _pointerEnd,
               child: LayoutBuilder(
-                builder: (context, constraints) => InteractiveViewer(
-                  transformationController: _transformController,
-                  minScale: 1.0,
-                  maxScale: 4.5,
-                  child: SizedBox.fromSize(
-                    size: constraints.biggest,
-                    child: Stack(
-                      fit: StackFit.expand,
-                      children: [
-                        ColorFiltered(
-                          colorFilter: _highContrast
-                              ? const ColorFilter.matrix(<double>[
-                                  1.8, 0, 0, 0, -50, // R
-                                  0, 1.8, 0, 0, -50, // G
-                                  0, 0, 1.8, 0, -50, // B
-                                  0, 0, 0, 1, 0, // A
-                                ])
-                              : const ColorFilter.mode(
-                                  Colors.transparent,
-                                  BlendMode.dst,
-                                ),
-                          child: _buildImageWidget(),
-                        ),
-                        if (_imageSize != null &&
-                            widget.onTokenSelected != null)
-                          ...widget.tokens.indexed
-                              .where(
-                                (entry) =>
-                                    entry.$2.width > 0 && entry.$2.height > 0,
-                              )
-                              .map((entry) {
-                                final token = entry.$2;
-                                final selected = widget.selectedTokens.contains(
-                                  entry.$1,
-                                );
-                                return Positioned.fromRect(
-                                  rect: fitReceiptBounds(
-                                    Rect.fromLTWH(
-                                      token.left,
-                                      token.top,
-                                      token.width,
-                                      token.height,
-                                    ),
-                                    imageSize: _imageSize!,
-                                    viewport: constraints.biggest,
+                builder: (context, constraints) {
+                  final image = InteractiveViewer(
+                    transformationController: _transformController,
+                    minScale: 1.0,
+                    maxScale: 4.5,
+                    child: SizedBox.fromSize(
+                      size: constraints.biggest,
+                      child: Stack(
+                        fit: StackFit.expand,
+                        children: [
+                          ColorFiltered(
+                            colorFilter: _highContrast
+                                ? const ColorFilter.matrix(<double>[
+                                    1.8, 0, 0, 0, -50, // R
+                                    0, 1.8, 0, 0, -50, // G
+                                    0, 0, 1.8, 0, -50, // B
+                                    0, 0, 0, 1, 0, // A
+                                  ])
+                                : const ColorFilter.mode(
+                                    Colors.transparent,
+                                    BlendMode.dst,
                                   ),
-                                  child: Semantics(
-                                    button: true,
-                                    selected: selected,
-                                    label: 'Select receipt text ${token.text}',
-                                    child: GestureDetector(
-                                      behavior: HitTestBehavior.opaque,
-                                      onTap: () =>
-                                          widget.onTokenSelected!(entry.$1),
-                                      child: Container(
-                                        decoration: BoxDecoration(
-                                          color: selected
-                                              ? AppColors.primaryLight
-                                                    .withValues(alpha: 0.25)
-                                              : Colors.transparent,
-                                          border: Border.all(
+                            child: _buildImageWidget(),
+                          ),
+                          if (_imageSize != null &&
+                              widget.onTokenSelected != null)
+                            ...widget.tokens.indexed
+                                .where(
+                                  (entry) =>
+                                      entry.$2.width > 0 && entry.$2.height > 0,
+                                )
+                                .map((entry) {
+                                  final token = entry.$2;
+                                  final selected = widget.selectedTokens
+                                      .contains(entry.$1);
+                                  return Positioned.fromRect(
+                                    rect: fitReceiptBounds(
+                                      Rect.fromLTWH(
+                                        token.left,
+                                        token.top,
+                                        token.width,
+                                        token.height,
+                                      ),
+                                      imageSize: _imageSize!,
+                                      viewport: constraints.biggest,
+                                    ),
+                                    child: Semantics(
+                                      button: true,
+                                      selected: selected,
+                                      label:
+                                          'Select receipt text ${token.text}',
+                                      child: GestureDetector(
+                                        behavior: HitTestBehavior.opaque,
+                                        onTap: () =>
+                                            widget.onTokenSelected!(entry.$1),
+                                        child: Container(
+                                          decoration: BoxDecoration(
                                             color: selected
                                                 ? AppColors.primaryLight
-                                                : AppColors.info,
-                                            width: selected ? 2 : 1,
+                                                      .withValues(alpha: 0.25)
+                                                : Colors.transparent,
+                                            border: Border.all(
+                                              color: selected
+                                                  ? AppColors.primaryLight
+                                                  : AppColors.info,
+                                              width: selected ? 2 : 1,
+                                            ),
                                           ),
                                         ),
                                       ),
                                     ),
-                                  ),
-                                );
-                              }),
-                      ],
+                                  );
+                                }),
+                        ],
+                      ),
                     ),
-                  ),
-                ),
+                  );
+                  if (!widget.scrollPageWithOneFinger) return image;
+                  return GestureDetector(
+                    behavior: HitTestBehavior.opaque,
+                    onScaleStart: _captureGestureStart,
+                    onScaleUpdate: (details) =>
+                        _captureGestureUpdate(details, constraints.biggest),
+                    onScaleEnd: _captureGestureEnd,
+                    child: IgnorePointer(child: image),
+                  );
+                },
               ),
             ),
           ),

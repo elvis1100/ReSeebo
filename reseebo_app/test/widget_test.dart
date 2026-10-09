@@ -3,6 +3,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:reseebo_app/core/widgets/store_header.dart';
+import 'package:reseebo_app/core/widgets/reseebo_bottom_navigation.dart';
+import 'package:reseebo_app/features/receipt_scan/screens/capture_screen.dart';
+import 'package:reseebo_app/features/profile/screens/profile_screen.dart';
 import 'package:reseebo_app/main.dart';
 import 'package:reseebo_app/core/adapters/mock_reseebo_data_adapter.dart';
 import 'package:reseebo_app/core/models/models.dart';
@@ -46,14 +49,8 @@ void main() {
     expect(find.text('Scan Receipt'), findsOneWidget);
     expect(find.text('Home'), findsOneWidget);
     expect(find.text('Settings'), findsOneWidget);
-    expect(find.byType(FloatingActionButton), findsOneWidget);
-    expect(
-      find.descendant(
-        of: find.byType(FloatingActionButton),
-        matching: find.text('Scan Receipt'),
-      ),
-      findsOneWidget,
-    );
+    expect(find.byType(FloatingActionButton), findsNothing);
+    expect(find.byKey(const ValueKey('bottom-scan-action')), findsOneWidget);
     final headerText = tester
         .widgetList<Text>(
           find.descendant(
@@ -63,7 +60,7 @@ void main() {
         )
         .map((text) => text.data);
     expect(headerText, ['Reseebo']);
-    expect(find.byTooltip('Refresh data'), findsOneWidget);
+    expect(find.byTooltip('Refresh data'), findsNothing);
     expect(find.byTooltip('Add product').hitTestable(), findsNothing);
     await tester.tap(find.text('Products (4)'));
     await tester.pumpAndSettle();
@@ -84,7 +81,7 @@ void main() {
           .map((text) => text.data),
       ['Reseebo'],
     );
-    expect(find.byTooltip('Refresh settings'), findsOneWidget);
+    expect(find.byTooltip('Refresh settings'), findsNothing);
   });
   testWidgets(
     'saving settings preserves an existing hidden logo and zero markup',
@@ -111,7 +108,16 @@ void main() {
         ),
         'Updated store',
       );
-      await tester.ensureVisible(find.text('Save settings'));
+      await tester.testTextInput.receiveAction(TextInputAction.done);
+      await tester.pumpAndSettle();
+      await tester.drag(
+        find.descendant(
+          of: find.byType(ProfileScreen),
+          matching: find.byType(ListView),
+        ),
+        const Offset(0, -250),
+      );
+      await tester.pumpAndSettle();
       await tester.tap(find.text('Save settings'));
       await tester.pumpAndSettle();
       final saved = await adapter.getStoreProfile();
@@ -175,7 +181,10 @@ void main() {
         painter.dispose();
       }
       expect(find.text('Add').hitTestable(), findsOneWidget);
-      await tester.tap(find.byTooltip('Refresh data'));
+      await tester.drag(
+        find.byKey(const PageStorageKey('dashboard-products-list')),
+        const Offset(0, 450),
+      );
       await tester.pumpAndSettle();
       expect(find.byTooltip('Add product').hitTestable(), findsOneWidget);
       await tester.tap(find.text('Recent Receipts (4)'));
@@ -264,4 +273,98 @@ void main() {
       await tester.pumpAndSettle();
     },
   );
+  testWidgets(
+    'raised center Scan opens capture and preserves selected Settings',
+    (tester) async {
+      tester.platformDispatcher.textScaleFactorTestValue = 1.5;
+      addTearDown(tester.platformDispatcher.clearTextScaleFactorTestValue);
+      tester.view.physicalSize = const Size(360, 800);
+      tester.view.devicePixelRatio = 1;
+      addTearDown(tester.view.resetPhysicalSize);
+      addTearDown(tester.view.resetDevicePixelRatio);
+      await tester.pumpWidget(const ReseeboApp());
+      await tester.pumpAndSettle();
+      final scan = tester.getRect(
+        find.byKey(const ValueKey('bottom-scan-action')),
+      );
+      expect(scan.center.dx, 180);
+      expect(scan.width, 60);
+      final homeIcon = tester.getRect(find.byIcon(Icons.storefront_rounded));
+      final settingsIcon = tester.getRect(find.byIcon(Icons.settings_outlined));
+      expect(scan.top, lessThan(homeIcon.top));
+      expect(scan.top, lessThan(settingsIcon.top));
+      expect(find.text('Scan Receipt').hitTestable(), findsOneWidget);
+      expect(tester.takeException(), isNull);
+      await tester.tap(find.text('Settings'));
+      await tester.pumpAndSettle();
+      expect(
+        tester
+            .widget<ReseeboBottomNavigation>(
+              find.byType(ReseeboBottomNavigation),
+            )
+            .selectedIndex,
+        1,
+      );
+      final before = tester
+          .widget<TextField>(
+            find.byWidgetPredicate(
+              (widget) =>
+                  widget is TextField &&
+                  widget.decoration?.labelText == 'Store name',
+            ),
+          )
+          .controller!
+          .text;
+      await tester.tap(find.text('Scan Receipt'));
+      await tester.pumpAndSettle();
+      expect(find.byType(CaptureScreen), findsOneWidget);
+      expect(find.byType(ReseeboBottomNavigation), findsNothing);
+      await tester.tap(find.byIcon(Icons.arrow_back_rounded));
+      await tester.pumpAndSettle();
+      expect(
+        tester
+            .widget<ReseeboBottomNavigation>(
+              find.byType(ReseeboBottomNavigation),
+            )
+            .selectedIndex,
+        1,
+      );
+      expect(
+        tester
+            .widget<TextField>(
+              find.byWidgetPredicate(
+                (widget) =>
+                    widget is TextField &&
+                    widget.decoration?.labelText == 'Store name',
+              ),
+            )
+            .controller!
+            .text,
+        before,
+      );
+      expect(tester.takeException(), isNull);
+    },
+  );
+  testWidgets('Scan label and circle each invoke the action once', (
+    tester,
+  ) async {
+    var scans = 0;
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          bottomNavigationBar: ReseeboBottomNavigation(
+            selectedIndex: 0,
+            onTabSelected: (_) {},
+            onScan: () => scans++,
+          ),
+        ),
+      ),
+    );
+    await tester.tap(find.text('Scan Receipt'));
+    await tester.pumpAndSettle();
+    expect(scans, 1);
+    await tester.tap(find.byKey(const ValueKey('bottom-scan-action')));
+    await tester.pumpAndSettle();
+    expect(scans, 2);
+  });
 }

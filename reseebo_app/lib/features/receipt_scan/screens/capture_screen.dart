@@ -29,13 +29,6 @@ class CaptureScreen extends StatefulWidget {
 
 class _CaptureScreenState extends State<CaptureScreen> {
   late final CaptureState _state;
-  bool _photoInteracting = false;
-
-  void _onPhotoInteraction(bool active) {
-    if (mounted && _photoInteracting != active) {
-      setState(() => _photoInteracting = active);
-    }
-  }
 
   @override
   void initState() {
@@ -75,7 +68,7 @@ class _CaptureScreenState extends State<CaptureScreen> {
     animation: _state,
     builder: (context, _) {
       final hasPhotos = _state.pages.isNotEmpty;
-      final enabled = !_state.busy && !_photoInteracting;
+      final enabled = !_state.busy;
       return PopScope(
         canPop: enabled,
         child: Scaffold(
@@ -92,11 +85,6 @@ class _CaptureScreenState extends State<CaptureScreen> {
             absorbing: _state.busy,
             child: SafeArea(
               child: ListView(
-                // The photo owns touches until all fingers lift, keeping a
-                // first finger's vertical drift from scrolling the whole page.
-                physics: _photoInteracting
-                    ? const NeverScrollableScrollPhysics()
-                    : null,
                 padding: const EdgeInsets.all(AppSpacing.lg),
                 children: [
                   const ReceiptScanSteps(activeStep: 0),
@@ -186,10 +174,10 @@ class _CaptureScreenState extends State<CaptureScreen> {
                     ReceiptImageViewer(
                       key: ValueKey(_state.previewPath),
                       imagePath: _state.previewPath!,
+                      scrollPageWithOneFinger: true,
                       isEnhanced:
                           !_state.selectedPage!.useOriginal &&
                           _state.selectedPage!.preparedPath != null,
-                      onInteractionActiveChanged: _onPhotoInteraction,
                       showContrastControl: false,
                       displayCacheWidth: 1000,
                       imageLabel: _state.selectedPage!.useOriginal
@@ -223,7 +211,7 @@ class _CaptureScreenState extends State<CaptureScreen> {
                           icon: const Icon(Icons.delete_outline),
                           label: const Text('Remove photo'),
                           style: TextButton.styleFrom(
-                            foregroundColor: AppColors.priceIncrease,
+                            foregroundColor: AppColors.danger,
                           ),
                           onPressed: enabled ? _state.removeSelectedPage : null,
                         ),

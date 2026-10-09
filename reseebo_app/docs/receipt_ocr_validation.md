@@ -3,14 +3,15 @@
 The capture flow prepares local cache copies for bundled ML Kit recognition.
 The full-screen photo editor stages crop, right-angle rotation, small angle
 correction, contrast, and optional faded-text enhancement. Apply keeps changes;
-Cancel preserves the previous selection. Original/Enhanced chooses the image
-read by OCR, while original photos remain intact. Reading locks competing
+Cancel preserves the previous selection. New photos use enhancement by default;
+Compare reveals the original and enhanced versions through a draggable divider
+without changing the image selected for OCR. Original photos remain intact. Reading locks competing
 controls and back navigation. Small/blank/blurred inputs stop before
 OCR; the owner can explicitly continue or use manual entry. Quality measurements
 are conservative pixel heuristics and still need calibration on real phones.
 
-Review shows originals and the matching recognition image. Word bounds belong
-to the recognition image. Select a field, select words or one value, and apply it.
+Review shows original photos and read-only recognized text for reference.
+Fields are corrected directly; the copy-from-receipt controls are removed.
 Amounts represent the final amount paid for the complete purchase line, not the unit price. New reviews do not expose a discount deduction. Pieces default for unspecified units; the owner still confirms every item and changes to packs where appropriate. Product
 selection, quantity units, pack contents, dates and lines require confirmation.
 Relevant edits clear confirmation. Missing and conflicting readings remain
@@ -30,10 +31,13 @@ including source-inspired format cases. They are not captured ML Kit output and
 do not measure recognition accuracy. The suite also checks real SQLite atomic
 saves, original-image retention, duplicate handling and database reopening.
 
-On 9 October 2026, `flutter test --no-pub --reporter expanded --timeout 60s` passed all 170
+On 10 October 2026, `flutter test --no-pub --reporter expanded --timeout 60s` passed all 186
 local tests, and `flutter analyze --no-pub` reported no issues. The corpus
 contains 23 synthetic JSON fixtures. These results cover
-parser, image, review UI/state and SQLite behavior; they do not substitute for
+parser, image, review UI/state, SQLite behavior, raised Scan navigation, and
+pull-to-refresh. Photo tests use actual rendered before/after images to check
+the comparison divider and shared zoom, plus real-image gestures to verify
+one-finger page scrolling and two-finger photo zoom. They do not substitute for
 the native and physical-phone checks below.
 
 ## Native offline smoke test
@@ -84,13 +88,21 @@ The OCR check uses a generated-image native smoke test, not measured recognition
 
 ## Physical-phone acceptance
 
+On 10 October 2026, a fresh isolated offline photo-UI smoke test passed on the
+same Samsung phone. A generated faded receipt verified one-finger page
+scrolling, the original/enhanced comparison divider, visible white editor
+header controls, applying edits, and bundled OCR date/time and amount parsing.
+The original bytes stayed unchanged. Connectivity was restored afterward.
+Raised navigation and pull-to-refresh passed local widget tests; the combined
+native navigation attempt was interrupted and did not establish that result.
+
 1. Use a fresh test installation on Android 10+ with internet disabled before
    first launch. Preserve any existing owner's app data.
 2. Capture receipts from several suppliers, including faded prints, cropped or
    rotated images, long receipts split into photos, numeric product names,
    multiple prices, pack purchases and unclear dates.
-3. Check image-value alignment while zooming, page switching and using the
-   original-photo toggle. Correct fields, choose exact products, and confirm
+3. Compare original/enhanced previews, zoom and switch original receipt pages.
+   Correct fields directly, choose exact products, and confirm
    units, pack contents and amounts. Resolve overlaps and total differences.
 4. Save, close the app completely and reopen offline. Verify the receipt's
    original pages, purchase history, quantities, pack contents and costs remain.

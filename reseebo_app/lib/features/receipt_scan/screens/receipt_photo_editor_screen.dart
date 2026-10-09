@@ -6,6 +6,7 @@ import '../models/capture_page.dart';
 import '../state/receipt_photo_editor_state.dart';
 import '../widgets/crop_receipt_dialog.dart';
 import '../widgets/receipt_image_viewer.dart';
+import '../widgets/receipt_photo_comparison.dart';
 import '../widgets/straighten_receipt_dialog.dart';
 
 class ReceiptPhotoEditorScreen extends StatefulWidget {
@@ -27,6 +28,7 @@ class _ReceiptPhotoEditorScreenState extends State<ReceiptPhotoEditorScreen> {
   late final ReceiptPhotoEditorState _state;
   bool _dialogOpen = false;
   bool _photoInteracting = false;
+  bool _comparing = false;
   double? _sliderContrast;
 
   @override
@@ -115,9 +117,12 @@ class _ReceiptPhotoEditorScreenState extends State<ReceiptPhotoEditorScreen> {
             foregroundColor: Colors.white,
             titleTextStyle: Theme.of(
               context,
-            ).textTheme.titleLarge?.copyWith(color: Colors.white),
+            ).appBarTheme.titleTextStyle?.copyWith(color: Colors.white),
+            iconTheme: const IconThemeData(color: Colors.white),
+            actionsIconTheme: const IconThemeData(color: Colors.white),
             title: const Text('Edit photo'),
             leading: IconButton(
+              color: Colors.white,
               tooltip: 'Cancel edits',
               icon: const Icon(Icons.arrow_back_rounded),
               onPressed: enabled ? _cancel : null,
@@ -125,7 +130,8 @@ class _ReceiptPhotoEditorScreenState extends State<ReceiptPhotoEditorScreen> {
             actions: [
               Padding(
                 padding: const EdgeInsets.only(right: AppSpacing.sm),
-                child: IconButton.filled(
+                child: IconButton(
+                  color: Colors.white,
                   tooltip: 'Apply edits',
                   icon: const Icon(Icons.check_rounded),
                   onPressed: enabled && _state.enhancedPath != null
@@ -147,61 +153,78 @@ class _ReceiptPhotoEditorScreenState extends State<ReceiptPhotoEditorScreen> {
                       // only competing controls are disabled until they finish.
                       absorbing: processing,
                       child: LayoutBuilder(
-                        builder: (context, constraints) => ReceiptImageViewer(
-                          key: ValueKey(_state.previewPath),
-                          imagePath: _state.previewPath,
-                          height: constraints.maxHeight,
-                          showContrastControl: false,
-                          displayCacheWidth: 1600,
-                          imageLabel: _state.useOriginal
-                              ? 'Original photo'
-                              : 'Enhanced photo',
-                          isEnhanced:
-                              !_state.useOriginal &&
-                              _state.enhancedPath != null,
-                          onInteractionActiveChanged: _setPhotoInteraction,
-                          topOverlay: Material(
-                            color: AppColors.surfaceCard.withValues(alpha: .95),
+                        builder: (context, constraints) {
+                          final compareButton = Material(
+                            color: Colors.black.withValues(alpha: .65),
                             borderRadius: BorderRadius.circular(
                               AppRadii.control,
                             ),
-                            child: Padding(
-                              padding: const EdgeInsets.only(
-                                left: AppSpacing.md,
-                                right: AppSpacing.xs,
-                              ),
-                              child: MergeSemantics(
-                                child: Row(
-                                  mainAxisSize: MainAxisSize.min,
-                                  children: [
-                                    const Flexible(
-                                      child: Text(
-                                        'Enhance photo',
-                                        style: TextStyle(
-                                          fontSize: 12,
-                                          fontWeight: FontWeight.w600,
-                                        ),
-                                      ),
-                                    ),
-                                    Switch.adaptive(
-                                      key: const ValueKey(
-                                        'receipt-photo-enhancement',
-                                      ),
-                                      value: !_state.useOriginal,
-                                      onChanged: enabled
-                                          ? (value) {
-                                              if (_controlsEnabled) {
-                                                _state.selectOriginal(!value);
-                                              }
-                                            }
-                                          : null,
-                                    ),
-                                  ],
+                            child: TextButton.icon(
+                              key: const ValueKey('receipt-photo-compare'),
+                              style: TextButton.styleFrom(
+                                foregroundColor: Colors.white,
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: AppSpacing.md,
+                                  vertical: AppSpacing.sm,
                                 ),
                               ),
+                              icon: Icon(
+                                _comparing
+                                    ? Icons.close_rounded
+                                    : Icons.compare_rounded,
+                                size: 18,
+                              ),
+                              label: Text(
+                                _comparing ? 'Done comparing' : 'Compare',
+                                style: const TextStyle(fontSize: 12),
+                              ),
+                              onPressed: enabled && _state.enhancedPath != null
+                                  ? () {
+                                      if (_controlsEnabled) {
+                                        setState(
+                                          () => _comparing = !_comparing,
+                                        );
+                                      }
+                                    }
+                                  : null,
                             ),
-                          ),
-                        ),
+                          );
+                          if (_comparing && _state.enhancedPath != null) {
+                            return ReceiptPhotoComparison(
+                              originalPath: _state.originalPath,
+                              enhancedPath: _state.enhancedPath!,
+                              height: constraints.maxHeight,
+                              onInteractionActiveChanged: _setPhotoInteraction,
+                              topOverlay: Align(
+                                alignment: Alignment.topLeft,
+                                child: ConstrainedBox(
+                                  constraints: BoxConstraints(
+                                    maxWidth: (constraints.maxWidth - 72).clamp(
+                                      0,
+                                      double.infinity,
+                                    ),
+                                  ),
+                                  child: compareButton,
+                                ),
+                              ),
+                            );
+                          }
+                          return ReceiptImageViewer(
+                            key: ValueKey(_state.previewPath),
+                            imagePath: _state.previewPath,
+                            height: constraints.maxHeight,
+                            showContrastControl: false,
+                            displayCacheWidth: 1600,
+                            imageLabel: _state.useOriginal
+                                ? 'Original photo'
+                                : 'Enhanced photo',
+                            isEnhanced:
+                                !_state.useOriginal &&
+                                _state.enhancedPath != null,
+                            onInteractionActiveChanged: _setPhotoInteraction,
+                            topOverlay: compareButton,
+                          );
+                        },
                       ),
                     ),
                   ),
@@ -226,27 +249,57 @@ class _ReceiptPhotoEditorScreenState extends State<ReceiptPhotoEditorScreen> {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.stretch,
                         children: [
-                          Align(
-                            alignment: Alignment.centerRight,
-                            child: OutlinedButton.icon(
-                              style: OutlinedButton.styleFrom(
-                                foregroundColor: AppColors.danger,
-                                side: BorderSide(
-                                  color: AppColors.danger.withValues(alpha: .5),
-                                ),
-                                padding: const EdgeInsets.symmetric(
-                                  horizontal: AppSpacing.md,
-                                  vertical: AppSpacing.sm,
-                                ),
-                              ),
-                              onPressed: enabled
-                                  ? () => _performEdit(_state.reset)
-                                  : null,
-                              icon: const Icon(
-                                Icons.settings_backup_restore_rounded,
-                              ),
-                              label: const Text('Reset edits'),
+                          Row(
+                            key: const ValueKey(
+                              'receipt-photo-enhance-reset-row',
                             ),
+                            children: [
+                              Expanded(
+                                flex: 3,
+                                child: MergeSemantics(
+                                  child: Row(
+                                    children: [
+                                      const Expanded(
+                                        child: Text('Faded text clearer'),
+                                      ),
+                                      Switch.adaptive(
+                                        key: const ValueKey(
+                                          'receipt-faded-text',
+                                        ),
+                                        value: _state.enhance,
+                                        onChanged: enabled
+                                            ? (value) => _performEdit(
+                                                () => _state.setEnhance(value),
+                                              )
+                                            : null,
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ),
+                              Flexible(
+                                flex: 2,
+                                child: TextButton.icon(
+                                  style: TextButton.styleFrom(
+                                    foregroundColor: AppColors.textPrimary,
+                                    padding: const EdgeInsets.symmetric(
+                                      horizontal: AppSpacing.sm,
+                                    ),
+                                  ),
+                                  onPressed: enabled
+                                      ? () => _performEdit(_state.reset)
+                                      : null,
+                                  icon: const Icon(
+                                    Icons.settings_backup_restore_rounded,
+                                    size: 18,
+                                  ),
+                                  label: const Text(
+                                    'Reset edits',
+                                    style: TextStyle(fontSize: 12),
+                                  ),
+                                ),
+                              ),
+                            ],
                           ),
                           Wrap(
                             spacing: AppSpacing.xs,
@@ -272,17 +325,6 @@ class _ReceiptPhotoEditorScreenState extends State<ReceiptPhotoEditorScreen> {
                                 label: const Text('Straighten'),
                               ),
                             ],
-                          ),
-                          SwitchListTile.adaptive(
-                            dense: true,
-                            contentPadding: EdgeInsets.zero,
-                            title: const Text('Make faded text clearer'),
-                            value: _state.enhance,
-                            onChanged: enabled
-                                ? (value) => _performEdit(
-                                    () => _state.setEnhance(value),
-                                  )
-                                : null,
                           ),
                           Row(
                             children: [

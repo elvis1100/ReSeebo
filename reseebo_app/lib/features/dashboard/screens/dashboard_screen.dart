@@ -15,7 +15,6 @@ import '../widgets/stat_header.dart';
 /// scanned receipts, tracked product prices, and fast scanning actions.
 class DashboardScreen extends StatefulWidget {
   final IReseeboDataAdapter dataAdapter;
-  final VoidCallback? onScanPressed;
   final VoidCallback? onSettingsPressed;
   final ValueChanged<Receipt>? onReceiptSelected;
   final ValueChanged<Product>? onProductSelected;
@@ -24,7 +23,6 @@ class DashboardScreen extends StatefulWidget {
   const DashboardScreen({
     super.key,
     required this.dataAdapter,
-    this.onScanPressed,
     this.onSettingsPressed,
     this.onReceiptSelected,
     this.onProductSelected,
@@ -50,6 +48,7 @@ class _DashboardScreenState extends State<DashboardScreen>
   Object? _error;
   bool _loadedOnce = false;
   int _request = 0;
+  Future<void>? _refreshing;
 
   @override
   void initState() {
@@ -86,10 +85,14 @@ class _DashboardScreenState extends State<DashboardScreen>
     });
   }
 
-  Future<void> _loadData() async {
+  Future<void> _refreshData() => _refreshing ??= _loadData(
+    refresh: true,
+  ).whenComplete(() => _refreshing = null);
+
+  Future<void> _loadData({bool refresh = false}) async {
     final request = ++_request;
     setState(() {
-      _isLoading = true;
+      if (!refresh) _isLoading = true;
       _error = null;
     });
     try {
@@ -161,17 +164,7 @@ class _DashboardScreenState extends State<DashboardScreen>
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppColors.background,
-      appBar: AppBar(
-        toolbarHeight: 64,
-        title: const StoreHeader(),
-        actions: [
-          IconButton(
-            tooltip: 'Refresh data',
-            icon: const Icon(Icons.refresh_rounded, size: 20),
-            onPressed: _loadData,
-          ),
-        ],
-      ),
+      appBar: AppBar(toolbarHeight: 64, title: const StoreHeader()),
       body: _isLoading
           ? const Center(
               child: CircularProgressIndicator(color: AppColors.primary),
@@ -185,8 +178,13 @@ class _DashboardScreenState extends State<DashboardScreen>
             )
           : RefreshIndicator(
               color: AppColors.primary,
-              onRefresh: _loadData,
+              onRefresh: _refreshData,
+              // TabBarView adds a viewport: its primary lists report depth 2.
+              notificationPredicate: (notification) =>
+                  notification.metrics.axis == Axis.vertical &&
+                  notification.depth <= 2,
               child: NestedScrollView(
+                physics: const AlwaysScrollableScrollPhysics(),
                 key: const ValueKey('dashboard-scroll'),
                 floatHeaderSlivers: true,
                 headerSliverBuilder: (context, innerBoxIsScrolled) => [
@@ -341,18 +339,6 @@ class _DashboardScreenState extends State<DashboardScreen>
                 ),
               ),
             ),
-      floatingActionButton: FloatingActionButton.extended(
-        clipBehavior: Clip.antiAlias,
-        backgroundColor: AppColors.primary,
-        foregroundColor: Colors.white,
-        elevation: 2,
-        icon: const Icon(Icons.document_scanner_rounded, size: 20),
-        label: const Text(
-          'Scan Receipt',
-          style: TextStyle(fontWeight: FontWeight.w700, letterSpacing: 0.2),
-        ),
-        onPressed: widget.onScanPressed,
-      ),
     );
   }
 

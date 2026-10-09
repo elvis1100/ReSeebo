@@ -17,7 +17,6 @@ import '../widgets/supplier_comparison_table.dart';
 class ProductComparisonScreen extends StatefulWidget {
   final IReseeboDataAdapter dataAdapter;
   final String productId;
-  final ValueChanged<String>? onRestockPlanRequested;
   final ValueChanged<String>? onReceiptTap;
   final VoidCallback? onBack;
 
@@ -25,7 +24,6 @@ class ProductComparisonScreen extends StatefulWidget {
     super.key,
     required this.dataAdapter,
     required this.productId,
-    this.onRestockPlanRequested,
     this.onReceiptTap,
     this.onBack,
   });
@@ -39,6 +37,8 @@ class _ProductComparisonScreenState extends State<ProductComparisonScreen> {
   ProductComparisonData? _comparisonData;
   bool _isLoading = true;
   String? _errorMessage;
+  bool _reading = false;
+  int _request = 0;
 
   @override
   void initState() {
@@ -46,9 +46,12 @@ class _ProductComparisonScreenState extends State<ProductComparisonScreen> {
     _loadComparison();
   }
 
-  Future<void> _loadComparison() async {
+  Future<void> _loadComparison({bool refresh = false}) async {
+    if (_reading) return;
+    _reading = true;
+    final request = ++_request;
     setState(() {
-      _isLoading = true;
+      if (!refresh) _isLoading = true;
       _errorMessage = null;
     });
 
@@ -56,20 +59,28 @@ class _ProductComparisonScreenState extends State<ProductComparisonScreen> {
       final data = await widget.dataAdapter.getProductComparison(
         widget.productId,
       );
-      if (mounted) {
+      if (mounted && request == _request) {
         setState(() {
           _comparisonData = data;
           _isLoading = false;
         });
       }
     } catch (e) {
-      if (mounted) {
+      if (mounted && request == _request) {
         setState(() {
-          _errorMessage = e.toString();
+          _errorMessage = userMessage(e);
           _isLoading = false;
         });
       }
+    } finally {
+      _reading = false;
     }
+  }
+
+  @override
+  void dispose() {
+    _request++;
+    super.dispose();
   }
 
   Future<void> _editProduct() async {
@@ -104,44 +115,23 @@ class _ProductComparisonScreenState extends State<ProductComparisonScreen> {
               icon: const Icon(Icons.edit_outlined),
               onPressed: _editProduct,
             ),
-          IconButton(
-            tooltip: 'Refresh',
-            icon: const Icon(Icons.refresh_rounded),
-            onPressed: _loadComparison,
-          ),
         ],
       ),
-      body: _buildBody(),
-      bottomNavigationBar: _comparisonData != null
-          ? Container(
-              padding: const EdgeInsets.all(AppSpacing.m),
-              decoration: BoxDecoration(
-                color: AppColors.surfaceCard,
-                border: const Border(top: BorderSide(color: AppColors.border)),
-              ),
-              child: SafeArea(
-                child: AppButton(
-                  label: 'Plan restock & profit',
-                  icon: Icons.calculate_rounded,
-                  isFullWidth: true,
-                  onPressed: () =>
-                      widget.onRestockPlanRequested?.call(widget.productId),
-                ),
-              ),
+      body: _isLoading
+          ? const Center(
+              child: CircularProgressIndicator(color: AppColors.primary),
             )
-          : null,
+          : RefreshIndicator(
+              onRefresh: () => _loadComparison(refresh: true),
+              child: _buildBody(),
+            ),
     );
   }
 
   Widget _buildBody() {
-    if (_isLoading) {
-      return const Center(
-        child: CircularProgressIndicator(color: AppColors.primary),
-      );
-    }
-
     if (_errorMessage != null || _comparisonData == null) {
-      return Center(
+      return SingleChildScrollView(
+        physics: const AlwaysScrollableScrollPhysics(),
         child: Padding(
           padding: const EdgeInsets.all(AppSpacing.xl),
           child: Column(
@@ -174,6 +164,7 @@ class _ProductComparisonScreenState extends State<ProductComparisonScreen> {
     final data = _comparisonData!;
 
     return SingleChildScrollView(
+      physics: const AlwaysScrollableScrollPhysics(),
       padding: const EdgeInsets.all(AppSpacing.m),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,

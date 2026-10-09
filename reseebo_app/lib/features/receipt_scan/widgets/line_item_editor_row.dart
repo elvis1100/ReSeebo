@@ -18,9 +18,7 @@ class LineItemEditorRow extends StatefulWidget {
     required this.onRemove,
     this.onFieldEdited,
     this.onUnitChanged,
-    this.onTargetSelected,
     this.onConfirm,
-    this.selectedField,
     this.problem,
     this.enabled = true,
   });
@@ -32,9 +30,7 @@ class LineItemEditorRow extends StatefulWidget {
   final ValueChanged<int> onPiecesPerPackChanged;
   final void Function(ReceiptLineField, String)? onFieldEdited;
   final ValueChanged<PurchaseUnit>? onUnitChanged;
-  final ValueChanged<ReceiptLineField>? onTargetSelected;
   final VoidCallback? onConfirm;
-  final ReceiptLineField? selectedField;
   final String? problem;
   final bool enabled;
 
@@ -105,22 +101,9 @@ class _LineItemEditorRowState extends State<LineItemEditorRow> {
     }
   }
 
-  bool _needsReview(ReceiptLineField field) => switch (field) {
-    ReceiptLineField.description =>
-      widget.line.description.trim().isEmpty || widget.matchedProduct == null,
-    ReceiptLineField.quantity => widget.line.quantity == null,
-    ReceiptLineField.piecesPerPack =>
-      widget.line.unit == PurchaseUnit.pack &&
-          widget.line.piecesPerPack == null,
-    ReceiptLineField.amount =>
-      widget.line.grossAmountCents == null ||
-          widget.line.grossAmountCents! <= 0,
-  };
-
   Widget _field(ReceiptLineField field) {
     final numeric = field != ReceiptLineField.description;
     final amount = field == ReceiptLineField.amount;
-    final warning = !widget.line.confirmed || _needsReview(field);
     return TextFormField(
       key: ValueKey(field.name),
       controller: _controllers[field],
@@ -134,11 +117,14 @@ class _LineItemEditorRowState extends State<LineItemEditorRow> {
             ? (widget.line.unit == PurchaseUnit.pack
                   ? 'Number of packs'
                   : 'Number of pieces')
-            : '${field.label}${amount ? ' (₱)' : ''}',
-        filled: warning,
-        fillColor: AppColors.warningBg,
+            : field == ReceiptLineField.description
+            ? 'Receipt details'
+            : amount
+            ? 'Cost (₱)'
+            : field.label,
+        filled: true,
+        fillColor: AppColors.fieldSurface,
         helperText: amount ? 'Total for this item' : null,
-        border: const OutlineInputBorder(),
       ),
       onChanged: (value) => _edit(field, value),
     );
@@ -164,27 +150,65 @@ class _LineItemEditorRowState extends State<LineItemEditorRow> {
                 IconButton(
                   tooltip: 'Remove item ${widget.index + 1}',
                   onPressed: widget.enabled ? widget.onRemove : null,
-                  icon: const Icon(Icons.delete_outline_rounded),
+                  icon: const Icon(
+                    Icons.delete_outline_rounded,
+                    color: AppColors.danger,
+                  ),
                 ),
               ],
             ),
-            ListTile(
-              contentPadding: EdgeInsets.zero,
-              title: Text(
-                widget.matchedProduct?.displayTitle ?? 'Match exact product',
-              ),
-              subtitle: Text(
-                widget.matchedProduct?.name ?? 'Check brand, variant and size',
-                style: TextStyle(
-                  color: widget.matchedProduct == null
-                      ? AppColors.amberText
-                      : null,
+            SizedBox(
+              width: double.infinity,
+              child: FilledButton(
+                onPressed: widget.enabled ? widget.onSelectProduct : null,
+                style: FilledButton.styleFrom(
+                  backgroundColor: widget.matchedProduct == null
+                      ? AppColors.primary
+                      : AppColors.primarySurface,
+                  foregroundColor: widget.matchedProduct == null
+                      ? AppColors.textInverse
+                      : AppColors.primaryDark,
+                  padding: const EdgeInsets.all(16),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                ),
+                child: Row(
+                  children: [
+                    Icon(
+                      widget.matchedProduct == null
+                          ? Icons.search_rounded
+                          : Icons.check_circle_outline_rounded,
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          if (widget.matchedProduct != null) ...[
+                            const Text(
+                              'Change product',
+                              style: TextStyle(fontSize: 12),
+                            ),
+                            const SizedBox(height: 4),
+                          ],
+                          Text(
+                            widget.matchedProduct?.displayTitle ??
+                                'Match exact product',
+                            style: const TextStyle(fontWeight: FontWeight.w600),
+                          ),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    const Icon(Icons.chevron_right_rounded),
+                  ],
                 ),
               ),
-              trailing: const Icon(Icons.arrow_forward_ios, size: 16),
-              onTap: widget.enabled ? widget.onSelectProduct : null,
             ),
-            const SizedBox(height: 8),
+            const SizedBox(height: 12),
+            _field(ReceiptLineField.description),
+            const SizedBox(height: 12),
             SegmentedButton<PurchaseUnit>(
               segments: const [
                 ButtonSegment(value: PurchaseUnit.piece, label: Text('Pcs')),
@@ -221,49 +245,7 @@ class _LineItemEditorRowState extends State<LineItemEditorRow> {
               const SizedBox(height: 12),
               _field(ReceiptLineField.piecesPerPack),
             ],
-            const SizedBox(height: 8),
-            ExpansionTile(
-              tilePadding: EdgeInsets.zero,
-              childrenPadding: const EdgeInsets.only(bottom: 12),
-              title: const Text('Receipt details'),
-              subtitle: Text(
-                line.description.isEmpty
-                    ? 'Enter the name printed on your receipt'
-                    : line.description,
-                maxLines: 2,
-                overflow: TextOverflow.ellipsis,
-              ),
-              children: [
-                _field(ReceiptLineField.description),
-                if (widget.onTargetSelected != null) ...[
-                  const SizedBox(height: 12),
-                  const Align(
-                    alignment: Alignment.centerLeft,
-                    child: Text('Copy a value from the receipt'),
-                  ),
-                  Wrap(
-                    spacing: 6,
-                    children: ReceiptLineField.values
-                        .where(
-                          (field) =>
-                              field != ReceiptLineField.piecesPerPack ||
-                              line.unit == PurchaseUnit.pack,
-                        )
-                        .map(
-                          (field) => ChoiceChip(
-                            label: Text(field.label),
-                            selected: widget.selectedField == field,
-                            onSelected: widget.enabled
-                                ? (_) => widget.onTargetSelected!(field)
-                                : null,
-                          ),
-                        )
-                        .toList(),
-                  ),
-                ],
-              ],
-            ),
-            if (widget.problem != null)
+            if (widget.problem != null && widget.problem != 'Select a product.')
               Padding(
                 padding: const EdgeInsets.symmetric(vertical: 8),
                 child: Text(
@@ -271,21 +253,6 @@ class _LineItemEditorRowState extends State<LineItemEditorRow> {
                   style: const TextStyle(color: AppColors.amberText),
                 ),
               ),
-            if (line.warnings.isNotEmpty) ...[
-              const SizedBox(height: 8),
-              const Text(
-                'Check these details',
-                style: TextStyle(fontWeight: FontWeight.w600),
-              ),
-              for (final warning in line.warnings.toSet())
-                Padding(
-                  padding: const EdgeInsets.only(top: 4),
-                  child: Text(
-                    warning,
-                    style: const TextStyle(color: AppColors.amberText),
-                  ),
-                ),
-            ],
             if (line.confirmed &&
                 widget.matchedProduct != null &&
                 widget.problem == null &&
@@ -300,9 +267,6 @@ class _LineItemEditorRowState extends State<LineItemEditorRow> {
               contentPadding: EdgeInsets.zero,
               controlAffinity: ListTileControlAffinity.leading,
               title: const Text('I checked this item'),
-              subtitle: const Text(
-                'Product, quantity and amount paid are correct',
-              ),
               value: line.confirmed,
               onChanged: widget.enabled && widget.onConfirm != null
                   ? (_) => widget.onConfirm!()

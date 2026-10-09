@@ -24,15 +24,12 @@ class ReceiptMetadataEditor extends StatefulWidget {
 }
 
 class _ReceiptMetadataEditorState extends State<ReceiptMetadataEditor> {
-  late final TextEditingController _supplier, _branch, _number, _notes;
+  late final TextEditingController _supplier;
 
   @override
   void initState() {
     super.initState();
     _supplier = TextEditingController(text: widget.draft.supplierName);
-    _branch = TextEditingController(text: widget.draft.supplierBranch);
-    _number = TextEditingController(text: widget.draft.receiptNumber);
-    _notes = TextEditingController(text: widget.draft.notes);
   }
 
   Future<void> _chooseSupplier() async {
@@ -47,7 +44,7 @@ class _ReceiptMetadataEditorState extends State<ReceiptMetadataEditor> {
               Padding(
                 padding: const EdgeInsets.all(20),
                 child: Text(
-                  'Choose supplier branch',
+                  'Choose supplier',
                   style: Theme.of(context).textTheme.titleLarge,
                 ),
               ),
@@ -58,7 +55,7 @@ class _ReceiptMetadataEditorState extends State<ReceiptMetadataEditor> {
                       const Padding(
                         padding: EdgeInsets.all(20),
                         child: Text(
-                          'No suppliers yet. Enter a name and branch on the receipt.',
+                          'No suppliers yet. Enter the supplier name on the receipt.',
                         ),
                       ),
                     ...widget.suppliers.map(
@@ -88,7 +85,6 @@ class _ReceiptMetadataEditorState extends State<ReceiptMetadataEditor> {
     );
     if (supplier != null && mounted) {
       _supplier.text = supplier.name;
-      _branch.text = supplier.branch;
       widget.draft.supplierName = supplier.name;
       widget.draft.supplierId = supplier.id;
       widget.draft.supplierBranch = supplier.branch;
@@ -117,47 +113,24 @@ class _ReceiptMetadataEditorState extends State<ReceiptMetadataEditor> {
     widget.onChanged();
   }
 
-  Future<void> _chooseTime() async {
-    final date = widget.draft.purchasedAt;
-    if (date == null) return;
-    final selected = await showTimePicker(
-      context: context,
-      initialTime: widget.draft.hasPurchaseTime
-          ? TimeOfDay.fromDateTime(date)
-          : const TimeOfDay(hour: 12, minute: 0),
-    );
-    if (selected == null || !mounted) return;
-    widget.draft.purchasedAt = DateTime(
-      date.year,
-      date.month,
-      date.day,
-      selected.hour,
-      selected.minute,
-    );
-    widget.draft.hasPurchaseTime = true;
-    widget.draft.dateConfirmed = false;
-    widget.onChanged();
-  }
-
   @override
   void didUpdateWidget(covariant ReceiptMetadataEditor oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (_supplier.text != widget.draft.supplierName) {
       _supplier.text = widget.draft.supplierName;
     }
-    if (_branch.text != widget.draft.supplierBranch) {
-      _branch.text = widget.draft.supplierBranch;
-    }
   }
 
   void _clearSupplierSelection() {
     widget.draft.supplierId = null;
+    // A typed new supplier must not inherit a hidden branch from the old match.
+    widget.draft.supplierBranch = '';
     widget.draft.supplierNotes = '';
   }
 
   @override
   void dispose() {
-    for (final controller in [_supplier, _branch, _number, _notes]) {
+    for (final controller in [_supplier]) {
       controller.dispose();
     }
     super.dispose();
@@ -166,172 +139,91 @@ class _ReceiptMetadataEditorState extends State<ReceiptMetadataEditor> {
   @override
   Widget build(BuildContext context) {
     final draft = widget.draft;
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text('Purchase details', style: Theme.of(context).textTheme.titleLarge),
-        const SizedBox(height: AppSpacing.sm),
-        const Text(
-          'Where and when did you buy these items?',
-          style: TextStyle(color: AppColors.textSecondary),
-        ),
-        const SizedBox(height: AppSpacing.lg),
-        AppField(
-          controller: _supplier,
-          enabled: widget.enabled,
-          label: 'Supplier name',
-          hint: 'Grocery store or wholesaler',
-          onChanged: (value) {
-            _clearSupplierSelection();
-            draft.supplierName = value;
-            widget.onChanged();
-          },
-          validator: (value) =>
-              value!.trim().isEmpty ? 'Enter supplier name.' : null,
-        ),
-        if (draft.supplierBranch.trim().isNotEmpty)
-          Padding(
-            padding: const EdgeInsets.only(top: AppSpacing.sm),
-            child: Text(
-              'Branch: ${draft.supplierBranch}',
-              style: const TextStyle(color: AppColors.textSecondary),
-            ),
+    return Theme(
+      data: Theme.of(context).copyWith(
+        inputDecorationTheme: Theme.of(
+          context,
+        ).inputDecorationTheme.copyWith(fillColor: AppColors.fieldSurface),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            'Purchase details',
+            style: Theme.of(context).textTheme.titleLarge,
           ),
-        Wrap(
-          spacing: AppSpacing.sm,
-          children: [
-            TextButton.icon(
-              onPressed: widget.enabled ? _chooseSupplier : null,
-              icon: const Icon(Icons.storefront),
-              label: const Text('Saved suppliers'),
-            ),
-            TextButton.icon(
-              onPressed: widget.enabled
-                  ? () => widget.onEditSupplier(null)
-                  : null,
-              icon: const Icon(Icons.add),
-              label: const Text('Add supplier'),
-            ),
-          ],
-        ),
-        const SizedBox(height: AppSpacing.md),
-        Text('Purchase date', style: Theme.of(context).textTheme.titleSmall),
-        const SizedBox(height: AppSpacing.sm),
-        SizedBox(
-          width: double.infinity,
-          child: OutlinedButton.icon(
-            onPressed: widget.enabled ? _chooseDate : null,
-            icon: const Icon(Icons.calendar_month_outlined),
-            label: Text(
-              draft.purchasedAt == null
-                  ? 'Choose purchase date'
-                  : purchaseDate(
-                      draft.purchasedAt!,
-                      withTime: draft.hasPurchaseTime,
-                    ),
-            ),
-          ),
-        ),
-        const Padding(
-          padding: EdgeInsets.only(top: AppSpacing.sm),
-          child: Text(
-            'Check the date and time printed on the receipt.',
+          const SizedBox(height: AppSpacing.sm),
+          const Text(
+            'Where and when did you buy these items?',
             style: TextStyle(color: AppColors.textSecondary),
           ),
-        ),
-        CheckboxListTile(
-          contentPadding: EdgeInsets.zero,
-          controlAffinity: ListTileControlAffinity.leading,
-          title: Text(
-            draft.hasPurchaseTime
-                ? 'I checked the purchase date and time'
-                : 'I checked the purchase date; time is unknown',
+          const SizedBox(height: AppSpacing.lg),
+          AppField(
+            controller: _supplier,
+            enabled: widget.enabled,
+            label: 'Supplier name',
+            hint: 'Grocery store or wholesaler',
+            onChanged: (value) {
+              _clearSupplierSelection();
+              draft.supplierName = value;
+              widget.onChanged();
+            },
+            validator: (value) =>
+                value!.trim().isEmpty ? 'Enter supplier name.' : null,
           ),
-          value: draft.dateConfirmed,
-          onChanged: widget.enabled && draft.purchasedAt != null
-              ? (value) {
-                  draft.dateConfirmed = value ?? false;
-                  widget.onChanged();
-                }
-              : null,
-        ),
-        const SizedBox(height: AppSpacing.sm),
-        ExpansionTile(
-          tilePadding: EdgeInsets.zero,
-          childrenPadding: const EdgeInsets.only(bottom: AppSpacing.sm),
-          leading: const Icon(Icons.notes_rounded),
-          title: const Text('More details'),
-          subtitle: const Text('Branch, time, receipt number, and notes'),
-          children: [
-            const SizedBox(height: AppSpacing.sm),
-            AppField(
-              controller: _branch,
-              enabled: widget.enabled,
-              label: 'Branch / location (optional)',
-              onChanged: (value) {
-                _clearSupplierSelection();
-                draft.supplierBranch = value;
-                widget.onChanged();
-              },
+          Wrap(
+            spacing: AppSpacing.sm,
+            children: [
+              TextButton.icon(
+                onPressed: widget.enabled ? _chooseSupplier : null,
+                icon: const Icon(Icons.storefront),
+                label: const Text('Saved suppliers'),
+              ),
+              TextButton.icon(
+                onPressed: widget.enabled
+                    ? () => widget.onEditSupplier(null)
+                    : null,
+                icon: const Icon(Icons.add),
+                label: const Text('Add supplier'),
+              ),
+            ],
+          ),
+          const SizedBox(height: AppSpacing.md),
+          Text('Purchase date', style: Theme.of(context).textTheme.titleSmall),
+          const SizedBox(height: AppSpacing.sm),
+          SizedBox(
+            width: double.infinity,
+            child: OutlinedButton.icon(
+              onPressed: widget.enabled ? _chooseDate : null,
+              icon: const Icon(Icons.calendar_month_outlined),
+              label: Text(
+                draft.purchasedAt == null
+                    ? 'Choose purchase date'
+                    : purchaseDate(draft.purchasedAt!, withTime: false),
+              ),
             ),
-            const SizedBox(height: AppSpacing.sm),
-            Wrap(
-              spacing: AppSpacing.sm,
-              children: [
-                TextButton.icon(
-                  icon: const Icon(Icons.schedule_outlined),
-                  onPressed: widget.enabled && draft.purchasedAt != null
-                      ? _chooseTime
-                      : null,
-                  label: Text(
-                    draft.hasPurchaseTime
-                        ? 'Change purchase time'
-                        : 'Add time from receipt',
-                  ),
-                ),
-                if (draft.hasPurchaseTime)
-                  TextButton(
-                    onPressed: widget.enabled
-                        ? () {
-                            final date = draft.purchasedAt!;
-                            draft.purchasedAt = DateTime(
-                              date.year,
-                              date.month,
-                              date.day,
-                            );
-                            draft.hasPurchaseTime = false;
-                            draft.dateConfirmed = false;
-                            widget.onChanged();
-                          }
-                        : null,
-                    child: const Text('Time unknown'),
-                  ),
-              ],
+          ),
+          const Padding(
+            padding: EdgeInsets.only(top: AppSpacing.sm),
+            child: Text(
+              'Check the purchase date.',
+              style: TextStyle(color: AppColors.textSecondary),
             ),
-            const SizedBox(height: AppSpacing.md),
-            AppField(
-              controller: _number,
-              enabled: widget.enabled,
-              label: 'Receipt number (optional)',
-              onChanged: (value) {
-                draft.receiptNumber = value;
-                widget.onChanged();
-              },
-            ),
-            const SizedBox(height: AppSpacing.lg),
-            AppField(
-              controller: _notes,
-              enabled: widget.enabled,
-              maxLines: 3,
-              label: 'Receipt notes (optional)',
-              onChanged: (value) {
-                draft.notes = value;
-                widget.onChanged();
-              },
-            ),
-          ],
-        ),
-      ],
+          ),
+          CheckboxListTile(
+            contentPadding: EdgeInsets.zero,
+            controlAffinity: ListTileControlAffinity.leading,
+            title: const Text('I checked the purchase date'),
+            value: draft.dateConfirmed,
+            onChanged: widget.enabled && draft.purchasedAt != null
+                ? (value) {
+                    draft.dateConfirmed = value ?? false;
+                    widget.onChanged();
+                  }
+                : null,
+          ),
+        ],
+      ),
     );
   }
 }

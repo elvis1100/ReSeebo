@@ -1,7 +1,9 @@
 import 'dart:async';
+import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:image/image.dart' as img;
 import 'package:reseebo_app/core/adapters/mock_reseebo_data_adapter.dart';
 import 'package:reseebo_app/core/theme/app_theme.dart';
 import 'package:reseebo_app/features/receipt_scan/screens/capture_screen.dart';
@@ -44,19 +46,40 @@ class TestCaptureImages extends LocalReceiptImageService {
 
 void main() {
   testWidgets(
-    'staggered photo pinch zooms without page drift and releases scrolling after cancel',
+    'one-finger preview drag scrolls the page and enhanced badge follows the shown version',
     (tester) async {
       tester.view.physicalSize = const Size(360, 900);
       tester.view.devicePixelRatio = 1;
       addTearDown(tester.view.resetPhysicalSize);
       addTearDown(tester.view.resetDevicePixelRatio);
+      late Directory directory;
+      late File original;
+      await tester.runAsync(() async {
+        directory = await Directory.systemTemp.createTemp(
+          'reseebo-preview-gesture-',
+        );
+        original = File('${directory.path}/receipt.png');
+        final image = img.Image(width: 600, height: 1000);
+        img.fill(image, color: img.ColorRgb8(245, 245, 245));
+        await original.writeAsBytes(img.encodePng(image));
+      });
+      addTearDown(
+        () => tester.runAsync(() => directory.delete(recursive: true)),
+      );
       final adapter = MockReseeboDataAdapter();
       final state = CaptureState(
         adapter: adapter,
-        initialImagePath: '/original.jpg',
+        initialImagePath: original.path,
       );
-      state.selectedPage!.preparedPath = '/enhanced.jpg';
+      state.selectedPage!.preparedPath = original.path;
       addTearDown(state.dispose);
+      await tester.pumpWidget(MaterialApp(theme: AppTheme.light, home: const Scaffold()));
+      await tester.runAsync(
+        () => precacheImage(
+          ResizeImage(FileImage(original), width: 1000),
+          tester.element(find.byType(Scaffold)),
+        ).timeout(const Duration(seconds: 5)),
+      );
       await tester.pumpWidget(
         MaterialApp(
           theme: AppTheme.light,
@@ -65,8 +88,8 @@ void main() {
       );
       await tester.ensureVisible(find.byType(ReceiptImageViewer));
       await tester.pumpAndSettle();
-      expect(find.text('Enhanced'), findsOneWidget);
       final photo = tester.getRect(find.byType(InteractiveViewer));
+      expect(find.text('Enhanced'), findsOneWidget);
       expect(
         tester.getRect(find.text('Enhanced')).center.dx,
         greaterThan(photo.center.dx),
@@ -75,47 +98,51 @@ void main() {
         find.byType(Scrollable).first,
       );
       final offset = scroll.position.pixels;
-      final transform = tester
-          .widget<InteractiveViewer>(find.byType(InteractiveViewer))
-          .transformationController!;
-      final first = await tester.createGesture(pointer: 1);
-      final second = await tester.createGesture(pointer: 2);
-      final center = photo.center;
-      await first.down(center - const Offset(30, 0));
+      await tester.dragFrom(photo.center, const Offset(0, 90));
+      await tester.pumpAndSettle();
+      expect(scroll.position.pixels, lessThan(offset));
+      final pinchOffset = scroll.position.pixels;
+      final viewer = tester.widget<InteractiveViewer>(
+        find.byType(InteractiveViewer),
+      );
+      final center = tester.getCenter(find.byType(InteractiveViewer));
+      final first = await tester.startGesture(
+        center - const Offset(30, 0),
+        pointer: 1,
+      );
+      final second = await tester.startGesture(
+        center + const Offset(30, 0),
+        pointer: 2,
+      );
+      await first.moveBy(const Offset(-20, 0));
+      await second.moveBy(const Offset(20, 0));
+      await tester.pump();
+      await first.moveBy(const Offset(-40, 0));
+      await second.moveBy(const Offset(40, 0));
       await tester.pump();
       expect(
-        tester.widget<ListView>(find.byType(ListView)).physics,
-        isA<NeverScrollableScrollPhysics>(),
+        viewer.transformationController!.value.getMaxScaleOnAxis(),
+        greaterThan(1.5),
       );
-      // The first finger drifts vertically before the second one lands. This
-      // previously let the page's drag recognizer win instead of photo scaling.
-      await first.moveTo(center + const Offset(-30, 35));
-      await tester.pump();
-      await second.down(center + const Offset(30, 35));
-      await tester.pump();
-      await first.moveTo(center + const Offset(-85, 50));
-      await second.moveTo(center + const Offset(85, 20));
-      await tester.pump();
-      expect(transform.value.getMaxScaleOnAxis(), greaterThan(1.5));
-      expect(scroll.position.pixels, closeTo(offset, .01));
+      expect(scroll.position.pixels, closeTo(pinchOffset, .01));
       await first.up();
-      await tester.pump();
-      expect(
-        tester.widget<ListView>(find.byType(ListView)).physics,
-        isA<NeverScrollableScrollPhysics>(),
-      );
       await second.cancel();
       await tester.pumpAndSettle();
+      await tester.tap(find.byTooltip('Fit photo to screen'));
+      await tester.pumpAndSettle();
+      expect(viewer.transformationController!.value.getMaxScaleOnAxis(), 1);
       expect(
         tester.widget<ListView>(find.byType(ListView)).physics,
         isNot(isA<NeverScrollableScrollPhysics>()),
       );
-      await tester.tap(find.byTooltip('Fit photo to screen'));
-      await tester.pumpAndSettle();
-      expect(transform.value.getMaxScaleOnAxis(), 1);
-      await tester.dragFrom(Offset(4, photo.center.dy), const Offset(0, -70));
-      await tester.pumpAndSettle();
-      expect(scroll.position.pixels, greaterThan(offset));
+      final remove = tester.widget<TextButton>(
+        find.widgetWithText(TextButton, 'Remove photo'),
+      );
+      expect(remove.style!.foregroundColor!.resolve({}), AppColors.danger);
+      state.selectedPage!.useOriginal = true;
+      state.selectPage(0);
+      await tester.pump();
+      expect(find.text('Enhanced'), findsNothing);
       expect(tester.takeException(), isNull);
     },
   );

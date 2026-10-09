@@ -33,6 +33,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
   bool _isLoading = true;
   bool _isSaving = false;
   Object? _loadError;
+  bool _isRefreshing = false;
 
   @override
   void initState() {
@@ -51,31 +52,51 @@ class _ProfileScreenState extends State<ProfileScreen> {
     super.dispose();
   }
 
-  Future<void> _loadProfile() async {
+  Future<void> _loadProfile({bool refresh = false}) async {
+    if (_isSaving || _isRefreshing) return;
+    final base = _profile;
+    _isRefreshing = true;
     setState(() {
-      _isLoading = true;
+      if (!refresh) _isLoading = true;
       _loadError = null;
     });
     try {
       final profile = await widget.dataAdapter.getStoreProfile();
       if (!mounted) return;
-      _storeNameController.text = profile.storeName.trim().isEmpty
+      // Refresh only pristine fields; edits made during the read also survive.
+      final baseName = base?.storeName.trim().isEmpty == true
           ? 'Sari-sari Store'
-          : profile.storeName;
-      _ownerNameController.text = profile.ownerName;
+          : base?.storeName;
+      if (base == null || _storeNameController.text == baseName) {
+        _storeNameController.text = profile.storeName.trim().isEmpty
+            ? 'Sari-sari Store'
+            : profile.storeName;
+      }
+      if (base == null || _ownerNameController.text == base.ownerName) {
+        _ownerNameController.text = profile.ownerName;
+      }
       setState(() {
+        if (base == null || _markupPercentage == base.defaultMarkupPercent) {
+          _markupPercentage = profile.defaultMarkupPercent;
+        }
         _profile = profile;
-        _markupPercentage = profile.defaultMarkupPercent;
       });
     } catch (error) {
-      if (mounted) setState(() => _loadError = error);
+      if (mounted) {
+        if (base == null) {
+          setState(() => _loadError = error);
+        } else {
+          showAppError(context, error);
+        }
+      }
     } finally {
+      _isRefreshing = false;
       if (mounted) setState(() => _isLoading = false);
     }
   }
 
   Future<void> _saveProfile() async {
-    if (_profile == null || _isSaving) return;
+    if (_profile == null || _isSaving || _isRefreshing) return;
     final storeName = _storeNameController.text.trim();
     if (storeName.isEmpty) {
       ScaffoldMessenger.of(
@@ -117,13 +138,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
     appBar: AppBar(
       toolbarHeight: 64,
       title: const StoreHeader(),
-      actions: [
-        IconButton(
-          tooltip: 'Refresh settings',
-          icon: const Icon(Icons.refresh_rounded, size: 20),
-          onPressed: _isSaving ? null : _loadProfile,
-        ),
-      ],
       leading: widget.onBack == null
           ? null
           : IconButton(
@@ -134,71 +148,77 @@ class _ProfileScreenState extends State<ProfileScreen> {
     ),
     body: _isLoading
         ? const Center(child: CircularProgressIndicator())
-        : _loadError != null
-        ? SingleChildScrollView(
-            child: ErrorState(
-              message: userMessage(_loadError!),
-              onRetry: _loadProfile,
-            ),
-          )
-        : ListView(
-            padding: AppSpacing.page,
-            children: [
-              AppCard(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    const Text(
-                      'Store information',
-                      style: AppTypography.headingMedium,
+        : RefreshIndicator(
+            onRefresh: () => _loadProfile(refresh: true),
+            child: _loadError != null
+                ? SingleChildScrollView(
+                    physics: const AlwaysScrollableScrollPhysics(),
+                    child: ErrorState(
+                      message: userMessage(_loadError!),
+                      onRetry: _loadProfile,
                     ),
-                    const SizedBox(height: 16),
-                    TextField(
-                      controller: _storeNameController,
-                      enabled: !_isSaving,
-                      textCapitalization: TextCapitalization.words,
-                      decoration: const InputDecoration(
-                        labelText: 'Store name',
-                        prefixIcon: Icon(Icons.storefront_rounded),
+                  )
+                : ListView(
+                    physics: const AlwaysScrollableScrollPhysics(),
+                    padding: AppSpacing.page,
+                    children: [
+                      AppCard(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            const Text(
+                              'Store information',
+                              style: AppTypography.headingMedium,
+                            ),
+                            const SizedBox(height: 16),
+                            TextField(
+                              controller: _storeNameController,
+                              enabled: !_isSaving,
+                              textCapitalization: TextCapitalization.words,
+                              decoration: const InputDecoration(
+                                labelText: 'Store name',
+                                prefixIcon: Icon(Icons.storefront_rounded),
+                              ),
+                            ),
+                            const SizedBox(height: 16),
+                            TextField(
+                              controller: _ownerNameController,
+                              enabled: !_isSaving,
+                              textCapitalization: TextCapitalization.words,
+                              decoration: const InputDecoration(
+                                labelText: 'Owner name (optional)',
+                                prefixIcon: Icon(Icons.person_outline_rounded),
+                              ),
+                            ),
+                          ],
+                        ),
                       ),
-                    ),
-                    const SizedBox(height: 16),
-                    TextField(
-                      controller: _ownerNameController,
-                      enabled: !_isSaving,
-                      textCapitalization: TextCapitalization.words,
-                      decoration: const InputDecoration(
-                        labelText: 'Owner name (optional)',
-                        prefixIcon: Icon(Icons.person_outline_rounded),
+                      const SizedBox(height: 16),
+                      DefaultMarkupSlider(
+                        markupPercentage: _markupPercentage,
+                        onChanged: _isSaving
+                            ? null
+                            : (value) =>
+                                  setState(() => _markupPercentage = value),
                       ),
-                    ),
-                  ],
-                ),
-              ),
-              const SizedBox(height: 16),
-              DefaultMarkupSlider(
-                markupPercentage: _markupPercentage,
-                onChanged: _isSaving
-                    ? null
-                    : (value) => setState(() => _markupPercentage = value),
-              ),
-              const SizedBox(height: 24),
-              AppButton(
-                label: 'Save settings',
-                icon: Icons.check_rounded,
-                isLoading: _isSaving,
-                isFullWidth: true,
-                onPressed: _saveProfile,
-              ),
-              const SizedBox(height: 24),
-              const Text(
-                'Reseebo v1.0.0',
-                textAlign: TextAlign.center,
-                style: AppTypography.bodySmall,
-              ),
-              const SizedBox(height: 16),
-              const ProductPhotoCredits(),
-            ],
+                      const SizedBox(height: 24),
+                      AppButton(
+                        label: 'Save settings',
+                        icon: Icons.check_rounded,
+                        isLoading: _isSaving,
+                        isFullWidth: true,
+                        onPressed: _saveProfile,
+                      ),
+                      const SizedBox(height: 24),
+                      const Text(
+                        'Reseebo v1.0.0',
+                        textAlign: TextAlign.center,
+                        style: AppTypography.bodySmall,
+                      ),
+                      const SizedBox(height: 16),
+                      const ProductPhotoCredits(),
+                    ],
+                  ),
           ),
   );
 }

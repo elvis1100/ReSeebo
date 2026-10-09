@@ -5,9 +5,7 @@ import 'package:reseebo_app/features/receipt_scan/widgets/line_item_editor_row.d
 import 'package:reseebo_app/core/theme/app_colors.dart';
 
 void main() {
-  testWidgets('item entry has amount paid and no discount controls', (
-    tester,
-  ) async {
+  testWidgets('item entry has cost and no discount controls', (tester) async {
     await tester.pumpWidget(
       MaterialApp(
         home: Scaffold(
@@ -25,14 +23,26 @@ void main() {
         ),
       ),
     );
-    expect(find.text('Amount paid (₱)'), findsOneWidget);
+    expect(find.text('Cost (₱)'), findsOneWidget);
     expect(find.text('Discount (₱)'), findsNothing);
     expect(find.byKey(const ValueKey('discount')), findsNothing);
     expect(find.text('Receipt details'), findsOneWidget);
+    expect(find.byType(ExpansionTile), findsNothing);
+    expect(find.text('Check brand, variant and size'), findsNothing);
+    final description = tester.getRect(
+      find.byKey(const ValueKey('description')),
+    );
+    final amount = tester.getRect(find.byKey(const ValueKey('amount')));
+    expect(description.bottom, lessThan(amount.top));
+    expect(description.width, greaterThan(amount.width));
+    expect(
+      tester.widget<Icon>(find.byIcon(Icons.delete_outline_rounded)).color,
+      AppColors.danger,
+    );
   });
 
   testWidgets(
-    'parser evidence warnings remain visible beside editable values',
+    'item warning section and copying tools are absent while validation stays visible',
     (tester) async {
       final line = ParsedLineItem(
         description: 'Coffee',
@@ -45,6 +55,7 @@ void main() {
             body: SingleChildScrollView(
               child: LineItemEditorRow(
                 line: line,
+                problem: 'Enter the total amount paid for this item.',
                 index: 0,
                 onSelectProduct: () {},
                 onQuantityChanged: (_) {},
@@ -58,44 +69,54 @@ void main() {
       );
       expect(
         find.text('Several prices found. Check the line amount.'),
+        findsNothing,
+      );
+      expect(find.text('Check these details'), findsNothing);
+      expect(
+        find.text('Enter the total amount paid for this item.'),
         findsOneWidget,
       );
+      expect(find.text('Copy a value from the receipt'), findsNothing);
+      expect(find.byType(ChoiceChip), findsNothing);
+      expect(find.byKey(const ValueKey('description')), findsOneWidget);
     },
   );
-  testWidgets('unconfirmed OCR quantity stays amber until owner checks it', (
-    tester,
-  ) async {
-    final line = ParsedLineItem(description: 'Coffee', quantity: 2);
-    Widget host() => MaterialApp(
-      home: Scaffold(
-        body: SingleChildScrollView(
-          child: LineItemEditorRow(
-            line: line,
-            index: 0,
-            onSelectProduct: () {},
-            onQuantityChanged: (_) {},
-            onPiecesPerPackChanged: (_) {},
-            onLineTotalChanged: (_) {},
-            onRemove: () {},
+  testWidgets(
+    'item fields retain a matte green fill before and after confirmation',
+    (tester) async {
+      final line = ParsedLineItem(description: 'Coffee', quantity: 2);
+      Widget host() => MaterialApp(
+        home: Scaffold(
+          body: SingleChildScrollView(
+            child: LineItemEditorRow(
+              line: line,
+              index: 0,
+              onSelectProduct: () {},
+              onQuantityChanged: (_) {},
+              onPiecesPerPackChanged: (_) {},
+              onLineTotalChanged: (_) {},
+              onRemove: () {},
+            ),
           ),
         ),
-      ),
-    );
-    await tester.pumpWidget(host());
-    TextField quantityField() => tester.widget<TextField>(
-      find.descendant(
-        of: find.byKey(const ValueKey('quantity')),
-        matching: find.byType(TextField),
-      ),
-    );
-    final quantity = quantityField();
-    expect(quantity.decoration!.filled, isTrue);
-    expect(quantity.decoration!.fillColor, AppColors.warningBg);
-    line.confirmed = true;
-    await tester.pumpWidget(host());
-    expect(quantityField().decoration!.filled, isFalse);
-  });
-  testWidgets('external assignment updates the visible quantity editor', (
+      );
+      await tester.pumpWidget(host());
+      TextField quantityField() => tester.widget<TextField>(
+        find.descendant(
+          of: find.byKey(const ValueKey('quantity')),
+          matching: find.byType(TextField),
+        ),
+      );
+      final quantity = quantityField();
+      expect(quantity.decoration!.filled, isTrue);
+    expect(quantity.decoration!.fillColor, AppColors.fieldSurface);
+      line.confirmed = true;
+      await tester.pumpWidget(host());
+      expect(quantityField().decoration!.filled, isTrue);
+    expect(quantityField().decoration!.fillColor, AppColors.fieldSurface);
+    },
+  );
+  testWidgets('external draft update refreshes an unfocused quantity editor', (
     tester,
   ) async {
     final line = ParsedLineItem(description: 'Coffee', quantity: 2);

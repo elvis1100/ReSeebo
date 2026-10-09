@@ -43,9 +43,6 @@ class ReceiptReviewState extends ChangeNotifier {
   bool saving = false;
   String? error;
   int selectedPage = 0;
-  String? targetLineId;
-  ReceiptLineField? targetField;
-  final Set<int> selectedTokens = {};
 
   List<ReceiptOcrPage> get pages => draft.ocrPages.isNotEmpty
       ? draft.ocrPages
@@ -63,89 +60,10 @@ class ReceiptReviewState extends ChangeNotifier {
             )
             .toList();
 
-  List<OcrTextToken> get pageTokens => pages.isEmpty
-      ? const []
-      : pages[selectedPage].textLines.expand((line) => line.tokens).toList();
-  String get selectedText => _selectedText();
-
-  String _selectedText() {
-    final tokens = pageTokens;
-    final indices = selectedTokens.toList()..sort();
-    return indices
-        .where((i) => i < tokens.length)
-        .map((i) => tokens[i].text)
-        .join(' ');
-  }
-
   void selectPage(int index) {
     if (saving || index < 0 || index >= pages.length) return;
     selectedPage = index;
-    selectedTokens.clear();
     _changed();
-  }
-
-  void selectTarget(String lineId, ReceiptLineField field) {
-    if (saving) return;
-    final line = draft.lines.where((line) => line.id == lineId).firstOrNull;
-    if (line == null) return;
-    targetLineId = lineId;
-    targetField = field;
-    if (line.sourcePage >= 0 && line.sourcePage < pages.length) {
-      selectedPage = line.sourcePage;
-    }
-    selectedTokens.clear();
-    _changed();
-  }
-
-  void toggleToken(int index) {
-    if (saving ||
-        targetField == null ||
-        index < 0 ||
-        index >= pageTokens.length) {
-      return;
-    }
-    if (!selectedTokens.remove(index)) selectedTokens.add(index);
-    _changed();
-  }
-
-  /// OCR assignment accepts only an unambiguous value. Rejection does not
-  /// alter existing data or confirmation; no OCR character substitutions apply.
-  String? assignText(String text) {
-    if (saving) return 'Wait for the receipt to finish saving.';
-    final line = draft.lines
-        .where((line) => line.id == targetLineId)
-        .firstOrNull;
-    final field = targetField;
-    if (line == null || field == null) return 'Choose a field first.';
-    final value = text.trim();
-    if (field == ReceiptLineField.description) {
-      if (value.isEmpty) return 'Select the receipt description.';
-      line.description = value;
-      line.productId = null;
-    } else if (field == ReceiptLineField.quantity ||
-        field == ReceiptLineField.piecesPerPack) {
-      final quantity = parseQuantity(value);
-      if (quantity == null) {
-        return 'Select one whole number greater than zero, or type it manually.';
-      }
-      if (field == ReceiptLineField.quantity) {
-        line.quantity = quantity;
-      } else {
-        if (line.unit != PurchaseUnit.pack) {
-          return 'Choose packs before assigning pack contents.';
-        }
-        line.piecesPerPack = quantity;
-      }
-    } else {
-      final amount = parsePesos(value);
-      if (amount == null || (field == ReceiptLineField.amount && amount <= 0)) {
-        return 'Select one peso amount, or type it manually.';
-      }
-      line.grossAmountCents = amount;
-    }
-    changed(line: line, affectsTotal: field == ReceiptLineField.amount);
-    selectedTokens.clear();
-    return null;
   }
 
   void editText(ParsedLineItem line, ReceiptLineField field, String text) {
@@ -261,11 +179,6 @@ class ReceiptReviewState extends ChangeNotifier {
   void removeLine(ParsedLineItem line) {
     draft.lines.remove(line);
     draft.allowDuplicate = false;
-    if (targetLineId == line.id) {
-      targetLineId = null;
-      targetField = null;
-      selectedTokens.clear();
-    }
     for (final remaining in draft.lines) {
       if (remaining.possibleDuplicateOf == line.id) {
         remaining.possibleDuplicateOf = null;
@@ -290,7 +203,7 @@ class ReceiptReviewState extends ChangeNotifier {
       return 'Enter the receipt description.';
     }
     if (productFor(line.productId) == null) {
-      return 'Choose the exact product, brand, variant, and size.';
+      return 'Select a product.';
     }
     if (line.quantity == null ||
         line.quantity! <= 0 ||

@@ -8,6 +8,7 @@ abstract final class AppColors {
   static const Color primaryLight = Color(0xFF198754);
   static const Color primaryDark = Color(0xFF0A3622);
   static const Color primarySurface = Color(0xFFE8F5E9);
+  static const Color fieldSurface = Color(0xFFF0FAF3);
 
   // Accent & Action (Warm Amber)
   static const Color accent = Color(0xFFD97706);

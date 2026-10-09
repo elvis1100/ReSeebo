@@ -10,7 +10,7 @@ import '../widgets/duplicate_review_dialog.dart';
 import '../widgets/line_item_editor_row.dart';
 import '../widgets/overlap_review_card.dart';
 import '../widgets/product_match_picker.dart';
-import '../widgets/receipt_assignment_panel.dart';
+import '../widgets/receipt_photo_review_panel.dart';
 import '../widgets/receipt_metadata_editor.dart';
 
 class ReviewMatchScreen extends StatefulWidget {
@@ -32,9 +32,7 @@ class ReviewMatchScreen extends StatefulWidget {
 class _ReviewMatchScreenState extends State<ReviewMatchScreen> {
   late final ReceiptReviewState _review;
   final ScrollController _scroll = ScrollController();
-  bool _showOriginal = true;
   bool _photosExpanded = false;
-  double _returnOffset = 0;
 
   @override
   void initState() {
@@ -94,30 +92,6 @@ class _ReviewMatchScreenState extends State<ReviewMatchScreen> {
     if (saved == true && mounted) await _review.load();
   }
 
-  void _selectTarget(ParsedLineItem line, ReceiptLineField field) {
-    FocusScope.of(context).unfocus();
-    _returnOffset = _scroll.hasClients ? _scroll.offset : 0;
-    _showOriginal = false;
-    _photosExpanded = true;
-    _review.selectTarget(line.id, field);
-    if (_scroll.hasClients) {
-      _scroll.animateTo(
-        0,
-        duration: const Duration(milliseconds: 250),
-        curve: Curves.easeOut,
-      );
-    }
-  }
-
-  void _applySelection() {
-    final issue = _review.assignText(_review.selectedText);
-    if (issue != null) {
-      _message(issue);
-      return;
-    }
-    _message('Field filled. Check the item and confirm it below.');
-  }
-
   Future<void> _save() async {
     if (_review.saving) return;
     FocusScope.of(context).unfocus();
@@ -148,21 +122,7 @@ class _ReviewMatchScreenState extends State<ReviewMatchScreen> {
     }
   }
 
-  Widget _photos() => ReceiptAssignmentPanel(
-    review: _review,
-    showOriginal: _showOriginal,
-    onOriginalChanged: (value) => setState(() => _showOriginal = value),
-    onApply: _applySelection,
-    onReturn: () {
-      if (_scroll.hasClients) {
-        _scroll.animateTo(
-          _returnOffset.clamp(0.0, _scroll.position.maxScrollExtent),
-          duration: const Duration(milliseconds: 250),
-          curve: Curves.easeOut,
-        );
-      }
-    },
-  );
+  Widget _photos() => ReceiptPhotoReviewPanel(review: _review);
 
   Widget _line(ParsedLineItem line, int index) {
     final problem = _review.lineProblem(line);
@@ -192,9 +152,6 @@ class _ReviewMatchScreenState extends State<ReviewMatchScreen> {
             matchedProduct: _review.productFor(line.productId),
             problem: problem,
             enabled: !_review.saving,
-            selectedField: _review.targetLineId == line.id
-                ? _review.targetField
-                : null,
             onSelectProduct: () => _match(line),
             onQuantityChanged: (quantity) => _review.editText(
               line,
@@ -214,7 +171,6 @@ class _ReviewMatchScreenState extends State<ReviewMatchScreen> {
             onFieldEdited: (field, value) =>
                 _review.editText(line, field, value),
             onUnitChanged: (unit) => _review.setUnit(line, unit),
-            onTargetSelected: (field) => _selectTarget(line, field),
             onRemove: () => _review.removeLine(line),
             onConfirm: () {
               if (line.confirmed) {
@@ -433,7 +389,9 @@ class _ReviewMatchScreenState extends State<ReviewMatchScreen> {
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              if (!_review.loading && _review.problem != null)
+              if (!_review.loading &&
+                  _review.problem != null &&
+                  !_review.problem!.endsWith('Select a product.'))
                 Padding(
                   padding: const EdgeInsets.only(bottom: 8),
                   child: Text(

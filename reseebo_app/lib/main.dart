@@ -4,9 +4,9 @@ import 'core/adapters/mock_reseebo_data_adapter.dart';
 import 'core/adapters/reseebo_data_adapter.dart';
 import 'core/adapters/sqlite_reseebo_data_adapter.dart';
 import 'core/theme/app_theme.dart';
+import 'core/widgets/reseebo_bottom_navigation.dart';
 import 'features/comparison/screens/product_comparison_screen.dart';
 import 'features/dashboard/screens/dashboard_screen.dart';
-import 'features/planner/screens/restock_planner_screen.dart';
 import 'features/profile/screens/profile_screen.dart';
 import 'features/receipt_scan/screens/capture_screen.dart';
 import 'features/receipt_scan/screens/review_match_screen.dart';
@@ -200,16 +200,6 @@ class _ReseeboRootNavigationState extends State<ReseeboRootNavigation> {
         builder: (context) => ProductComparisonScreen(
           dataAdapter: widget.dataAdapter,
           productId: product.id,
-          onRestockPlanRequested: (prodId) {
-            Navigator.of(context).push(
-              MaterialPageRoute(
-                builder: (context) => RestockPlannerScreen(
-                  dataAdapter: widget.dataAdapter,
-                  productId: prodId,
-                ),
-              ),
-            );
-          },
         ),
       ),
     );
@@ -236,7 +226,6 @@ class _ReseeboRootNavigationState extends State<ReseeboRootNavigation> {
           DashboardScreen(
             dataAdapter: widget.dataAdapter,
             refreshRevision: _dataRevision,
-            onScanPressed: _openCaptureScreen,
             onSettingsPressed: () => _navigateToTab(1),
             onProductSelected: _openProductComparison,
             onReceiptSelected: _openReceiptDetail,
@@ -247,23 +236,10 @@ class _ReseeboRootNavigationState extends State<ReseeboRootNavigation> {
           ),
         ],
       ),
-      bottomNavigationBar: BottomNavigationBar(
-        currentIndex: _currentIndex,
-        selectedItemColor: AppColors.primary,
-        unselectedItemColor: AppColors.textMuted,
-        onTap: _navigateToTab,
-        items: const [
-          BottomNavigationBarItem(
-            icon: Icon(Icons.storefront_outlined),
-            activeIcon: Icon(Icons.storefront_rounded),
-            label: 'Home',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.settings_outlined),
-            activeIcon: Icon(Icons.settings_rounded),
-            label: 'Settings',
-          ),
-        ],
+      bottomNavigationBar: ReseeboBottomNavigation(
+        selectedIndex: _currentIndex,
+        onTabSelected: _navigateToTab,
+        onScan: _openCaptureScreen,
       ),
     );
   }

@@ -5,6 +5,7 @@ import 'package:reseebo_app/core/models/models.dart';
 import 'package:reseebo_app/core/services/receipt_validator.dart';
 import 'package:reseebo_app/core/errors/app_exception.dart';
 import 'package:reseebo_app/features/receipt_scan/screens/review_match_screen.dart';
+import 'package:reseebo_app/features/receipt_scan/widgets/receipt_image_viewer.dart';
 
 const _product = Product(
   id: 'coffee',
@@ -131,7 +132,7 @@ void main() {
   );
 
   testWidgets(
-    'recognized token assignment updates the target field without confirming it',
+    'receipt evidence stays read-only and manual edits require confirmation',
     (tester) async {
       final adapter = _ReviewAdapter();
       final draft = _validDraft();
@@ -166,62 +167,35 @@ void main() {
         ),
       );
       await tester.pumpAndSettle();
-      final target = find.byWidgetPredicate(
-        (widget) =>
-            widget is ChoiceChip &&
-            widget.label is Text &&
-            (widget.label as Text).data == 'Quantity',
+      await tester.tap(find.text('Receipt photos'));
+      await tester.pumpAndSettle();
+      final photo = tester.widget<ReceiptImageViewer>(
+        find.byType(ReceiptImageViewer),
       );
+      expect(photo.imagePath, 'original.jpg');
+      expect(find.text('Photo used for recognition'), findsNothing);
       await tester.scrollUntilVisible(
-        find.text('Receipt details'),
-        300,
+        find.text('Recognized text'),
+        150,
         scrollable: find.byType(Scrollable).first,
       );
-      await tester.ensureVisible(find.text('Receipt details'));
-      await tester.pumpAndSettle();
-      await tester.tap(find.text('Receipt details'));
-      await tester.pumpAndSettle();
-      await tester.scrollUntilVisible(
-        target,
-        300,
-        scrollable: find.byType(Scrollable).first,
-      );
-      await tester.pumpAndSettle();
-      await tester.ensureVisible(target);
-      await tester.pumpAndSettle();
-      await tester.tap(target);
-      await tester.pumpAndSettle();
-      expect(find.text('Photo used for recognition'), findsOneWidget);
-      await tester.ensureVisible(find.text('Recognized text'));
       await tester.pumpAndSettle();
       await tester.tap(find.text('Recognized text'));
       await tester.pumpAndSettle();
-      final token = find.byWidgetPredicate(
-        (widget) =>
-            widget is FilterChip &&
-            widget.label is Text &&
-            (widget.label as Text).data == '12',
-      );
-      await tester.ensureVisible(token);
-      await tester.pumpAndSettle();
-      await tester.tap(token);
-      await tester.pumpAndSettle();
-      await tester.ensureVisible(find.text('Apply to field'));
-      await tester.pumpAndSettle();
-      await tester.tap(find.text('Apply to field'));
-      await tester.pumpAndSettle();
+      expect(find.text('12 Coffee'), findsOneWidget);
+      expect(find.byType(FilterChip), findsNothing);
+      expect(find.text('Copy recognized text'), findsNothing);
+      expect(find.text('Apply to field'), findsNothing);
       await tester.scrollUntilVisible(
         find.byKey(const ValueKey('quantity')),
         300,
         scrollable: find.byType(Scrollable).first,
       );
-      final editor = tester.widget<EditableText>(
-        find.descendant(
-          of: find.byKey(const ValueKey('quantity')),
-          matching: find.byType(EditableText),
-        ),
-      );
-      expect(editor.controller.text, '12');
+      await tester.enterText(find.byKey(const ValueKey('quantity')), '12');
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Save receipt'));
+      await tester.pumpAndSettle();
+      expect(adapter.saved, isNull);
       expect(
         find.textContaining('Check and confirm this product'),
         findsWidgets,
@@ -296,6 +270,35 @@ void main() {
       expect(adapter.saved!.imagePaths, ['original-a.jpg', 'original-b.jpg']);
       expect(adapter.saved!.dateConfirmed, isTrue);
       expect(adapter.saved!.supplierName, 'New supplier');
+    },
+  );
+  testWidgets(
+    'missing product has no passive instructions but still blocks saving',
+    (tester) async {
+      final adapter = _ReviewAdapter();
+      final draft = _validDraft();
+      draft.lines.single.productId = null;
+      draft.lines.single.confirmed = false;
+      await tester.pumpWidget(
+        MaterialApp(
+          home: ReviewMatchScreen(dataAdapter: adapter, initialDraft: draft),
+        ),
+      );
+      await tester.pumpAndSettle();
+      expect(find.textContaining('Choose the exact product'), findsNothing);
+      expect(find.textContaining('Select a product.'), findsNothing);
+      await tester.scrollUntilVisible(
+        find.byKey(const ValueKey('description')),
+        200,
+        scrollable: find.byType(Scrollable).first,
+      );
+      expect(find.text('Match exact product'), findsOneWidget);
+      expect(find.text('Check brand, variant and size'), findsNothing);
+      expect(find.byKey(const ValueKey('description')), findsOneWidget);
+      await tester.tap(find.text('Save receipt'));
+      await tester.pumpAndSettle();
+      expect(adapter.saved, isNull);
+      expect(find.textContaining('Select a product.'), findsOneWidget);
     },
   );
 }
