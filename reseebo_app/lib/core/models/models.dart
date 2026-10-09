@@ -14,6 +14,24 @@ class StoreProfile {
   final String ownerName;
   final String? photoPath;
   final double? defaultMarkupPercent;
+
+  String get storeName => name;
+  double get defaultMarkupPercentage => defaultMarkupPercent ?? 15.0;
+
+  StoreProfile copyWith({
+    String? name,
+    String? storeName,
+    String? ownerName,
+    String? photoPath,
+    double? defaultMarkupPercent,
+    double? defaultMarkupPercentage,
+  }) =>
+      StoreProfile(
+        name: storeName ?? name ?? this.name,
+        ownerName: ownerName ?? this.ownerName,
+        photoPath: photoPath ?? this.photoPath,
+        defaultMarkupPercent: defaultMarkupPercentage ?? defaultMarkupPercent ?? this.defaultMarkupPercent,
+      );
 }
 
 class Product {
@@ -40,6 +58,38 @@ class Product {
   final double? markupPercent;
   final int? sellingPriceCents;
   String get identity => '$brand · $variant · $size';
+
+  String get displayTitle => '$brand $variant $size'.trim();
+  String get displayName => name.isNotEmpty ? name : displayTitle;
+  String get sizeUnit => size;
+  double? get markupPercentageOverride => markupPercent;
+  double? get ownerSetSellingPrice =>
+      sellingPriceCents != null ? sellingPriceCents! / 100.0 : null;
+
+  Product copyWith({
+    String? id,
+    String? name,
+    String? brand,
+    String? variant,
+    String? size,
+    String? category,
+    String? barcode,
+    String? photoPath,
+    double? markupPercent,
+    int? sellingPriceCents,
+  }) =>
+      Product(
+        id: id ?? this.id,
+        name: name ?? this.name,
+        brand: brand ?? this.brand,
+        variant: variant ?? this.variant,
+        size: size ?? this.size,
+        category: category ?? this.category,
+        barcode: barcode ?? this.barcode,
+        photoPath: photoPath ?? this.photoPath,
+        markupPercent: markupPercent ?? this.markupPercent,
+        sellingPriceCents: sellingPriceCents ?? this.sellingPriceCents,
+      );
 }
 
 class Supplier {
@@ -54,6 +104,8 @@ class Supplier {
   final String branch;
   final String notes;
   String get label => branch.isEmpty ? name : '$name · $branch';
+  String get displayName => label;
+  String get branchLocation => branch;
 }
 
 class ProductAlias {
@@ -76,6 +128,7 @@ class ProductMatchSuggestion {
   final Product product;
   final String reason;
   final bool exactAlias;
+  double get confidence => exactAlias ? 1.0 : 0.85;
 }
 
 enum PurchaseUnit { piece, pack }
@@ -113,18 +166,23 @@ class ReceiptOcrPage {
 class ParsedLineItem {
   ParsedLineItem({
     String? id,
-    this.description = '',
+    String? tempId,
+    String description = '',
+    String? rawDescription,
     this.productId,
     this.quantity,
     this.unit,
     this.piecesPerPack,
-    this.grossAmountCents,
+    int? grossAmountCents,
+    double? netAmount,
     this.discountCents = 0,
     this.confirmed = false,
     this.sourcePage = 0,
     this.possibleDuplicateOf,
     List<String>? warnings,
-  }) : id = id ?? const Uuid().v4(),
+  }) : id = tempId ?? id ?? const Uuid().v4(),
+       description = rawDescription ?? description,
+       grossAmountCents = netAmount != null ? (netAmount * 100).round() : grossAmountCents,
        warnings = warnings ?? [];
   final String id;
   String description;
@@ -150,6 +208,36 @@ class ParsedLineItem {
       (totalPieces ?? 0) <= 0 || (netAmountCents ?? 0) <= 0
       ? null
       : netAmountCents! / totalPieces!;
+  double? get unitCost =>
+      costPerPieceCents != null ? costPerPieceCents! / 100.0 : null;
+  double? get totalAmount =>
+      netAmountCents != null ? netAmountCents! / 100.0 : null;
+  double? get packPrice =>
+      grossAmountCents != null ? grossAmountCents! / 100.0 : null;
+  int get piecesPerPackValue => piecesPerPack ?? 1;
+  int get packsCount => quantity ?? 1;
+
+  String get rawDescription => description;
+  set rawDescription(String v) => description = v;
+
+  String? get matchedProductId => productId;
+  set matchedProductId(String? v) => productId = v;
+
+  bool get isAmbiguous => !confirmed;
+  set isAmbiguous(bool v) => confirmed = !v;
+
+  double get netAmount => (netAmountCents ?? 0) / 100.0;
+  set netAmount(double v) => grossAmountCents = (v * 100).round();
+
+  double? get estimatedCostPerPiece =>
+      costPerPieceCents != null ? costPerPieceCents! / 100.0 : null;
+
+  String get unitType => unit == PurchaseUnit.pack ? 'pack' : 'piece';
+  set unitType(String v) =>
+      unit = v == 'pack' ? PurchaseUnit.pack : PurchaseUnit.piece;
+
+  double get discount => discountCents / 100.0;
+  set discount(double v) => discountCents = (v * 100).round();
   ParsedLineItem snapshot() => ParsedLineItem(
     id: id,
     description: description,
@@ -169,14 +257,17 @@ class ParsedLineItem {
 class ReceiptDraft {
   ReceiptDraft({
     String? operationId,
-    required this.imagePath,
+    String? imagePath,
+    String? localImagePath,
     List<String>? imagePaths,
     this.recognitionImagePath,
     this.supplierId,
     this.supplierName = '',
-    this.supplierBranch = '',
+    String? supplierBranch,
+    String? branchLocation,
     this.supplierNotes = '',
-    this.purchasedAt,
+    DateTime? purchasedAt,
+    DateTime? purchaseDate,
     this.hasPurchaseTime = false,
     this.dateConfirmed = false,
     this.receiptNumber = '',
@@ -188,7 +279,10 @@ class ReceiptDraft {
     List<OcrTextLine>? textLines,
     List<ParsedLineItem>? lines,
     List<String>? warnings,
-  }) : imagePaths = List.unmodifiable(imagePaths ?? [imagePath]),
+  }) : imagePath = localImagePath ?? imagePath ?? '',
+       supplierBranch = branchLocation ?? supplierBranch ?? '',
+       purchasedAt = purchaseDate ?? purchasedAt,
+       imagePaths = List.unmodifiable(imagePaths ?? [localImagePath ?? imagePath ?? '']),
        operationId = operationId ?? const Uuid().v4(),
        lines = lines ?? [],
        textLines = textLines ?? [],
@@ -213,6 +307,11 @@ class ReceiptDraft {
   final List<OcrTextLine> textLines;
   final List<ParsedLineItem> lines;
   final List<String> warnings;
+
+  String get localImagePath => imagePath;
+  double get totalAmount => (detectedTotalCents ?? 0) / 100.0;
+  int get lineItemCount => lines.length;
+  DateTime get purchaseDate => purchasedAt ?? DateTime.now();
   ReceiptDraft snapshot() => ReceiptDraft(
     operationId: operationId,
     imagePath: imagePath,
@@ -266,6 +365,14 @@ class Receipt {
   final int totalCents;
   final String receiptNumber;
   final String notes;
+
+  String get supplierName => supplier.name;
+  String get supplierId => supplier.id;
+  DateTime get purchaseDate => purchasedAt;
+  double get totalAmount => totalCents / 100.0;
+  String get localImagePath => imagePath;
+  int get lineItemCount => lineCount;
+  int get itemCount => lineCount;
 }
 
 /// Costs use integer centavos and an integer piece denominator. A fractional
@@ -312,7 +419,14 @@ class PurchaseRecord {
   String get purchaseLabel => unit == PurchaseUnit.pack
       ? '$quantity packs × $piecesPerPack pcs'
       : '$quantity pcs';
+
+  double get unitCost => costPerPieceCents / 100.0;
+  double get totalAmount => netAmountCents / 100.0;
+  int get totalPiecesCount => totalPieces;
+  String get supplierName => supplier.name;
 }
+
+typedef PurchaseLine = PurchaseRecord;
 
 class ReceiptDetail {
   const ReceiptDetail({required this.receipt, required this.lines});
@@ -342,6 +456,17 @@ class SupplierPriceRow {
   final double bestCostPerPieceCents;
   double get differenceCents =>
       purchase.costPerPieceCents - bestCostPerPieceCents;
+
+  double get difference => differenceCents / 100.0;
+  double get differenceVsBest => difference;
+  double get unitCost => purchase.costPerPieceCents / 100.0;
+  double get costPerPiece => unitCost;
+  String get supplierName => purchase.supplier.name;
+  bool get isLowest => differenceCents == 0.0;
+  bool get isLowestPrice => isLowest;
+  String get sourceReceiptId => purchase.receiptId;
+  String get packageDescription => purchase.purchaseLabel;
+  DateTime get latestPurchaseDate => purchase.purchasedAt;
 }
 
 class PriceHistoryRecord {
@@ -359,6 +484,18 @@ class PriceHistoryRecord {
   double? get changePercent => previousCostPerPieceCents == null
       ? null
       : changeCents! / previousCostPerPieceCents! * 100;
+
+  double? get changeAmount =>
+      changeCents != null ? changeCents! / 100.0 : null;
+  double? get changeFromPreviousPesos => changeAmount;
+  double? get changeFromPreviousPercent => changePercent;
+  double get unitCost => purchase.costPerPieceCents / 100.0;
+  double get costPerPiece => unitCost;
+  DateTime get date => purchase.purchasedAt;
+  DateTime get purchaseDate => date;
+  String get supplierName => purchase.supplier.name;
+  String get sourceReceiptId => purchase.receiptId;
+  String get packageDetails => purchase.purchaseLabel;
 }
 
 class ProductComparisonData {
@@ -376,6 +513,12 @@ class ProductComparisonData {
   final PurchaseRecord? lowestHistorical;
   double? get effectiveMarkupPercent =>
       product.markupPercent ?? profile.defaultMarkupPercent;
+
+  double? get lowestHistoricalPrice => lowestHistorical?.unitCost;
+  String? get lowestHistoricalSupplierName => lowestHistorical?.supplier.name;
+  DateTime? get lowestHistoricalDate => lowestHistorical?.purchasedAt;
+  List<SupplierPriceRow> get supplierRows => latestPrices;
+  List<PriceHistoryRecord> get historyRows => history;
 }
 
 class ProfitCalculation {
@@ -385,12 +528,44 @@ class ProfitCalculation {
     required this.grossProfitCents,
     required this.markupPercent,
     required this.marginPercent,
+    this.ownerSetSellingPrice,
   });
   final double costPerPieceCents;
   final int sellingPriceCents;
   final double grossProfitCents;
   final double markupPercent;
   final double? marginPercent;
+  final double? ownerSetSellingPrice;
+
+  double get costPerPiece => costPerPieceCents / 100.0;
+  double get suggestedSellingPrice => sellingPriceCents / 100.0;
+  double get estimatedGrossProfit => grossProfitCents / 100.0;
+  double get markupPercentageUsed => markupPercent;
+  double? get grossMarginPercentage => marginPercent;
+
+  static ProfitCalculation compute({
+    required double costPerPiece,
+    double? defaultMarkupPercentage,
+    double? markupPercentage,
+    double? customSellingPrice,
+    double? ownerSetSellingPrice,
+  }) {
+    final effectiveMarkup = markupPercentage ?? defaultMarkupPercentage ?? 15.0;
+    final effectiveSelling = ownerSetSellingPrice ?? customSellingPrice;
+    final costCents = costPerPiece * 100.0;
+    final sellingCents = effectiveSelling != null
+        ? (effectiveSelling * 100.0).round()
+        : (costCents * (1 + effectiveMarkup / 100)).round();
+    final gross = sellingCents - costCents;
+    return ProfitCalculation(
+      costPerPieceCents: costCents,
+      sellingPriceCents: sellingCents,
+      grossProfitCents: gross,
+      markupPercent: effectiveMarkup,
+      marginPercent: sellingCents == 0 ? null : (gross / sellingCents * 100),
+      ownerSetSellingPrice: effectiveSelling,
+    );
+  }
 }
 
 class RestockSupplierEstimate {
@@ -409,23 +584,57 @@ class RestockSupplierEstimate {
   final int subtotalCents;
   final int additionalCostCents;
   int get totalCents => subtotalCents + additionalCostCents;
+
+  int get packsNeeded => packsToBuy;
+  int get totalPurchasedPieces => purchasedPieces;
+  int get totalPiecesPurchased => purchasedPieces;
+  double get calculatedSubtotal => subtotalCents / 100.0;
+  double get totalEstimatedCost => (subtotalCents + additionalCostCents) / 100.0;
+  double get totalPurchaseCost => subtotalCents / 100.0;
+  double get travelCost => additionalCostCents / 100.0;
+  double get totalCostWithTravel => (subtotalCents + additionalCostCents) / 100.0;
+  double? get netSavingsAfterTravel => null;
+  double get packCost =>
+      (purchase.netAmountCents / (purchase.quantity > 0 ? purchase.quantity : 1)) / 100.0;
+
+  double get subtotal => subtotalCents / 100.0;
+  double get totalWithFare => (subtotalCents + additionalCostCents) / 100.0;
+  double get unitCost => purchase.costPerPieceCents / 100.0;
+  String get supplierName => purchase.supplier.name;
+  int get piecesPerPack => purchase.piecesPerPack;
+  String get supplierId => purchase.supplier.id;
 }
+
+typedef RestockSupplierOption = RestockSupplierEstimate;
 
 class RestockEstimate {
   const RestockEstimate({
-    required this.product,
+    this.product,
     required this.targetPieces,
-    required this.suppliers,
-  });
-  final Product product;
+    List<RestockSupplierEstimate>? suppliers,
+    List<RestockSupplierEstimate>? estimates,
+    this.additionalCostCents = 0,
+  }) : suppliers = suppliers ?? estimates ?? const [];
+
+  final Product? product;
   final int targetPieces;
   final List<RestockSupplierEstimate> suppliers;
+  final int additionalCostCents;
+
+  List<RestockSupplierEstimate> get estimates => suppliers;
+  List<RestockSupplierOption> get supplierOptions => suppliers;
+  RestockSupplierOption? get recommendedSupplier =>
+      suppliers.isNotEmpty ? suppliers.first : null;
 }
 
 class BasketItem {
   const BasketItem({required this.product, required this.estimate});
   final Product product;
   final RestockSupplierEstimate estimate;
+
+  int get pieces => estimate.targetPieces;
+  int get packs => estimate.packsToBuy;
+  double get cost => estimate.subtotal;
 }
 
 class BasketSupplierGroup {
@@ -440,6 +649,10 @@ class BasketSupplierGroup {
   int get subtotalCents =>
       items.fold(0, (sum, item) => sum + item.estimate.subtotalCents);
   int get totalCents => subtotalCents + additionalCostCents;
+
+  double get totalCost => totalCents / 100.0;
+  double get subtotalCost => subtotalCents / 100.0;
+  double get travelCost => additionalCostCents / 100.0;
 }
 
 class BasketSupplierAlternative {
@@ -460,14 +673,21 @@ class BasketSupplierAlternative {
 
 class BasketEstimate {
   const BasketEstimate({
-    required this.groups,
-    required this.missingProducts,
-    required this.alternatives,
-  });
+    List<BasketSupplierGroup>? groups,
+    List<BasketSupplierGroup>? supplierGroups,
+    this.missingProducts = const [],
+    this.alternatives = const [],
+    int? overallTotalCents,
+  }) : groups = groups ?? supplierGroups ?? const [];
+
   final List<BasketSupplierGroup> groups;
   final List<Product> missingProducts;
   final List<BasketSupplierAlternative> alternatives;
+
+  List<BasketSupplierGroup> get supplierGroups => groups;
   int get subtotalCents =>
       groups.fold(0, (sum, group) => sum + group.subtotalCents);
   int get totalCents => groups.fold(0, (sum, group) => sum + group.totalCents);
+  int get overallTotalCents => totalCents;
+  double get totalOverallCost => totalCents / 100.0;
 }

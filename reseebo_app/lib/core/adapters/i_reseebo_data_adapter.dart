@@ -2,6 +2,7 @@ import '../models/models.dart';
 import '../errors/app_exception.dart';
 import '../models/latest_product_cost.dart';
 import '../services/latest_product_cost_service.dart';
+import '../services/pricing_service.dart';
 
 export '../models/models.dart';
 export '../errors/app_exception.dart';
@@ -16,6 +17,10 @@ abstract class IReseeboDataAdapter {
   Future<Product?> getProductById(String id);
   Future<void> saveProduct(Product product);
   Future<List<Supplier>> getSuppliers();
+  Future<Supplier?> getSupplierById(String id) async {
+    final list = await getSuppliers();
+    return list.where((s) => s.id == id).firstOrNull;
+  }
   Future<void> saveSupplier(Supplier supplier);
   Future<List<ProductMatchSuggestion>> matchAliases(String rawOcrDescription);
   Future<List<ProductAlias>> getAliases(String productId);
@@ -92,5 +97,19 @@ abstract class IReseeboDataAdapter {
     Map<String, int> targetPieces, {
     Map<String, int> additionalCostsCents = const {},
   });
+  Future<ProfitCalculation> calculateProfit({
+    required String productId,
+    required double costPerPiece,
+    double? customMarkupPercentage,
+    double? customSellingPrice,
+  }) async {
+    final costCents = costPerPiece * 100.0;
+    final markup = customMarkupPercentage ?? 15.0;
+    final sellingCents = customSellingPrice != null
+        ? (customSellingPrice * 100.0).round()
+        : PricingService.suggestedSellingPriceCents(costCents, markup);
+    return PricingService.profit(costCents, sellingCents);
+  }
+
   Future<void> close();
 }

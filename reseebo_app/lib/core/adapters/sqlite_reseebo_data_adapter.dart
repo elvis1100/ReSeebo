@@ -240,6 +240,12 @@ class SqliteReseeboDataAdapter implements IReseeboDataAdapter {
   )).map(supplierFromRow).toList();
 
   @override
+  Future<Supplier?> getSupplierById(String id) async {
+    final rows = await _db.query('suppliers', where: 'id = ?', whereArgs: [id]);
+    return rows.isEmpty ? null : supplierFromRow(rows.first);
+  }
+
+  @override
   Future<void> saveSupplier(Supplier supplier) => _write(() async {
     if (supplier.id.trim().isEmpty || supplier.name.trim().isEmpty) {
       throw const ValidationException('Enter a supplier name.');
@@ -896,6 +902,21 @@ class SqliteReseeboDataAdapter implements IReseeboDataAdapter {
   }
 
   @override
+  Future<ProfitCalculation> calculateProfit({
+    required String productId,
+    required double costPerPiece,
+    double? customMarkupPercentage,
+    double? customSellingPrice,
+  }) async {
+    final costCents = costPerPiece * 100.0;
+    final markup = customMarkupPercentage ?? 15.0;
+    final sellingCents = customSellingPrice != null
+        ? (customSellingPrice * 100.0).round()
+        : PricingService.suggestedSellingPriceCents(costCents, markup);
+    return PricingService.profit(costCents, sellingCents);
+  }
+
+  @override
   Future<BasketEstimate> calculateBasket(
     Map<String, int> targetPieces, {
     Map<String, int> additionalCostsCents = const {},
@@ -909,7 +930,9 @@ class SqliteReseeboDataAdapter implements IReseeboDataAdapter {
         targetPieces: entry.value,
         additionalCost: 0,
       );
-      estimates[estimate.product] = estimate;
+      if (estimate.product != null) {
+        estimates[estimate.product!] = estimate;
+      }
     }
     return PricingService.basket(
       estimates,
