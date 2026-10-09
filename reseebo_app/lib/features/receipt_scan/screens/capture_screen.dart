@@ -138,46 +138,6 @@ class _CaptureScreenState extends State<CaptureScreen> {
           // Framing cut-out guidelines
           const CameraViewfinderGuide(),
 
-          // Top offline status pill
-          Positioned(
-            top: AppSpacing.m,
-            left: 0,
-            right: 0,
-            child: Center(
-              child: Container(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: AppSpacing.m,
-                  vertical: AppSpacing.xs + 2,
-                ),
-                decoration: BoxDecoration(
-                  color: AppColors.primaryDark.withValues(alpha: 0.85),
-                  borderRadius: BorderRadius.circular(AppSpacing.radiusPill),
-                  border: Border.all(
-                    color: AppColors.primaryLight.withValues(alpha: 0.5),
-                  ),
-                ),
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    const Icon(
-                      Icons.wifi_off_rounded,
-                      color: AppColors.accentLight,
-                      size: 15,
-                    ),
-                    const SizedBox(width: AppSpacing.s),
-                    Text(
-                      '100% Offline • On-Device OCR',
-                      style: AppTypography.caption.copyWith(
-                        color: Colors.white,
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-          ),
-
           // Bottom control toolbar
           Positioned(
             bottom: 0,
