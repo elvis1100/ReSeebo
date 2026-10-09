@@ -21,11 +21,12 @@ void main() {
       final root = await Directory(
         '${cache.path}/ocr-smoke-${DateTime.now().microsecondsSinceEpoch}',
       ).create();
-      final image = img.Image(width: 1600, height: 600);
+      final image = img.Image(width: 1600, height: 730);
       img.fill(image, color: img.ColorRgb8(255, 255, 255));
       const rows = [
         'SUPPLIER A',
-        '2026-10-08',
+        'OCTOBER 8, 2026',
+        'TIME 02:30 PM',
         '2 PC COFFEE ORIGINAL 26G 168.00',
         'TOTAL 168.00',
       ];
@@ -47,6 +48,19 @@ void main() {
         mediaDirectory: Directory('${root.path}/media'),
       );
       var adapter = await open();
+      final starterCatalog = await adapter.getProducts();
+      expect(starterCatalog.length, greaterThanOrEqualTo(150));
+      expect(
+        starterCatalog.every(
+          (product) =>
+              product.photoPath?.startsWith('asset:assets/catalog/images/') ==
+              true,
+        ),
+        isTrue,
+      );
+      expect(await adapter.getRecentReceipts(), isEmpty);
+      expect((await adapter.getStoreProfile()).name, 'Sari-sari Store');
+      expect((await adapter.getStoreProfile()).defaultMarkupPercent, 20);
       final capture = CaptureState(
         adapter: adapter,
         initialImagePath: original.path,
@@ -64,7 +78,8 @@ void main() {
         );
         final draft = await capture.recognize();
         expect(draft, isNotNull, reason: capture.error);
-        expect(draft!.purchasedAt, DateTime(2026, 10, 8));
+        expect(draft!.purchasedAt, DateTime(2026, 10, 8, 14, 30));
+        expect(draft.hasPurchaseTime, isTrue);
         expect(draft.lines, hasLength(1));
         expect(draft.lines.single.quantity, 2);
         expect(draft.lines.single.unit, PurchaseUnit.piece);
@@ -95,7 +110,9 @@ void main() {
         expect(saved.unitCostsCents, [8400.0]);
         await adapter.close();
         adapter = await open();
+        expect((await adapter.getProducts()).length, starterCatalog.length + 1);
         final receipt = await adapter.getReceipt(saved.receiptId);
+        expect(receipt.receipt.purchasedAt, DateTime(2026, 10, 8, 14, 30));
         expect(receipt.lines.single.costPerPieceCents, 8400);
         expect(receipt.receipt.imagePaths, hasLength(1));
         expect(

@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import '../errors/app_exception.dart';
 import '../theme/app_theme.dart';
@@ -15,10 +16,12 @@ class LocalPhoto extends StatelessWidget {
     this.path,
     this.size = 56,
     this.icon = Icons.inventory_2_outlined,
+    this.fit = BoxFit.cover,
   });
   final String? path;
   final double size;
   final IconData icon;
+  final BoxFit fit;
 
   @override
   Widget build(BuildContext context) {
@@ -35,9 +38,21 @@ class LocalPhoto extends StatelessWidget {
         height: size,
         child: path == null || path!.isEmpty
             ? placeholder
+            : path!.startsWith('asset:') || path!.startsWith('assets/')
+            ? Image.asset(
+                path!.startsWith('asset:') ? path!.substring(6) : path!,
+                fit: fit,
+                errorBuilder: (_, _, _) => placeholder,
+              )
+            : kIsWeb
+            ? Image.network(
+                path!,
+                fit: fit,
+                errorBuilder: (_, _, _) => placeholder,
+              )
             : Image.file(
                 File(path!),
-                fit: BoxFit.cover,
+                fit: fit,
                 errorBuilder: (_, _, _) => placeholder,
               ),
       ),
@@ -60,37 +75,36 @@ class EmptyState extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Padding(
-        padding: const EdgeInsets.all(28),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Container(
-              padding: const EdgeInsets.all(24),
-              decoration: const BoxDecoration(
-                color: AppColors.softPrimary,
-                shape: BoxShape.circle,
-              ),
-              child: Icon(icon, color: AppColors.primary, size: 42),
-            ),
-            const SizedBox(height: 20),
-            Text(
-              title,
-              textAlign: TextAlign.center,
-              style: Theme.of(context)
-                  .textTheme
-                  .titleLarge
-                  ?.copyWith(fontWeight: FontWeight.w700),
-            ),
-            const SizedBox(height: 8),
-            Text(
-              message,
-              textAlign: TextAlign.center,
-              style: const TextStyle(color: AppColors.muted),
-            ),
-            if (action != null) ...[const SizedBox(height: 20), action!],
-          ],
+    padding: const EdgeInsets.all(28),
+    child: Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Container(
+          padding: const EdgeInsets.all(24),
+          decoration: const BoxDecoration(
+            color: AppColors.softPrimary,
+            shape: BoxShape.circle,
+          ),
+          child: Icon(icon, color: AppColors.primary, size: 42),
         ),
-      );
+        const SizedBox(height: 20),
+        Text(
+          title,
+          textAlign: TextAlign.center,
+          style: Theme.of(
+            context,
+          ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w700),
+        ),
+        const SizedBox(height: 8),
+        Text(
+          message,
+          textAlign: TextAlign.center,
+          style: const TextStyle(color: AppColors.muted),
+        ),
+        if (action != null) ...[const SizedBox(height: 20), action!],
+      ],
+    ),
+  );
 }
 
 class ErrorState extends StatelessWidget {
@@ -100,15 +114,15 @@ class ErrorState extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => EmptyState(
-        icon: Icons.error_outline,
-        title: 'Could not load your records',
-        message: message,
-        action: FilledButton.icon(
-          onPressed: onRetry,
-          icon: const Icon(Icons.refresh),
-          label: const Text('Try again'),
-        ),
-      );
+    icon: Icons.error_outline,
+    title: 'Could not load your records',
+    message: message,
+    action: FilledButton.icon(
+      onPressed: onRetry,
+      icon: const Icon(Icons.refresh),
+      label: const Text('Try again'),
+    ),
+  );
 }
 
 class Notice extends StatelessWidget {
@@ -118,34 +132,34 @@ class Notice extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Semantics(
-        liveRegion: true,
-        child: Container(
-          padding: const EdgeInsets.all(12),
-          decoration: BoxDecoration(
-            color: warning ? AppColors.softAmber : AppColors.softPrimary,
-            borderRadius: BorderRadius.circular(AppRadii.control),
+    liveRegion: true,
+    child: Container(
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: warning ? AppColors.softAmber : AppColors.softPrimary,
+        borderRadius: BorderRadius.circular(AppRadii.control),
+      ),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Icon(
+            warning ? Icons.info_outline : Icons.check_circle_outline,
+            size: 20,
+            color: warning ? AppColors.amber : AppColors.primary,
           ),
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Icon(
-                warning ? Icons.info_outline : Icons.check_circle_outline,
-                size: 20,
-                color: warning ? AppColors.amber : AppColors.primary,
+          const SizedBox(width: 10),
+          Expanded(
+            child: Text(
+              message,
+              style: TextStyle(
+                color: warning ? AppColors.amberText : AppColors.primary,
               ),
-              const SizedBox(width: 10),
-              Expanded(
-                child: Text(
-                  message,
-                  style: TextStyle(
-                    color: warning ? AppColors.amberText : AppColors.primary,
-                  ),
-                ),
-              ),
-            ],
+            ),
           ),
-        ),
-      );
+        ],
+      ),
+    ),
+  );
 }
 
 class AppField extends StatelessWidget {
@@ -177,24 +191,24 @@ class AppField extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => TextFormField(
-        controller: controller,
-        enabled: enabled,
-        decoration: InputDecoration(
-          labelText: label,
-          hintText: hint,
-          helperText: helper,
-          suffixIcon: suffixIcon,
-        ),
-        validator: validator,
-        onChanged: onChanged,
-        keyboardType: keyboardType,
-        maxLines: maxLines,
-        minLines: minLines,
-        textCapitalization: keyboardType == null
-            ? TextCapitalization.sentences
-            : TextCapitalization.none,
-        autovalidateMode: AutovalidateMode.onUserInteraction,
-      );
+    controller: controller,
+    enabled: enabled,
+    decoration: InputDecoration(
+      labelText: label,
+      hintText: hint,
+      helperText: helper,
+      suffixIcon: suffixIcon,
+    ),
+    validator: validator,
+    onChanged: onChanged,
+    keyboardType: keyboardType,
+    maxLines: maxLines,
+    minLines: minLines,
+    textCapitalization: keyboardType == null
+        ? TextCapitalization.sentences
+        : TextCapitalization.none,
+    autovalidateMode: AutovalidateMode.onUserInteraction,
+  );
 }
 
 class AppActionButton extends StatelessWidget {
@@ -214,19 +228,18 @@ class AppActionButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => FilledButton.icon(
-        onPressed: busy ? null : onPressed,
-        icon: SizedBox(
-          width: 20,
-          height: 20,
-          child: busy
-              ? CircularProgressIndicator(
-                  strokeWidth: 2, semanticsLabel: busyLabel)
-              : Icon(icon, size: 20),
-        ),
-        label: Text(busy ? busyLabel : label),
-      );
+    onPressed: busy ? null : onPressed,
+    icon: SizedBox(
+      width: 20,
+      height: 20,
+      child: busy
+          ? CircularProgressIndicator(strokeWidth: 2, semanticsLabel: busyLabel)
+          : Icon(icon, size: 20),
+    ),
+    label: Text(busy ? busyLabel : label),
+  );
 }
 
 void showAppError(BuildContext context, Object error) => ScaffoldMessenger.of(
-      context,
-    ).showSnackBar(SnackBar(content: Text(userMessage(error))));
+  context,
+).showSnackBar(SnackBar(content: Text(userMessage(error))));

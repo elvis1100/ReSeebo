@@ -1,5 +1,5 @@
 name: reseebo_app
-description: "Reseebo: offline tindahan price and tubo tracker."
+description: "Reseebo: offline store purchase and profit tracker."
 publish_to: 'none'
 
 version: 1.0.0+1
@@ -40,4 +40,6 @@ flutter:
   assets:
     - assets/placeholders/
     - assets/fonts/
+    - assets/catalog/
+    - assets/catalog/images/
 

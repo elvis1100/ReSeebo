@@ -5,6 +5,8 @@ import '../../../core/theme/app_spacing.dart';
 import '../../../core/theme/app_typography.dart';
 import '../../../core/widgets/app_card.dart';
 import '../../../core/widgets/currency_text.dart';
+import '../../../core/widgets/shared_widgets.dart' show LocalPhoto;
+import '../../../core/utils/date_formatter.dart';
 
 /// Interactive card rendering a product in the store owner's catalog.
 ///
@@ -14,6 +16,7 @@ class ProductCatalogItem extends StatelessWidget {
   final Product product;
   final double? latestUnitCost;
   final double? suggestedPrice;
+  final DateTime? latestPurchaseDate;
   final VoidCallback? onTap;
 
   const ProductCatalogItem({
@@ -21,6 +24,7 @@ class ProductCatalogItem extends StatelessWidget {
     required this.product,
     this.latestUnitCost,
     this.suggestedPrice,
+    this.latestPurchaseDate,
     this.onTap,
   });
 
@@ -31,19 +35,7 @@ class ProductCatalogItem extends StatelessWidget {
       padding: AppSpacing.compactCardPadding,
       child: Row(
         children: [
-          Container(
-            width: 40,
-            height: 40,
-            decoration: BoxDecoration(
-              color: AppColors.surfaceSubtle,
-              borderRadius: BorderRadius.circular(AppSpacing.radiusS),
-            ),
-            child: const Icon(
-              Icons.inventory_2_outlined,
-              color: AppColors.textSecondary,
-              size: 20,
-            ),
-          ),
+          LocalPhoto(path: product.photoPath, size: 48, fit: BoxFit.contain),
           const SizedBox(width: AppSpacing.m),
           Expanded(
             child: Column(
@@ -52,11 +44,13 @@ class ProductCatalogItem extends StatelessWidget {
                 Text(
                   product.displayName,
                   style: AppTypography.headingSmall.copyWith(fontSize: 15),
-                  maxLines: 1,
+                  maxLines: 2,
                   overflow: TextOverflow.ellipsis,
                 ),
                 const SizedBox(height: 2),
-                Row(
+                Wrap(
+                  spacing: AppSpacing.s,
+                  runSpacing: 4,
                   children: [
                     if (product.category.isNotEmpty) ...[
                       Container(
@@ -77,12 +71,8 @@ class ProductCatalogItem extends StatelessWidget {
                           ),
                         ),
                       ),
-                      const SizedBox(width: AppSpacing.s),
                     ],
-                    Text(
-                      product.sizeUnit,
-                      style: AppTypography.caption,
-                    ),
+                    Text(product.sizeUnit, style: AppTypography.caption),
                   ],
                 ),
               ],
@@ -97,7 +87,7 @@ class ProductCatalogItem extends StatelessWidget {
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     Text(
-                      'Cost: ',
+                      'Cost / pc: ',
                       style: AppTypography.caption.copyWith(fontSize: 11),
                     ),
                     CurrencyText(
@@ -110,13 +100,20 @@ class ProductCatalogItem extends StatelessWidget {
                   ],
                 ),
               ],
+              if (latestPurchaseDate != null)
+                Text(
+                  DateFormatter.format(latestPurchaseDate!),
+                  style: AppTypography.caption,
+                ),
+              if (latestUnitCost == null)
+                const Text('No price yet', style: AppTypography.bodySmall),
               if (suggestedPrice != null) ...[
                 const SizedBox(height: 2),
                 Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     Text(
-                      'SRP: ',
+                      'Suggested: ',
                       style: AppTypography.caption.copyWith(
                         fontSize: 11,
                         color: AppColors.textSecondary,

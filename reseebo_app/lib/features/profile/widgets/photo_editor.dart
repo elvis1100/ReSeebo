@@ -1,8 +1,6 @@
-import 'dart:io';
-
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
+import '../../../core/widgets/shared_widgets.dart';
 
 /// Picker files are temporary until the profile/product adapter copies them.
 class PhotoEditor extends StatefulWidget {
@@ -54,35 +52,11 @@ class _PhotoEditorState extends State<PhotoEditor> {
     children: [
       Row(
         children: [
-          ClipRRect(
-            borderRadius: BorderRadius.circular(16),
-            child: SizedBox(
-              width: 88,
-              height: 88,
-              child: widget.path == null
-                  ? ColoredBox(
-                      color: Theme.of(
-                        context,
-                      ).colorScheme.surfaceContainerHighest,
-                      child: const Icon(
-                        Icons.add_photo_alternate_outlined,
-                        size: 32,
-                      ),
-                    )
-                  : (kIsWeb
-                      ? Image.network(
-                          widget.path!,
-                          fit: BoxFit.cover,
-                          errorBuilder: (_, _, _) =>
-                              const Icon(Icons.broken_image_outlined),
-                        )
-                      : Image.file(
-                          File(widget.path!),
-                          fit: BoxFit.cover,
-                          errorBuilder: (_, _, _) =>
-                              const Icon(Icons.broken_image_outlined),
-                        )),
-            ),
+          LocalPhoto(
+            path: widget.path,
+            size: 88,
+            icon: Icons.add_photo_alternate_outlined,
+            fit: BoxFit.contain,
           ),
           const SizedBox(width: 16),
           Expanded(

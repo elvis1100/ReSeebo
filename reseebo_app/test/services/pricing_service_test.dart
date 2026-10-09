@@ -244,6 +244,14 @@ void main() {
           const StoreProfile(),
           [],
         ).effectiveMarkupPercent,
+        20,
+      );
+      expect(
+        PricingService.comparison(
+          product,
+          const StoreProfile(defaultMarkupPercent: null),
+          [],
+        ).effectiveMarkupPercent,
         isNull,
       );
     },

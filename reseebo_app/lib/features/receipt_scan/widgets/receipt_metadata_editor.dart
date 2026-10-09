@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../../../core/adapters/i_reseebo_data_adapter.dart';
 import '../../../core/constants/formatters.dart';
 import '../../../core/widgets/shared_widgets.dart';
+import '../../../core/theme/app_theme.dart';
 
 class ReceiptMetadataEditor extends StatefulWidget {
   const ReceiptMetadataEditor({
@@ -169,11 +170,17 @@ class _ReceiptMetadataEditorState extends State<ReceiptMetadataEditor> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text('Purchase details', style: Theme.of(context).textTheme.titleLarge),
-        const SizedBox(height: 16),
+        const SizedBox(height: AppSpacing.sm),
+        const Text(
+          'Where and when did you buy these items?',
+          style: TextStyle(color: AppColors.textSecondary),
+        ),
+        const SizedBox(height: AppSpacing.lg),
         AppField(
           controller: _supplier,
           enabled: widget.enabled,
           label: 'Supplier name',
+          hint: 'Grocery store or wholesaler',
           onChanged: (value) {
             _clearSupplierSelection();
             draft.supplierName = value;
@@ -182,19 +189,16 @@ class _ReceiptMetadataEditorState extends State<ReceiptMetadataEditor> {
           validator: (value) =>
               value!.trim().isEmpty ? 'Enter supplier name.' : null,
         ),
-        const SizedBox(height: 16),
-        AppField(
-          controller: _branch,
-          enabled: widget.enabled,
-          label: 'Branch / location (optional)',
-          onChanged: (value) {
-            _clearSupplierSelection();
-            draft.supplierBranch = value;
-            widget.onChanged();
-          },
-        ),
+        if (draft.supplierBranch.trim().isNotEmpty)
+          Padding(
+            padding: const EdgeInsets.only(top: AppSpacing.sm),
+            child: Text(
+              'Branch: ${draft.supplierBranch}',
+              style: const TextStyle(color: AppColors.textSecondary),
+            ),
+          ),
         Wrap(
-          spacing: 8,
+          spacing: AppSpacing.sm,
           children: [
             TextButton.icon(
               onPressed: widget.enabled ? _chooseSupplier : null,
@@ -210,50 +214,30 @@ class _ReceiptMetadataEditorState extends State<ReceiptMetadataEditor> {
             ),
           ],
         ),
-        const SizedBox(height: 12),
-        OutlinedButton.icon(
-          onPressed: widget.enabled ? _chooseDate : null,
-          icon: const Icon(Icons.calendar_month_outlined),
-          label: Text(
-            draft.purchasedAt == null
-                ? 'Choose purchase date'
-                : purchaseDate(
-                    draft.purchasedAt!,
-                    withTime: draft.hasPurchaseTime,
-                  ),
+        const SizedBox(height: AppSpacing.md),
+        Text('Purchase date', style: Theme.of(context).textTheme.titleSmall),
+        const SizedBox(height: AppSpacing.sm),
+        SizedBox(
+          width: double.infinity,
+          child: OutlinedButton.icon(
+            onPressed: widget.enabled ? _chooseDate : null,
+            icon: const Icon(Icons.calendar_month_outlined),
+            label: Text(
+              draft.purchasedAt == null
+                  ? 'Choose purchase date'
+                  : purchaseDate(
+                      draft.purchasedAt!,
+                      withTime: draft.hasPurchaseTime,
+                    ),
+            ),
           ),
         ),
-        Wrap(
-          spacing: 8,
-          children: [
-            TextButton(
-              onPressed: widget.enabled && draft.purchasedAt != null
-                  ? _chooseTime
-                  : null,
-              child: Text(
-                draft.hasPurchaseTime
-                    ? 'Change purchase time'
-                    : 'Add time from receipt',
-              ),
-            ),
-            if (draft.hasPurchaseTime)
-              TextButton(
-                onPressed: widget.enabled
-                    ? () {
-                        final date = draft.purchasedAt!;
-                        draft.purchasedAt = DateTime(
-                          date.year,
-                          date.month,
-                          date.day,
-                        );
-                        draft.hasPurchaseTime = false;
-                        draft.dateConfirmed = false;
-                        widget.onChanged();
-                      }
-                    : null,
-                child: const Text('Time unknown'),
-              ),
-          ],
+        const Padding(
+          padding: EdgeInsets.only(top: AppSpacing.sm),
+          child: Text(
+            'Check the date and time printed on the receipt.',
+            style: TextStyle(color: AppColors.textSecondary),
+          ),
         ),
         CheckboxListTile(
           contentPadding: EdgeInsets.zero,
@@ -271,26 +255,81 @@ class _ReceiptMetadataEditorState extends State<ReceiptMetadataEditor> {
                 }
               : null,
         ),
-        const SizedBox(height: 12),
-        AppField(
-          controller: _number,
-          enabled: widget.enabled,
-          label: 'Receipt number (optional)',
-          onChanged: (value) {
-            draft.receiptNumber = value;
-            widget.onChanged();
-          },
-        ),
-        const SizedBox(height: 16),
-        AppField(
-          controller: _notes,
-          enabled: widget.enabled,
-          maxLines: 3,
-          label: 'Receipt notes (optional)',
-          onChanged: (value) {
-            draft.notes = value;
-            widget.onChanged();
-          },
+        const SizedBox(height: AppSpacing.sm),
+        ExpansionTile(
+          tilePadding: EdgeInsets.zero,
+          childrenPadding: const EdgeInsets.only(bottom: AppSpacing.sm),
+          leading: const Icon(Icons.notes_rounded),
+          title: const Text('More details'),
+          subtitle: const Text('Branch, time, receipt number, and notes'),
+          children: [
+            const SizedBox(height: AppSpacing.sm),
+            AppField(
+              controller: _branch,
+              enabled: widget.enabled,
+              label: 'Branch / location (optional)',
+              onChanged: (value) {
+                _clearSupplierSelection();
+                draft.supplierBranch = value;
+                widget.onChanged();
+              },
+            ),
+            const SizedBox(height: AppSpacing.sm),
+            Wrap(
+              spacing: AppSpacing.sm,
+              children: [
+                TextButton.icon(
+                  icon: const Icon(Icons.schedule_outlined),
+                  onPressed: widget.enabled && draft.purchasedAt != null
+                      ? _chooseTime
+                      : null,
+                  label: Text(
+                    draft.hasPurchaseTime
+                        ? 'Change purchase time'
+                        : 'Add time from receipt',
+                  ),
+                ),
+                if (draft.hasPurchaseTime)
+                  TextButton(
+                    onPressed: widget.enabled
+                        ? () {
+                            final date = draft.purchasedAt!;
+                            draft.purchasedAt = DateTime(
+                              date.year,
+                              date.month,
+                              date.day,
+                            );
+                            draft.hasPurchaseTime = false;
+                            draft.dateConfirmed = false;
+                            widget.onChanged();
+                          }
+                        : null,
+                    child: const Text('Time unknown'),
+                  ),
+              ],
+            ),
+            const SizedBox(height: AppSpacing.md),
+            AppField(
+              controller: _number,
+              enabled: widget.enabled,
+              label: 'Receipt number (optional)',
+              onChanged: (value) {
+                draft.receiptNumber = value;
+                widget.onChanged();
+              },
+            ),
+            const SizedBox(height: AppSpacing.lg),
+            AppField(
+              controller: _notes,
+              enabled: widget.enabled,
+              maxLines: 3,
+              label: 'Receipt notes (optional)',
+              onChanged: (value) {
+                draft.notes = value;
+                widget.onChanged();
+              },
+            ),
+          ],
         ),
       ],
     );

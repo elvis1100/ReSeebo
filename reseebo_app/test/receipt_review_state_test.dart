@@ -5,7 +5,82 @@ import 'package:reseebo_app/features/receipt_scan/state/receipt_review_state.dar
 
 void main() {
   test(
-    'invalid discount hides the draft total instead of adding a centavo',
+    'unique saved supplier and alias prefill without confirming purchases',
+    () async {
+      final state = ReceiptReviewState(
+        adapter: _AutofillAdapter(),
+        draft: ReceiptDraft(
+          supplierName: ' Grocery Store ',
+          lines: [ParsedLineItem(description: 'BRANDX COF 26G')],
+        ),
+      );
+      await state.load();
+      expect(state.draft.supplierId, 'supplier');
+      expect(state.draft.supplierBranch, 'Main');
+      expect(state.draft.lines.single.productId, 'coffee');
+      expect(state.draft.lines.single.confirmed, isFalse);
+      state.dispose();
+    },
+  );
+
+  test(
+    'ambiguous saved aliases do not choose a product automatically',
+    () async {
+      final state = ReceiptReviewState(
+        adapter: _AutofillAdapter(ambiguous: true),
+        draft: ReceiptDraft(lines: [ParsedLineItem(description: 'COFFEE')]),
+      );
+      await state.load();
+      expect(state.draft.lines.single.productId, isNull);
+      state.dispose();
+    },
+  );
+
+  test(
+    'new review and manually added items default to pieces without confirmation',
+    () {
+      final original = ParsedLineItem(description: 'Coffee');
+      final state = ReceiptReviewState(
+        adapter: MockReseeboDataAdapter(),
+        draft: ReceiptDraft(lines: [original]),
+      );
+      expect(state.draft.lines.single.unit, PurchaseUnit.piece);
+      expect(state.draft.lines.single.piecesPerPack, 1);
+      expect(state.draft.lines.single.confirmed, isFalse);
+      expect(original.unit, isNull);
+      state.addLine();
+      expect(state.draft.lines.last.unit, PurchaseUnit.piece);
+      expect(state.draft.lines.last.piecesPerPack, 1);
+      state.dispose();
+    },
+  );
+
+  test(
+    'review retains net amount of older drafts without a second deduction',
+    () {
+      final original = ParsedLineItem(
+        description: 'Coffee',
+        grossAmountCents: 2000,
+        discountCents: 200,
+        unit: PurchaseUnit.pack,
+        piecesPerPack: 10,
+      );
+      final state = ReceiptReviewState(
+        adapter: MockReseeboDataAdapter(),
+        draft: ReceiptDraft(lines: [original]),
+      );
+      expect(state.draft.lines.single.grossAmountCents, 1800);
+      expect(state.draft.lines.single.discountCents, 0);
+      expect(state.draft.lines.single.unit, PurchaseUnit.pack);
+      expect(state.draft.lines.single.piecesPerPack, 10);
+      expect(state.lineTotalCents, 1800);
+      expect(original.discountCents, 200);
+      state.dispose();
+    },
+  );
+
+  test(
+    'invalid amount hides the draft total instead of retaining an old value',
     () {
       final state = ReceiptReviewState(
         adapter: MockReseeboDataAdapter(),
@@ -17,7 +92,7 @@ void main() {
       );
       state.editText(
         state.draft.lines.single,
-        ReceiptLineField.discount,
+        ReceiptLineField.amount,
         'eight',
       );
       expect(state.lineTotalCents, isNull);
@@ -48,6 +123,8 @@ void main() {
           ParsedLineItem(
             description: 'Coffee',
             grossAmountCents: 16800,
+            unit: PurchaseUnit.piece,
+            piecesPerPack: 1,
             confirmed: true,
           ),
         ],
@@ -142,7 +219,13 @@ void main() {
       adapter: MockReseeboDataAdapter(),
       draft: ReceiptDraft(
         lines: [
-          ParsedLineItem(description: 'Coffee', quantity: 2, confirmed: true),
+          ParsedLineItem(
+            description: 'Coffee',
+            quantity: 2,
+            unit: PurchaseUnit.piece,
+            piecesPerPack: 1,
+            confirmed: true,
+          ),
         ],
       ),
     );
@@ -212,7 +295,13 @@ void main() {
       adapter: MockReseeboDataAdapter(),
       draft: ReceiptDraft(
         lines: [
-          ParsedLineItem(description: 'Coffee', quantity: 2, confirmed: true),
+          ParsedLineItem(
+            description: 'Coffee',
+            quantity: 2,
+            unit: PurchaseUnit.piece,
+            piecesPerPack: 1,
+            confirmed: true,
+          ),
         ],
       ),
     );
@@ -248,4 +337,47 @@ void main() {
     expect(line.piecesPerPack, isNull);
     state.dispose();
   });
+}
+
+class _AutofillAdapter extends MockReseeboDataAdapter {
+  _AutofillAdapter({this.ambiguous = false});
+  final bool ambiguous;
+  static const coffee = Product(
+    id: 'coffee',
+    name: 'Coffee',
+    brand: 'Brand X',
+    variant: 'Original',
+    size: '26g',
+  );
+  static const largeCoffee = Product(
+    id: 'large',
+    name: 'Coffee',
+    brand: 'Brand X',
+    variant: 'Original',
+    size: '50g',
+  );
+  @override
+  Future<List<Product>> getProducts({String? query}) async => [
+    coffee,
+    largeCoffee,
+  ];
+  @override
+  Future<List<Supplier>> getSuppliers() async => [
+    const Supplier(id: 'supplier', name: 'Grocery Store', branch: 'Main'),
+  ];
+  @override
+  Future<List<ProductMatchSuggestion>> matchAliases(String description) async =>
+      [
+        const ProductMatchSuggestion(
+          product: coffee,
+          reason: 'Saved description',
+          exactAlias: true,
+        ),
+        if (ambiguous)
+          const ProductMatchSuggestion(
+            product: largeCoffee,
+            reason: 'Saved description',
+            exactAlias: true,
+          ),
+      ];
 }

@@ -24,8 +24,8 @@ class ProfitTuboCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final effectivePrice = calculation.ownerSetSellingPrice ??
-        calculation.suggestedSellingPrice;
+    final effectivePrice =
+        calculation.ownerSetSellingPrice ?? calculation.suggestedSellingPrice;
     final totalBatchTubo = calculation.estimatedGrossProfit * batchPieces;
 
     return AppCard(
@@ -37,7 +37,7 @@ class ProfitTuboCard extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(
-                'Retail Price & Tubo (Gross Profit)',
+                'Price & gross profit',
                 style: AppTypography.headingSmall.copyWith(fontSize: 15),
               ),
               Container(
@@ -76,8 +76,9 @@ class ProfitTuboCard extends StatelessWidget {
                         color: isSelected
                             ? AppColors.primary
                             : AppColors.surfaceSubtle,
-                        borderRadius:
-                            BorderRadius.circular(AppSpacing.radiusXs),
+                        borderRadius: BorderRadius.circular(
+                          AppSpacing.radiusXs,
+                        ),
                         border: Border.all(
                           color: isSelected
                               ? AppColors.primary
@@ -90,8 +91,9 @@ class ProfitTuboCard extends StatelessWidget {
                           color: isSelected
                               ? Colors.white
                               : AppColors.textPrimary,
-                          fontWeight:
-                              isSelected ? FontWeight.w700 : FontWeight.w500,
+                          fontWeight: isSelected
+                              ? FontWeight.w700
+                              : FontWeight.w500,
                         ),
                       ),
                     ),
@@ -167,8 +169,9 @@ class ProfitTuboCard extends StatelessWidget {
                             vertical: 8,
                           ),
                           border: OutlineInputBorder(
-                            borderRadius:
-                                BorderRadius.circular(AppSpacing.radiusXs),
+                            borderRadius: BorderRadius.circular(
+                              AppSpacing.radiusXs,
+                            ),
                           ),
                         ),
                         onChanged: (val) {
@@ -209,7 +212,7 @@ class ProfitTuboCard extends StatelessWidget {
                         ),
                         const SizedBox(width: 4),
                         Text(
-                          'Estimated Tubo Per Piece:',
+                          'Gross profit per piece:',
                           style: AppTypography.caption.copyWith(
                             color: AppColors.priceCheaper,
                             fontWeight: FontWeight.w700,
@@ -233,7 +236,7 @@ class ProfitTuboCard extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.end,
                     children: [
                       Text(
-                        'Total Batch Tubo',
+                        'Total batch gross profit',
                         style: AppTypography.caption.copyWith(
                           color: AppColors.priceCheaper,
                           fontSize: 10,

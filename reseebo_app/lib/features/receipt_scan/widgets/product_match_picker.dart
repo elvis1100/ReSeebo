@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../../core/adapters/i_reseebo_data_adapter.dart';
 import '../../catalog/screens/product_editor_screen.dart';
+import '../../../core/widgets/shared_widgets.dart';
 
 class ProductMatchPicker extends StatefulWidget {
   const ProductMatchPicker({
@@ -132,7 +133,11 @@ class _ProductMatchPickerState extends State<ProductMatchPicker> {
                 ..._suggestions.map(
                   (suggestion) => ListTile(
                     contentPadding: EdgeInsets.zero,
-                    leading: const Icon(Icons.link),
+                    leading: LocalPhoto(
+                      path: suggestion.product.photoPath,
+                      size: 48,
+                      icon: Icons.inventory_2_outlined,
+                    ),
                     title: Text(suggestion.product.name),
                     subtitle: Text(
                       '${suggestion.product.identity}\n${suggestion.reason}',
@@ -162,6 +167,11 @@ class _ProductMatchPickerState extends State<ProductMatchPicker> {
                   .map(
                     (product) => ListTile(
                       contentPadding: EdgeInsets.zero,
+                      leading: LocalPhoto(
+                        path: product.photoPath,
+                        size: 48,
+                        icon: Icons.inventory_2_outlined,
+                      ),
                       title: Text(product.name),
                       subtitle: Text(product.identity),
                       trailing: const Icon(Icons.chevron_right),

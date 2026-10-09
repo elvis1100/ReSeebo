@@ -2,10 +2,12 @@ import '../constants/formatters.dart';
 import '../models/models.dart';
 import '../errors/app_exception.dart';
 import 'receipt_layout.dart';
+import 'receipt_purchase_datetime.dart';
 
 /// Layout heuristics provide editable suggestions, never confirmed purchases.
-/// Unlabeled pack conversion, ambiguous dates and discounts stay owner decisions.
+/// Unlabeled pack conversion and ambiguous dates stay owner decisions.
 class ReceiptParser {
+  final _purchaseDateTime = ReceiptPurchaseDateTime();
   ReceiptDraft parse({
     required String imagePath,
     required List<OcrTextLine> textLines,
@@ -25,6 +27,12 @@ class ReceiptParser {
         ),
       ],
     );
+    final purchase = _purchaseDateTime.suggest(
+      recognizedReceiptText(textLines).split('\n'),
+    );
+    draft.purchasedAt = purchase.purchasedAt;
+    draft.hasPurchaseTime = purchase.hasPurchaseTime;
+    draft.warnings.addAll(purchase.warnings);
     final amountPattern = RegExp(
       r'(?:₱|PHP\s*)?(-?\d[\d,]*\.\d{2})\s*(?:[A-Z*])?\s*$',
       caseSensitive: false,
@@ -46,45 +54,6 @@ class ReceiptParser {
       }
       if (draft.supplierName.isEmpty && index < 6 && _supplierCandidate(text)) {
         draft.supplierName = text;
-      }
-      if (draft.purchasedAt == null) {
-        final parsedDate = _date(text);
-        if (parsedDate != null) {
-          draft.purchasedAt = parsedDate;
-          final time = _time(text);
-          if (time != null) {
-            draft.purchasedAt = DateTime(
-              parsedDate.year,
-              parsedDate.month,
-              parsedDate.day,
-              time.$1,
-              time.$2,
-              time.$3,
-            );
-            draft.hasPurchaseTime = true;
-          }
-        } else if (RegExp(
-          r'\b\d{1,2}[./\-]\d{1,2}[./\-]\d{2,4}\b',
-        ).hasMatch(text)) {
-          draft.warnings.add(
-            'The printed date is ambiguous. Confirm the purchase date.',
-          );
-        }
-      } else if (!draft.hasPurchaseTime &&
-          RegExp(r'\btime\b', caseSensitive: false).hasMatch(text)) {
-        final time = _time(text);
-        if (time != null) {
-          final date = draft.purchasedAt!;
-          draft.purchasedAt = DateTime(
-            date.year,
-            date.month,
-            date.day,
-            time.$1,
-            time.$2,
-            time.$3,
-          );
-          draft.hasPurchaseTime = true;
-        }
       }
       final number = RegExp(
         r'\b(?:receipt|invoice|transaction|o\.?r\.?)\s*(?:no\.?|number|#)\s*[:#]?\s*([\w\-]+)|\b(?:receipt|invoice|transaction|o\.?r\.?)\s*[:#]\s*([\w\-]+)',
@@ -136,7 +105,7 @@ class ReceiptParser {
           ).hasMatch(text) ||
           amountMatch.group(1)!.startsWith('-')) {
         final warning =
-            'Possible discount ${amountMatch.group(1)}. Check whether the printed line amount already includes it before deducting.';
+            'Possible discount ${amountMatch.group(1)}. Enter the final amount paid for the item; check it against the receipt total.';
         if (draft.lines.isNotEmpty && !reachedTotal) {
           draft.lines.last.warnings.add(warning);
         } else {
@@ -262,10 +231,12 @@ class ReceiptParser {
     return draft;
   }
 
-  bool _metadata(String text) => RegExp(
-    r'^(?:date|time|tin|address|branch|page|qty|quantity|description|item|product)\b|\b(?:sub\s*total|vat|tax|cash|change|tender|payment|balance|total|amount\s+due|receipt|invoice|tel|phone)\b',
-    caseSensitive: false,
-  ).hasMatch(text);
+  bool _metadata(String text) =>
+      _purchaseDateTime.isMetadata(text) ||
+      RegExp(
+        r'^(?:date|time|tin|address|branch|page|qty|quantity|description|item|product)\b|\b(?:sub\s*total|vat|tax|cash|change|tender|payment|balance|total|amount\s+due|receipt|invoice|tel|phone)\b',
+        caseSensitive: false,
+      ).hasMatch(text);
 
   bool _likelyIncompleteItem(String text) =>
       RegExp(r'[a-z]', caseSensitive: false).hasMatch(text) &&
@@ -275,6 +246,7 @@ class ReceiptParser {
       ).hasMatch(text);
 
   bool _supplierCandidate(String text) =>
+      !_purchaseDateTime.isMetadata(text) &&
       RegExp(r'[a-z]', caseSensitive: false).hasMatch(text) &&
       !RegExp(
         r'^(?:official|sales|cash|tax|receipt|invoice|transaction|date|time|tin|vat|tel|phone|address|branch|page|qty|quantity|description|item|total)\b|\b(?:street|barangay|brgy|avenue|road|city)\b',
@@ -320,24 +292,15 @@ class ReceiptParser {
         'Supplier headings differ between photos. Confirm that all pages belong to one receipt and enter the supplier.',
       );
     }
-    final dates = drafts
-        .map((draft) => draft.purchasedAt)
-        .whereType<DateTime>()
-        .toList();
-    if (dates.isNotEmpty) {
-      result.purchasedAt = dates.first;
-      result.hasPurchaseTime = drafts
-          .firstWhere((draft) => draft.purchasedAt != null)
-          .hasPurchaseTime;
-    }
-    if (dates.map((date) => (date.year, date.month, date.day)).toSet().length >
-        1) {
-      result.purchasedAt = null;
-      result.hasPurchaseTime = false;
-      result.warnings.add(
-        'Purchase dates differ between photos. Check the receipt pages before confirming a date.',
-      );
-    }
+    final purchase = _purchaseDateTime.suggest([
+      for (final page in pages) ...[
+        ...recognizedReceiptText(page.textLines).split('\n'),
+        '',
+      ],
+    ]);
+    result.purchasedAt = purchase.purchasedAt;
+    result.hasPurchaseTime = purchase.hasPurchaseTime;
+    result.warnings.addAll(purchase.warnings);
     final numbers = drafts
         .map((draft) => draft.receiptNumber)
         .where((number) => number.isNotEmpty)
@@ -415,83 +378,5 @@ class ReceiptParser {
     }
     // Punctuation differences only suggest review; neither row is discarded.
     return description.replaceAll(RegExp(r'[^a-z0-9]+'), ' ').trim();
-  }
-
-  DateTime? _date(String text) {
-    final iso = RegExp(
-      r'\b(20\d{2})[./\-](\d{1,2})[./\-](\d{1,2})\b',
-    ).firstMatch(text);
-    if (iso != null) {
-      return _validDate(
-        int.parse(iso.group(1)!),
-        int.parse(iso.group(2)!),
-        int.parse(iso.group(3)!),
-      );
-    }
-    final named = RegExp(
-      r'\b(\d{1,2})\s*[- /]?\s*(JAN|FEB|MAR|APR|MAY|JUN|JUL|AUG|SEP|OCT|NOV|DEC)[a-z]*\s*[- /]?\s*(20\d{2})\b',
-      caseSensitive: false,
-    ).firstMatch(text);
-    if (named != null) {
-      final month =
-          [
-            'JAN',
-            'FEB',
-            'MAR',
-            'APR',
-            'MAY',
-            'JUN',
-            'JUL',
-            'AUG',
-            'SEP',
-            'OCT',
-            'NOV',
-            'DEC',
-          ].indexOf(named.group(2)!.toUpperCase()) +
-          1;
-      return _validDate(
-        int.parse(named.group(3)!),
-        month,
-        int.parse(named.group(1)!),
-      );
-    }
-    final separated = RegExp(
-      r'\b(\d{1,2})[./\-](\d{1,2})[./\-](20\d{2}|\d{2})\b',
-    ).firstMatch(text);
-    if (separated == null) return null;
-    final first = int.parse(separated.group(1)!);
-    final second = int.parse(separated.group(2)!);
-    // This app records modern purchases. Short printed years are suggestions
-    // in 2000–2099; the owner still confirms dates and ambiguous month/day order.
-    final printedYear = int.parse(separated.group(3)!);
-    final year = printedYear < 100 ? 2000 + printedYear : printedYear;
-    if (first > 12) return _validDate(year, second, first);
-    if (second > 12) return _validDate(year, first, second);
-    return null;
-  }
-
-  DateTime? _validDate(int year, int month, int day) {
-    final result = DateTime(year, month, day);
-    return result.year == year && result.month == month && result.day == day
-        ? result
-        : null;
-  }
-
-  (int, int, int)? _time(String text) {
-    final match = RegExp(
-      r'\b(\d{1,2}):(\d{2})(?::(\d{2}))?\s*(AM|PM)?\b',
-      caseSensitive: false,
-    ).firstMatch(text);
-    if (match == null) return null;
-    var hour = int.parse(match.group(1)!);
-    final minute = int.parse(match.group(2)!);
-    final second = int.parse(match.group(3) ?? '0');
-    final meridiem = match.group(4)?.toUpperCase();
-    if (meridiem != null) {
-      if (hour < 1 || hour > 12) return null;
-      hour = hour % 12 + (meridiem == 'PM' ? 12 : 0);
-    }
-    if (hour > 23 || minute > 59 || second > 59) return null;
-    return (hour, minute, second);
   }
 }

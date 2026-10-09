@@ -5,10 +5,9 @@ import '../../../core/constants/formatters.dart';
 
 enum ReceiptLineField {
   description('Description'),
-  quantity('Qty'),
-  piecesPerPack('Pcs/pack'),
-  amount('Line amount'),
-  discount('Discount');
+  quantity('Quantity'),
+  piecesPerPack('Pieces per pack'),
+  amount('Amount paid');
 
   const ReceiptLineField(this.label);
   final String label;
@@ -16,7 +15,26 @@ enum ReceiptLineField {
 
 class ReceiptReviewState extends ChangeNotifier {
   ReceiptReviewState({required this.adapter, required ReceiptDraft draft})
-    : draft = draft.snapshot();
+    : draft = draft.snapshot() {
+    for (final line in this.draft.lines) {
+      _prepareLine(line);
+    }
+  }
+
+  /// New reviews use the final amount paid. Retain the net amount from older
+  /// drafts without exposing a second deduction; saved history is untouched.
+  void _prepareLine(ParsedLineItem line) {
+    if (line.discountCents != 0) {
+      line.grossAmountCents = line.netAmountCents;
+      line.discountCents = 0;
+    }
+    if (line.unit == null) {
+      line.unit = PurchaseUnit.piece;
+      line.piecesPerPack = 1;
+      line.confirmed = false;
+    }
+  }
+
   final IReseeboDataAdapter adapter;
   final ReceiptDraft draft;
   List<Product> products = [];
@@ -123,21 +141,9 @@ class ReceiptReviewState extends ChangeNotifier {
       if (amount == null || (field == ReceiptLineField.amount && amount <= 0)) {
         return 'Select one peso amount, or type it manually.';
       }
-      if (field == ReceiptLineField.amount) {
-        line.grossAmountCents = amount;
-      } else {
-        if (line.grossAmountCents == null || amount >= line.grossAmountCents!) {
-          return 'Discount must be less than the line amount.';
-        }
-        line.discountCents = amount;
-      }
+      line.grossAmountCents = amount;
     }
-    changed(
-      line: line,
-      affectsTotal:
-          field == ReceiptLineField.amount ||
-          field == ReceiptLineField.discount,
-    );
+    changed(line: line, affectsTotal: field == ReceiptLineField.amount);
     selectedTokens.clear();
     return null;
   }
@@ -154,16 +160,8 @@ class ReceiptReviewState extends ChangeNotifier {
         line.piecesPerPack = parseQuantity(text);
       case ReceiptLineField.amount:
         line.grossAmountCents = parsePesos(text);
-      case ReceiptLineField.discount:
-        // Invalid discounts remain invalid at the service boundary.
-        line.discountCents = parsePesos(text) ?? -1;
     }
-    changed(
-      line: line,
-      affectsTotal:
-          field == ReceiptLineField.amount ||
-          field == ReceiptLineField.discount,
-    );
+    changed(line: line, affectsTotal: field == ReceiptLineField.amount);
   }
 
   void setUnit(ParsedLineItem line, PurchaseUnit unit) {
@@ -190,12 +188,42 @@ class ReceiptReviewState extends ChangeNotifier {
     try {
       products = await adapter.getProducts();
       suppliers = await adapter.getSuppliers();
+      if (draft.supplierId == null) {
+        final matches = suppliers
+            .where(
+              (supplier) =>
+                  _key(supplier.name) == _key(draft.supplierName) &&
+                  (draft.supplierBranch.isEmpty ||
+                      _key(supplier.branch) == _key(draft.supplierBranch)),
+            )
+            .toList();
+        if (matches.length == 1) draft.supplierId = matches.single.id;
+      }
       for (final supplier in suppliers) {
         if (supplier.id == draft.supplierId) {
           draft.supplierName = supplier.name;
           draft.supplierBranch = supplier.branch;
           draft.supplierNotes = '';
           break;
+        }
+      }
+      // Only a unique mapping previously confirmed by the owner may prefill
+      // product identity. Similar catalog names still need an explicit choice.
+      final aliases = <String, List<ProductMatchSuggestion>>{};
+      for (final line in draft.lines) {
+        if (line.productId != null || line.description.trim().isEmpty) continue;
+        final key = _key(line.description);
+        final matches = aliases[key] ??= await adapter.matchAliases(
+          line.description,
+        );
+        final exactIds = matches
+            .where((match) => match.exactAlias)
+            .map((match) => match.product.id)
+            .where((id) => productFor(id) != null)
+            .toSet();
+        if (exactIds.length == 1) {
+          line.productId = exactIds.single;
+          line.confirmed = false;
         }
       }
     } catch (failure) {
@@ -205,6 +233,9 @@ class ReceiptReviewState extends ChangeNotifier {
       _changed();
     }
   }
+
+  static String _key(String value) =>
+      value.trim().toLowerCase().replaceAll(RegExp(r'\s+'), ' ');
 
   Product? productFor(String? id) {
     for (final product in products) {
@@ -221,7 +252,7 @@ class ReceiptReviewState extends ChangeNotifier {
   }
 
   void addLine() {
-    draft.lines.add(ParsedLineItem());
+    draft.lines.add(ParsedLineItem(unit: PurchaseUnit.piece, piecesPerPack: 1));
     draft.totalDifferenceConfirmed = false;
     draft.allowDuplicate = false;
     _changed();
@@ -281,17 +312,19 @@ class ReceiptReviewState extends ChangeNotifier {
     if (line.grossAmountCents == null ||
         line.grossAmountCents! <= 0 ||
         line.grossAmountCents! > maxAmountCents) {
-      return 'Enter the total line amount before discount.';
+      return 'Enter the total amount paid for this item.';
     }
     if (line.discountCents < 0 ||
         line.discountCents >= line.grossAmountCents!) {
-      return 'Discount must be zero or less than the line amount.';
+      return 'Check the amount paid for this item.';
     }
     if (requireConfirmation && !line.confirmed) {
       return 'Check and confirm this product, quantity, and amount.';
     }
     return null;
   }
+
+  int get confirmedCount => draft.lines.where((line) => line.confirmed).length;
 
   int? get lineTotalCents {
     var sum = 0;

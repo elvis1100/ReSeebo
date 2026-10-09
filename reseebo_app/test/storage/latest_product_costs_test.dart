@@ -97,6 +97,7 @@ void main() {
       databasePath: p.join(root.path, 'records.sqlite'),
       mediaDirectory: Directory(p.join(root.path, 'media')),
       ocrService: fixtures.FakeOcr(),
+      starterProducts: const [],
       clock: () =>
           DateTime.fromMillisecondsSinceEpoch(recordedMillis, isUtc: true),
     );

@@ -14,6 +14,7 @@ import '../services/ocr_service.dart';
 import '../services/pricing_service.dart';
 import '../services/receipt_parser.dart';
 import '../services/receipt_validator.dart';
+import '../services/starter_catalog_service.dart';
 import 'i_reseebo_data_adapter.dart';
 
 class SqliteReseeboDataAdapter implements IReseeboDataAdapter {
@@ -34,6 +35,7 @@ class SqliteReseeboDataAdapter implements IReseeboDataAdapter {
     Directory? mediaDirectory,
     OcrService? ocrService,
     DateTime Function()? clock,
+    List<Product>? starterProducts,
   }) async {
     final String dbPath;
     if (databasePath == null) {
@@ -53,6 +55,16 @@ class SqliteReseeboDataAdapter implements IReseeboDataAdapter {
       factory: databaseFactory ?? sqlite.databaseFactory,
       path: dbPath,
     );
+    try {
+      await StarterCatalogService.seed(
+        db,
+        starterProducts ?? await StarterCatalogService.load(),
+        now: (clock ?? DateTime.now)(),
+      );
+    } catch (_) {
+      await db.close();
+      rethrow;
+    }
     return SqliteReseeboDataAdapter._(
       db,
       LocalFileStore(mediaDirectory),
@@ -192,7 +204,8 @@ class SqliteReseeboDataAdapter implements IReseeboDataAdapter {
     }
     StoredLocalFile? copied;
     try {
-      if (product.photoPath != null) {
+      if (product.photoPath != null &&
+          !product.photoPath!.startsWith('asset:')) {
         copied = await _files.persist(
           product.photoPath!,
           category: 'product_photos',
@@ -207,7 +220,9 @@ class SqliteReseeboDataAdapter implements IReseeboDataAdapter {
         'size': product.size.trim(),
         'category': product.category.trim(),
         'barcode': product.barcode.trim(),
-        'photo_path': copied?.path,
+        'photo_path': product.photoPath?.startsWith('asset:') == true
+            ? product.photoPath
+            : copied?.path,
         'markup_percent': product.markupPercent,
         'selling_price_cents': product.sellingPriceCents,
         'updated_at': now,

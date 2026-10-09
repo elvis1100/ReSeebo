@@ -4,6 +4,10 @@ import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_spacing.dart';
 import '../../../core/theme/app_typography.dart';
 import '../widgets/product_catalog_item.dart';
+import '../../../core/services/pricing_service.dart';
+import '../../../core/widgets/store_header.dart';
+import '../../../core/widgets/shared_widgets.dart' show ErrorState;
+import '../../catalog/screens/product_editor_screen.dart';
 import '../widgets/receipt_list_item.dart';
 import '../widgets/stat_header.dart';
 
@@ -15,6 +19,7 @@ class DashboardScreen extends StatefulWidget {
   final VoidCallback? onSettingsPressed;
   final ValueChanged<Receipt>? onReceiptSelected;
   final ValueChanged<Product>? onProductSelected;
+  final int refreshRevision;
 
   const DashboardScreen({
     super.key,
@@ -23,6 +28,7 @@ class DashboardScreen extends StatefulWidget {
     this.onSettingsPressed,
     this.onReceiptSelected,
     this.onProductSelected,
+    this.refreshRevision = 0,
   });
 
   @override
@@ -40,6 +46,10 @@ class _DashboardScreenState extends State<DashboardScreen>
   Map<String, Supplier> _suppliersMap = {};
   bool _isLoading = true;
   String _searchQuery = '';
+  Map<String, LatestProductCost> _costs = {};
+  Object? _error;
+  bool _loadedOnce = false;
+  int _request = 0;
 
   @override
   void initState() {
@@ -50,7 +60,14 @@ class _DashboardScreenState extends State<DashboardScreen>
   }
 
   @override
+  void didUpdateWidget(covariant DashboardScreen oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.refreshRevision != widget.refreshRevision) _loadData();
+  }
+
+  @override
   void dispose() {
+    _request++;
     _tabController.dispose();
     _searchController.removeListener(_onSearchChanged);
     _searchController.dispose();
@@ -64,26 +81,54 @@ class _DashboardScreenState extends State<DashboardScreen>
   }
 
   Future<void> _loadData() async {
-    setState(() => _isLoading = true);
-    final profile = await widget.dataAdapter.getStoreProfile();
-    final receipts = await widget.dataAdapter.getRecentReceipts();
-    final products = await widget.dataAdapter.getProducts();
-    final suppliers = await widget.dataAdapter.getSuppliers();
-
-    final map = <String, Supplier>{};
-    for (final s in suppliers) {
-      map[s.id] = s;
-    }
-
-    if (mounted) {
+    final request = ++_request;
+    setState(() {
+      _isLoading = true;
+      _error = null;
+    });
+    try {
+      final profile = await widget.dataAdapter.getStoreProfile();
+      final receipts = await widget.dataAdapter.getRecentReceipts();
+      final products = await widget.dataAdapter.getProducts();
+      final costs = await widget.dataAdapter.getLatestProductCosts(
+        products.map((p) => p.id),
+      );
+      if (!mounted || request != _request) return;
+      if (!_loadedOnce) {
+        _tabController.index = receipts.isEmpty && products.isNotEmpty ? 1 : 0;
+        _loadedOnce = true;
+      }
+      final suppliers = {
+        for (final receipt in receipts) receipt.supplierId: receipt.supplier,
+      };
       setState(() {
         _storeProfile = profile;
         _receipts = receipts;
         _products = products;
-        _suppliersMap = map;
-        _isLoading = false;
+        _costs = costs;
+        _suppliersMap = suppliers;
       });
+    } catch (error) {
+      if (mounted && request == _request) setState(() => _error = error);
+    } finally {
+      if (mounted && request == _request) setState(() => _isLoading = false);
     }
+  }
+
+  Future<void> _addProduct() async {
+    final saved = await Navigator.of(context).push<bool>(
+      MaterialPageRoute(
+        builder: (_) => ProductEditorScreen(adapter: widget.dataAdapter),
+      ),
+    );
+    if (!mounted || saved != true) return;
+    _tabController.index = 1;
+    _searchController.clear();
+    await _loadData();
+    if (!mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('Product added to your catalog.')),
+    );
   }
 
   List<Receipt> get _filteredReceipts {
@@ -100,7 +145,7 @@ class _DashboardScreenState extends State<DashboardScreen>
   List<Product> get _filteredProducts {
     if (_searchQuery.isEmpty) return _products;
     return _products.where((p) {
-      final name = p.displayTitle.toLowerCase();
+      final name = '${p.displayName} ${p.displayTitle}'.toLowerCase();
       final cat = p.category.toLowerCase();
       return name.contains(_searchQuery) || cat.contains(_searchQuery);
     }).toList();
@@ -111,14 +156,8 @@ class _DashboardScreenState extends State<DashboardScreen>
     return Scaffold(
       backgroundColor: AppColors.background,
       appBar: AppBar(
-        title: const Text(
-          'Reseebo',
-          style: TextStyle(
-            fontSize: 20,
-            fontWeight: FontWeight.w800,
-            letterSpacing: -0.5,
-          ),
-        ),
+        toolbarHeight: 64,
+        title: const StoreHeader(),
         actions: [
           IconButton(
             tooltip: 'Refresh data',
@@ -130,6 +169,13 @@ class _DashboardScreenState extends State<DashboardScreen>
       body: _isLoading
           ? const Center(
               child: CircularProgressIndicator(color: AppColors.primary),
+            )
+          : _error != null
+          ? SingleChildScrollView(
+              child: ErrorState(
+                message: userMessage(_error!),
+                onRetry: _loadData,
+              ),
             )
           : RefreshIndicator(
               color: AppColors.primary,
@@ -167,7 +213,10 @@ class _DashboardScreenState extends State<DashboardScreen>
                               ),
                               suffixIcon: _searchQuery.isNotEmpty
                                   ? IconButton(
-                                      icon: const Icon(Icons.clear_rounded, size: 18),
+                                      icon: const Icon(
+                                        Icons.clear_rounded,
+                                        size: 18,
+                                      ),
                                       onPressed: () {
                                         _searchController.clear();
                                       },
@@ -182,7 +231,9 @@ class _DashboardScreenState extends State<DashboardScreen>
                             padding: const EdgeInsets.all(3),
                             decoration: BoxDecoration(
                               color: AppColors.surfaceSubtle,
-                              borderRadius: BorderRadius.circular(AppSpacing.radiusS),
+                              borderRadius: BorderRadius.circular(
+                                AppSpacing.radiusS,
+                              ),
                             ),
                             child: TabBar(
                               controller: _tabController,
@@ -191,7 +242,9 @@ class _DashboardScreenState extends State<DashboardScreen>
                               indicatorSize: TabBarIndicatorSize.tab,
                               indicator: BoxDecoration(
                                 color: Colors.white,
-                                borderRadius: BorderRadius.circular(AppSpacing.radiusXs + 2),
+                                borderRadius: BorderRadius.circular(
+                                  AppSpacing.radiusXs + 2,
+                                ),
                                 boxShadow: [
                                   BoxShadow(
                                     color: Colors.black.withValues(alpha: 0.05),
@@ -210,10 +263,12 @@ class _DashboardScreenState extends State<DashboardScreen>
                               ),
                               tabs: [
                                 Tab(
-                                  text: 'Recent Receipts (${_filteredReceipts.length})',
+                                  text:
+                                      'Recent Receipts (${_filteredReceipts.length})',
                                 ),
                                 Tab(
-                                  text: 'Products (${_filteredProducts.length})',
+                                  text:
+                                      'Products (${_filteredProducts.length})',
                                 ),
                               ],
                             ),
@@ -226,10 +281,7 @@ class _DashboardScreenState extends State<DashboardScreen>
                     hasScrollBody: true,
                     child: TabBarView(
                       controller: _tabController,
-                      children: [
-                        _buildReceiptsTab(),
-                        _buildProductsTab(),
-                      ],
+                      children: [_buildReceiptsTab(), _buildProductsTab()],
                     ),
                   ),
                 ],
@@ -263,8 +315,10 @@ class _DashboardScreenState extends State<DashboardScreen>
                 color: AppColors.textMuted,
               ),
               const SizedBox(height: AppSpacing.s),
-              const Text(
-                'No receipts recorded yet',
+              Text(
+                _searchQuery.isEmpty
+                    ? 'No receipts recorded yet'
+                    : 'No matching receipts',
                 style: AppTypography.headingSmall,
               ),
               const SizedBox(height: 4),
@@ -299,7 +353,30 @@ class _DashboardScreenState extends State<DashboardScreen>
     );
   }
 
-  Widget _buildProductsTab() {
+  Widget _buildProductsTab() => Column(
+    crossAxisAlignment: CrossAxisAlignment.stretch,
+    children: [
+      Padding(
+        padding: const EdgeInsets.fromLTRB(
+          AppSpacing.m,
+          AppSpacing.s,
+          AppSpacing.m,
+          0,
+        ),
+        child: Align(
+          alignment: Alignment.centerRight,
+          child: OutlinedButton.icon(
+            onPressed: _addProduct,
+            icon: const Icon(Icons.add_rounded),
+            label: const Text('Add product'),
+          ),
+        ),
+      ),
+      Expanded(child: _buildProductList()),
+    ],
+  );
+
+  Widget _buildProductList() {
     if (_filteredProducts.isEmpty) {
       return Center(
         child: Padding(
@@ -313,13 +390,15 @@ class _DashboardScreenState extends State<DashboardScreen>
                 color: AppColors.textMuted,
               ),
               const SizedBox(height: AppSpacing.s),
-              const Text(
-                'No products in catalog',
+              Text(
+                _searchQuery.isEmpty
+                    ? 'No products in catalog'
+                    : 'No matching products',
                 style: AppTypography.headingSmall,
               ),
               const SizedBox(height: 4),
               const Text(
-                'Products and prices are automatically indexed when you scan receipts.',
+                'Add a product here or while reviewing a receipt. Recorded prices appear after saving purchases.',
                 textAlign: TextAlign.center,
                 style: AppTypography.bodySmall,
               ),
@@ -339,12 +418,21 @@ class _DashboardScreenState extends State<DashboardScreen>
           const SizedBox(height: AppSpacing.s),
       itemBuilder: (context, index) {
         final product = _filteredProducts[index];
-        final latestCost = 28.50 + (index * 4.25);
-        final srp = (latestCost * 1.15).ceilToDouble();
+        final cost = _costs[product.id];
+        final markup =
+            product.markupPercent ?? _storeProfile?.defaultMarkupPercent;
+        final srp = cost == null || markup == null
+            ? null
+            : PricingService.suggestedSellingPriceCents(
+                    cost.costPerPieceCents,
+                    markup,
+                  ) /
+                  100;
 
         return ProductCatalogItem(
           product: product,
-          latestUnitCost: latestCost,
+          latestUnitCost: cost == null ? null : cost.costPerPieceCents / 100,
+          latestPurchaseDate: cost?.purchasedAt,
           suggestedPrice: srp,
           onTap: () => widget.onProductSelected?.call(product),
         );

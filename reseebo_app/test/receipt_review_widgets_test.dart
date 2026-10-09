@@ -5,6 +5,32 @@ import 'package:reseebo_app/features/receipt_scan/widgets/line_item_editor_row.d
 import 'package:reseebo_app/core/theme/app_colors.dart';
 
 void main() {
+  testWidgets('item entry has amount paid and no discount controls', (
+    tester,
+  ) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: SingleChildScrollView(
+            child: LineItemEditorRow(
+              line: ParsedLineItem(unit: PurchaseUnit.piece, piecesPerPack: 1),
+              index: 0,
+              onSelectProduct: () {},
+              onQuantityChanged: (_) {},
+              onPiecesPerPackChanged: (_) {},
+              onLineTotalChanged: (_) {},
+              onRemove: () {},
+            ),
+          ),
+        ),
+      ),
+    );
+    expect(find.text('Amount paid (₱)'), findsOneWidget);
+    expect(find.text('Discount (₱)'), findsNothing);
+    expect(find.byKey(const ValueKey('discount')), findsNothing);
+    expect(find.text('Receipt details'), findsOneWidget);
+  });
+
   testWidgets(
     'parser evidence warnings remain visible beside editable values',
     (tester) async {

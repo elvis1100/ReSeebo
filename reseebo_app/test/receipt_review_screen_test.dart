@@ -93,7 +93,7 @@ void main() {
     expect(bounds.left, greaterThanOrEqualTo(0));
     expect(bounds.right, lessThanOrEqualTo(360));
     await tester.scrollUntilVisible(
-      find.text('I checked product, quantity and line amount'),
+      find.text('I checked this item'),
       250,
       scrollable: find.byType(Scrollable).first,
     );
@@ -120,7 +120,7 @@ void main() {
       );
       await tester.enterText(find.byKey(const ValueKey('quantity')), '4');
       await tester.pumpAndSettle();
-      await tester.tap(find.text('Save to Ledger'));
+      await tester.tap(find.text('Save receipt'));
       await tester.pumpAndSettle();
       expect(adapter.saved, isNull);
       expect(
@@ -170,8 +170,17 @@ void main() {
         (widget) =>
             widget is ChoiceChip &&
             widget.label is Text &&
-            (widget.label as Text).data == 'Qty',
+            (widget.label as Text).data == 'Quantity',
       );
+      await tester.scrollUntilVisible(
+        find.text('Receipt details'),
+        300,
+        scrollable: find.byType(Scrollable).first,
+      );
+      await tester.ensureVisible(find.text('Receipt details'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Receipt details'));
+      await tester.pumpAndSettle();
       await tester.scrollUntilVisible(
         target,
         300,
@@ -234,7 +243,7 @@ void main() {
         ),
       );
       await tester.pumpAndSettle();
-      await tester.tap(find.text('Save to Ledger'));
+      await tester.tap(find.text('Save receipt'));
       await tester.pumpAndSettle();
       expect(find.text('Possible duplicate receipt'), findsOneWidget);
       expect(adapter.saved, isNull);
@@ -280,7 +289,7 @@ void main() {
         ),
       );
       await tester.pumpAndSettle();
-      await tester.tap(find.text('Save to Ledger'));
+      await tester.tap(find.text('Save receipt'));
       await tester.pumpAndSettle();
       expect(saved, isTrue);
       expect(adapter.saved!.operationId, 'operation');

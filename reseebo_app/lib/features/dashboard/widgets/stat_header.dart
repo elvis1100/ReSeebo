@@ -74,7 +74,9 @@ class StatHeader extends StatelessWidget {
                   borderRadius: BorderRadius.circular(AppSpacing.radiusPill),
                 ),
                 child: Text(
-                  '${CurrencyFormatter.formatPercentage(profile.defaultMarkupPercentage)} Markup',
+                  profile.defaultMarkupPercent == null
+                      ? 'Set markup'
+                      : '${CurrencyFormatter.formatPercentage(profile.defaultMarkupPercent!)} Markup',
                   style: AppTypography.caption.copyWith(
                     color: AppColors.primary,
                     fontWeight: FontWeight.w700,
@@ -118,10 +120,7 @@ class StatHeader extends StatelessWidget {
     );
   }
 
-  Widget _buildMiniMetric({
-    required String label,
-    required String value,
-  }) {
+  Widget _buildMiniMetric({required String label, required String value}) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [

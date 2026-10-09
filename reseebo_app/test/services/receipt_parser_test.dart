@@ -209,7 +209,7 @@ void main() {
       expect(draft.lines.single.netAmountCents, 16000);
       expect(
         draft.lines.single.warnings.any(
-          (warning) => warning.contains('already includes'),
+          (warning) => warning.contains('final amount paid'),
         ),
         isTrue,
       );
@@ -219,6 +219,193 @@ void main() {
   ReceiptDraft parseRows(List<String> rows) => parser.parse(
     imagePath: '/original.jpg',
     textLines: rows.map((text) => OcrTextLine(text: text)).toList(),
+  );
+
+  for (final printed in [
+    'October 9, 2026 2:30 PM',
+    'OCT 09 26 14:30',
+    '09-OCT-26 02:30 p.m.',
+    '9 October 2026 14:30:00',
+  ]) {
+    test('suggests an English purchase date and time: $printed', () {
+      final draft = parseRows(['Supplier A', printed, '1 pcs Coffee 84.00']);
+      expect(draft.purchasedAt, DateTime(2026, 10, 9, 14, 30));
+      expect(draft.hasPurchaseTime, isTrue);
+      expect(draft.dateConfirmed, isFalse);
+      expect(draft.lines.single.quantity, 1);
+      expect(draft.lines.single.unit, PurchaseUnit.piece);
+      expect(draft.rawText, contains(printed));
+    });
+  }
+
+  for (final clockFirst in [false, true]) {
+    test(
+      'uses an adjacent standalone clock ${clockFirst ? 'before' : 'after'} the date',
+      () {
+        final dateAndTime = ['October 9, 2026', '02:30 PM'];
+        final draft = parseRows([
+          'Supplier A',
+          ...(clockFirst ? dateAndTime.reversed : dateAndTime),
+          '1 pcs Coffee 84.00',
+        ]);
+        expect(draft.purchasedAt, DateTime(2026, 10, 9, 14, 30));
+        expect(draft.hasPurchaseTime, isTrue);
+        expect(draft.dateConfirmed, isFalse);
+      },
+    );
+  }
+
+  test(
+    'a labeled clock before a separated date preserves midnight correctly',
+    () {
+      final draft = parseRows([
+        'Supplier A',
+        'Time: 12:05 AM',
+        'Receipt No 123',
+        'Date: 09-OCT-26',
+      ]);
+      expect(draft.purchasedAt, DateTime(2026, 10, 9, 0, 5));
+      expect(draft.hasPurchaseTime, isTrue);
+    },
+  );
+
+  test(
+    'equal numeric day and month is unambiguous; distinct ones need review',
+    () {
+      expect(
+        parseRows(['Supplier A', '09/09/26']).purchasedAt,
+        DateTime(2026, 9, 9),
+      );
+      expect(parseRows(['Supplier A', '09/10/26']).purchasedAt, isNull);
+    },
+  );
+
+  test(
+    'unrelated expiry manufacture and card dates cannot override purchase evidence',
+    () {
+      final draft = parseRows([
+        'Supplier A',
+        'Expiry date: 2027-02-20 14:30',
+        'Manufacture date: October 8, 2026',
+        'CARD VALID THRU 12/12/2028',
+        'Date: October 9, 2026',
+        'Time: 14:35',
+        'Opening time: 08:00',
+        '1 pcs Coffee 84.00',
+      ]);
+      expect(draft.purchasedAt, DateTime(2026, 10, 9, 14, 35));
+      expect(draft.hasPurchaseTime, isTrue);
+      expect(draft.lines, hasLength(1));
+      expect(
+        draft.warnings.any((warning) => warning.contains('differ')),
+        isFalse,
+      );
+      final expiryOnly = parseRows(['Supplier A', 'EXP 2027-02-20']);
+      expect(expiryOnly.purchasedAt, isNull);
+    },
+  );
+
+  for (final printed in ['February 30, 2026', '2026-13-09', '31/02/26']) {
+    test('rejects invalid calendar date $printed without rollover', () {
+      final draft = parseRows(['Supplier A', printed]);
+      expect(draft.purchasedAt, isNull);
+      expect(
+        draft.warnings.any((warning) => warning.contains('invalid')),
+        isTrue,
+      );
+    });
+  }
+
+  for (final clock in ['25:30', '14:60', '14:30:60', '00:30 AM', '14:30 PM']) {
+    test('rejects invalid purchase clock $clock without rollover', () {
+      final draft = parseRows([
+        'Supplier A',
+        'Date: October 9, 2026',
+        'Time: $clock',
+      ]);
+      expect(draft.purchasedAt, DateTime(2026, 10, 9));
+      expect(draft.hasPurchaseTime, isFalse);
+      expect(
+        draft.warnings.any((warning) => warning.contains('invalid')),
+        isTrue,
+      );
+    });
+  }
+
+  test('date and time conflicts stay unresolved for review', () {
+    final dates = parseRows([
+      'Supplier A',
+      '2026-10-09 14:30',
+      'Date: 2026-10-08',
+    ]);
+    expect(dates.purchasedAt, isNull);
+    expect(dates.hasPurchaseTime, isFalse);
+    expect(
+      dates.warnings.any((warning) => warning.contains('dates differ')),
+      isTrue,
+    );
+    final times = parseRows(['Supplier A', '2026-10-09 14:30', 'Time: 14:31']);
+    expect(times.purchasedAt, DateTime(2026, 10, 9));
+    expect(times.hasPurchaseTime, isFalse);
+    expect(
+      times.warnings.any((warning) => warning.contains('times differ')),
+      isTrue,
+    );
+  });
+
+  test('an unrelated distant unlabeled clock stays unknown', () {
+    final draft = parseRows([
+      'Supplier A',
+      '2026-10-09',
+      '1 pcs Coffee 84.00',
+      'TOTAL 84.00',
+      '15:30',
+    ]);
+    expect(draft.purchasedAt, DateTime(2026, 10, 9));
+    expect(draft.hasPurchaseTime, isFalse);
+  });
+
+  test('an English date in the first row cannot become the supplier name', () {
+    final draft = parseRows([
+      'October 9, 2026',
+      'Supplier A',
+      '1 pcs Coffee 84.00',
+    ]);
+    expect(draft.supplierName, 'Supplier A');
+  });
+
+  test(
+    'later page time enriches the same date and conflicting page clocks remain unknown',
+    () {
+      ReceiptOcrPage page(String path, String metadata) => ReceiptOcrPage(
+        imagePath: path,
+        textLines: [
+          const OcrTextLine(text: 'Supplier A'),
+          OcrTextLine(text: metadata),
+        ],
+      );
+      final enriched = parser.parsePages(
+        pages: [
+          page('/a.jpg', 'Date: October 9, 2026'),
+          page('/b.jpg', '2026-10-09 14:30'),
+        ],
+      );
+      expect(enriched.purchasedAt, DateTime(2026, 10, 9, 14, 30));
+      expect(enriched.hasPurchaseTime, isTrue);
+      expect(enriched.dateConfirmed, isFalse);
+      final conflict = parser.parsePages(
+        pages: [
+          page('/a.jpg', '2026-10-09 14:30'),
+          page('/b.jpg', '2026-10-09 14:31'),
+        ],
+      );
+      expect(conflict.purchasedAt, DateTime(2026, 10, 9));
+      expect(conflict.hasPurchaseTime, isFalse);
+      expect(
+        conflict.warnings.any((warning) => warning.contains('times differ')),
+        isTrue,
+      );
+    },
   );
 
   for (final count in ['2.00', '2.50']) {

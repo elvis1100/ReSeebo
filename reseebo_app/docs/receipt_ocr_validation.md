@@ -8,7 +8,7 @@ are conservative pixel heuristics and still need calibration on real phones.
 
 Review shows originals and the matching recognition image. Word bounds belong
 to the recognition image. Select a field, select words or one value, and apply it.
-Amounts represent the total purchase-line amount, not the unit price. Product
+Amounts represent the final amount paid for the complete purchase line, not the unit price. New reviews do not expose a discount deduction. Pieces default for unspecified units; the owner still confirms every item and changes to packs where appropriate. Product
 selection, quantity units, pack contents, dates and lines require confirmation.
 Relevant edits clear confirmation. Missing and conflicting readings remain
 editable; the SQLite validator is the final save boundary.
@@ -27,7 +27,7 @@ including source-inspired format cases. They are not captured ML Kit output and
 do not measure recognition accuracy. The suite also checks real SQLite atomic
 saves, original-image retention, duplicate handling and database reopening.
 
-On 9 October 2026, `flutter test --no-pub --reporter expanded --timeout 60s` passed all 124
+On 9 October 2026, `flutter test --no-pub --reporter expanded --timeout 60s` passed all 159
 local tests, and `flutter analyze --no-pub` reported no issues. The corpus
 contains 23 synthetic JSON fixtures. These results cover
 parser, image, review UI/state and SQLite behavior; they do not substitute for
@@ -63,12 +63,17 @@ SQLite database. It checks word bounds, confirmed cost and original image bytes
 after database reopening. It does not establish accuracy on real receipts or
 simulate a full application process restart.
 
-The attempted emulator run on 9 October 2026 was blocked before app compilation
+An earlier emulator run on 9 October 2026 was blocked before app compilation
 by Gradle/Java `Unable to establish loopback connection`, caused by
 `UnixDomainSockets.connect0` returning `Invalid argument: connect`. The same
-failure occurred with direct Gradle `--no-daemon --stacktrace`. Native OCR and
-fresh-install offline success therefore remain unverified in this session.
+failure occurred with direct Gradle `--no-daemon --stacktrace`. That earlier attempt did not verify native OCR or fresh-install offline success.
 Emulator airplane mode and Wi-Fi settings were restored after the attempt.
+
+## Physical-phone verification on 9 October 2026
+
+A separate verification app (`com.reseebo.reseebo.verification`) was installed on the connected Samsung SM-A576B. Wi-Fi and mobile data were disabled before test launch and restored afterward; the existing Reseebo app/data were preserved. The native integration test passed with bundled OCR on a generated receipt containing an English month-first date and a separate AM/PM time row. Date/time, quantity, amount and word bounds were recognized. All 265 bundled catalog entries loaded without downloads. The receipt, cost and byte-identical original image persisted after closing and reopening SQLite.
+
+This is a generated-image native smoke test, not measured recognition accuracy on real grocery receipts. The database reopen check alone is not a full application process restart.
 
 ## Physical-phone acceptance
 

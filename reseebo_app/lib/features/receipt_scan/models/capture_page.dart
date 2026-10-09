@@ -9,5 +9,12 @@ class CapturePage {
   String? originalHash;
   String? recognitionPath;
   String? preparedPath;
-  String get previewPath => recognitionPath ?? originalPath;
+  String? originalPreparedPath;
+  bool useOriginal = false;
+  bool enhance = true;
+  double contrast = 1;
+  String get editedPath => recognitionPath ?? originalPath;
+  String get previewPath => useOriginal
+      ? originalPath
+      : preparedPath ?? editedPath;
 }

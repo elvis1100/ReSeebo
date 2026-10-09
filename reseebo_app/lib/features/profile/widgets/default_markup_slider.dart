@@ -7,8 +7,8 @@ import '../../../core/widgets/app_card.dart';
 
 /// Interactive slider and preset chips for customizing store-wide default profit markup.
 class DefaultMarkupSlider extends StatelessWidget {
-  final double markupPercentage;
-  final ValueChanged<double> onChanged;
+  final double? markupPercentage;
+  final ValueChanged<double>? onChanged;
 
   const DefaultMarkupSlider({
     super.key,
@@ -27,17 +27,22 @@ class DefaultMarkupSlider extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(
-                'Default Tubo Markup',
+                'Default markup',
                 style: AppTypography.headingSmall.copyWith(fontSize: 15),
               ),
               Container(
-                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 3),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 10,
+                  vertical: 3,
+                ),
                 decoration: BoxDecoration(
                   color: AppColors.primary,
                   borderRadius: BorderRadius.circular(AppSpacing.radiusPill),
                 ),
                 child: Text(
-                  CurrencyFormatter.formatPercentage(markupPercentage),
+                  markupPercentage == null
+                      ? 'Not set'
+                      : CurrencyFormatter.formatPercentage(markupPercentage!),
                   style: AppTypography.caption.copyWith(
                     color: Colors.white,
                     fontWeight: FontWeight.w800,
@@ -49,37 +54,40 @@ class DefaultMarkupSlider extends StatelessWidget {
           ),
           const SizedBox(height: AppSpacing.xs),
           Text(
-            'Applied automatically to calculate suggested retail prices (SRP) when new receipts are scanned.',
+            'Choose how much to add to purchase costs when suggesting selling prices. Individual products can have their own markup.',
             style: AppTypography.bodySmall,
           ),
           const SizedBox(height: AppSpacing.s),
 
           // Continuous Slider
-          SliderTheme(
-            data: SliderTheme.of(context).copyWith(
-              activeTrackColor: AppColors.primary,
-              inactiveTrackColor: AppColors.surfaceSubtle,
-              thumbColor: AppColors.primary,
-              overlayColor: AppColors.primary.withValues(alpha: 0.15),
+          if (markupPercentage != null)
+            SliderTheme(
+              data: SliderTheme.of(context).copyWith(
+                activeTrackColor: AppColors.primary,
+                inactiveTrackColor: AppColors.surfaceSubtle,
+                thumbColor: AppColors.primary,
+                overlayColor: AppColors.primary.withValues(alpha: 0.15),
+              ),
+              child: Slider(
+                value: markupPercentage!.clamp(0.0, 50.0),
+                min: 0.0,
+                max: 50.0,
+                divisions: 50,
+                onChanged: onChanged,
+              ),
             ),
-            child: Slider(
-              value: markupPercentage.clamp(5.0, 50.0),
-              min: 5.0,
-              max: 50.0,
-              divisions: 45,
-              onChanged: onChanged,
-            ),
-          ),
 
           // Preset Chips (10%, 15%, 20%, 25%, 30%)
           Row(
             children: [10.0, 15.0, 20.0, 25.0, 30.0].map((rate) {
-              final isSelected = (markupPercentage - rate).abs() < 0.5;
+              final isSelected =
+                  markupPercentage != null &&
+                  (markupPercentage! - rate).abs() < 0.5;
               return Expanded(
                 child: Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 2.0),
                   child: InkWell(
-                    onTap: () => onChanged(rate),
+                    onTap: onChanged == null ? null : () => onChanged!(rate),
                     borderRadius: BorderRadius.circular(AppSpacing.radiusXs),
                     child: Container(
                       padding: const EdgeInsets.symmetric(vertical: 6.0),
@@ -88,8 +96,9 @@ class DefaultMarkupSlider extends StatelessWidget {
                         color: isSelected
                             ? AppColors.primary
                             : AppColors.surfaceSubtle,
-                        borderRadius:
-                            BorderRadius.circular(AppSpacing.radiusXs),
+                        borderRadius: BorderRadius.circular(
+                          AppSpacing.radiusXs,
+                        ),
                         border: Border.all(
                           color: isSelected
                               ? AppColors.primary
@@ -102,8 +111,9 @@ class DefaultMarkupSlider extends StatelessWidget {
                           color: isSelected
                               ? Colors.white
                               : AppColors.textPrimary,
-                          fontWeight:
-                              isSelected ? FontWeight.w700 : FontWeight.w500,
+                          fontWeight: isSelected
+                              ? FontWeight.w700
+                              : FontWeight.w500,
                         ),
                       ),
                     ),

@@ -50,6 +50,7 @@ void main() {
         mediaDirectory: media,
         ocrService: ocr,
         clock: () => DateTime.utc(2026, 10, 9, 8),
+        starterProducts: const [],
       );
 
   Future<ReceiptDraft> draft({
@@ -117,7 +118,7 @@ void main() {
   });
 
   test(
-    'fresh local database has exactly seven versioned tables and no sample receipts',
+    'fresh local database has eight versioned tables and no sample receipts',
     () async {
       final tables = await db.rawQuery(
         "SELECT name FROM sqlite_master WHERE type = 'table' AND name NOT LIKE 'sqlite_%'",
@@ -130,14 +131,15 @@ void main() {
         'receipts',
         'purchase_lines',
         'receipt_images',
+        'catalog_seed_entries',
       });
-      expect(await db.getVersion(), 2);
+      expect(await db.getVersion(), 3);
       expect(
         (await db.rawQuery('PRAGMA foreign_keys')).single.values.single,
         1,
       );
       expect(await adapter.getRecentReceipts(), isEmpty);
-      expect((await adapter.getStoreProfile()).defaultMarkupPercent, isNull);
+      expect((await adapter.getStoreProfile()).defaultMarkupPercent, 20);
     },
   );
 
@@ -354,6 +356,45 @@ void main() {
       } finally {
         await upgraded.close();
       }
+    },
+  );
+
+  test(
+    'version 2 upgrade adds starter catalog while preserving owner records',
+    () async {
+      await adapter.updateStoreProfile(
+        const StoreProfile(name: 'My existing shop', defaultMarkupPercent: 17),
+      );
+      final saved = await adapter.saveConfirmedReceipt(
+        await draft(operation: 'v2-upgrade'),
+      );
+      final before = await adapter.getReceipt(saved.receiptId);
+      // Remove only the v3 ledger and mark the existing real database as v2,
+      // retaining its actual receipts, purchase lines, files and owner profile.
+      await db.execute('DROP TABLE catalog_seed_entries');
+      await db.setVersion(2);
+      await adapter.close();
+      adapter = await SqliteReseeboDataAdapter.open(
+        databaseFactory: databaseFactoryFfi,
+        databasePath: databasePath,
+        mediaDirectory: media,
+        ocrService: FakeOcr(),
+      );
+      db = await databaseFactoryFfi.openDatabase(databasePath);
+      expect(await db.getVersion(), 3);
+      expect((await adapter.getProducts()).length, greaterThan(200));
+      expect((await adapter.getStoreProfile()).name, 'My existing shop');
+      expect((await adapter.getStoreProfile()).defaultMarkupPercent, 17);
+      final after = await adapter.getReceipt(saved.receiptId);
+      expect(after.receipt.imagePaths, before.receipt.imagePaths);
+      expect(after.receipt.totalCents, before.receipt.totalCents);
+      expect(
+        after.lines.single.netAmountCents,
+        before.lines.single.netAmountCents,
+      );
+      expect(await File(after.receipt.imagePath).exists(), isTrue);
+      expect(await count('receipts'), 1);
+      expect(await count('purchase_lines'), 1);
     },
   );
 

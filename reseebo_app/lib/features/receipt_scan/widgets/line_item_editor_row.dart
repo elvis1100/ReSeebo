@@ -52,10 +52,6 @@ class _LineItemEditorRowState extends State<LineItemEditorRow> {
     ReceiptLineField.piecesPerPack =>
       widget.line.piecesPerPack?.toString() ?? '',
     ReceiptLineField.amount => editablePesos(widget.line.grossAmountCents),
-    ReceiptLineField.discount =>
-      widget.line.discountCents < 0
-          ? ''
-          : editablePesos(widget.line.discountCents),
   };
 
   @override
@@ -105,7 +101,6 @@ class _LineItemEditorRowState extends State<LineItemEditorRow> {
         final amount = parsePesos(value);
         if (amount != null) widget.onLineTotalChanged(amount / 100);
       case ReceiptLineField.description:
-      case ReceiptLineField.discount:
         break;
     }
   }
@@ -120,13 +115,11 @@ class _LineItemEditorRowState extends State<LineItemEditorRow> {
     ReceiptLineField.amount =>
       widget.line.grossAmountCents == null ||
           widget.line.grossAmountCents! <= 0,
-    ReceiptLineField.discount => widget.line.discountCents < 0,
   };
 
   Widget _field(ReceiptLineField field) {
     final numeric = field != ReceiptLineField.description;
-    final amount =
-        field == ReceiptLineField.amount || field == ReceiptLineField.discount;
+    final amount = field == ReceiptLineField.amount;
     final warning = !widget.line.confirmed || _needsReview(field);
     return TextFormField(
       key: ValueKey(field.name),
@@ -137,10 +130,14 @@ class _LineItemEditorRowState extends State<LineItemEditorRow> {
           ? TextInputType.numberWithOptions(decimal: amount)
           : TextInputType.text,
       decoration: InputDecoration(
-        labelText: '${field.label}${amount ? ' (₱)' : ''}',
+        labelText: field == ReceiptLineField.quantity
+            ? (widget.line.unit == PurchaseUnit.pack
+                  ? 'Number of packs'
+                  : 'Number of pieces')
+            : '${field.label}${amount ? ' (₱)' : ''}',
         filled: warning,
         fillColor: AppColors.warningBg,
-        helperText: warning ? 'Check receipt' : null,
+        helperText: amount ? 'Total for this item' : null,
         border: const OutlineInputBorder(),
       ),
       onChanged: (value) => _edit(field, value),
@@ -160,14 +157,14 @@ class _LineItemEditorRowState extends State<LineItemEditorRow> {
               children: [
                 Expanded(
                   child: Text(
-                    'Item ${widget.index + 1} · Photo ${line.sourcePage + 1}',
+                    'Item ${widget.index + 1}',
                     style: Theme.of(context).textTheme.titleSmall,
                   ),
                 ),
                 IconButton(
                   tooltip: 'Remove item ${widget.index + 1}',
                   onPressed: widget.enabled ? widget.onRemove : null,
-                  icon: const Icon(Icons.close),
+                  icon: const Icon(Icons.delete_outline_rounded),
                 ),
               ],
             ),
@@ -187,15 +184,14 @@ class _LineItemEditorRowState extends State<LineItemEditorRow> {
               trailing: const Icon(Icons.arrow_forward_ios, size: 16),
               onTap: widget.enabled ? widget.onSelectProduct : null,
             ),
-            _field(ReceiptLineField.description),
-            const SizedBox(height: 12),
+            const SizedBox(height: 8),
             SegmentedButton<PurchaseUnit>(
               segments: const [
                 ButtonSegment(value: PurchaseUnit.piece, label: Text('Pcs')),
                 ButtonSegment(value: PurchaseUnit.pack, label: Text('Packs')),
               ],
-              emptySelectionAllowed: true,
-              selected: {if (line.unit != null) line.unit!},
+              showSelectedIcon: false,
+              selected: {line.unit ?? PurchaseUnit.piece},
               onSelectionChanged: widget.enabled && widget.onUnitChanged != null
                   ? (values) {
                       if (values.isNotEmpty) {
@@ -217,44 +213,56 @@ class _LineItemEditorRowState extends State<LineItemEditorRow> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Expanded(child: _field(ReceiptLineField.quantity)),
-                if (line.unit == PurchaseUnit.pack) ...[
-                  const SizedBox(width: 8),
-                  Expanded(child: _field(ReceiptLineField.piecesPerPack)),
+                const SizedBox(width: 12),
+                Expanded(child: _field(ReceiptLineField.amount)),
+              ],
+            ),
+            if (line.unit == PurchaseUnit.pack) ...[
+              const SizedBox(height: 12),
+              _field(ReceiptLineField.piecesPerPack),
+            ],
+            const SizedBox(height: 8),
+            ExpansionTile(
+              tilePadding: EdgeInsets.zero,
+              childrenPadding: const EdgeInsets.only(bottom: 12),
+              title: const Text('Receipt details'),
+              subtitle: Text(
+                line.description.isEmpty
+                    ? 'Enter the name printed on your receipt'
+                    : line.description,
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+              ),
+              children: [
+                _field(ReceiptLineField.description),
+                if (widget.onTargetSelected != null) ...[
+                  const SizedBox(height: 12),
+                  const Align(
+                    alignment: Alignment.centerLeft,
+                    child: Text('Copy a value from the receipt'),
+                  ),
+                  Wrap(
+                    spacing: 6,
+                    children: ReceiptLineField.values
+                        .where(
+                          (field) =>
+                              field != ReceiptLineField.piecesPerPack ||
+                              line.unit == PurchaseUnit.pack,
+                        )
+                        .map(
+                          (field) => ChoiceChip(
+                            label: Text(field.label),
+                            selected: widget.selectedField == field,
+                            onSelected: widget.enabled
+                                ? (_) => widget.onTargetSelected!(field)
+                                : null,
+                          ),
+                        )
+                        .toList(),
+                  ),
                 ],
               ],
             ),
-            const SizedBox(height: 12),
-            Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Expanded(child: _field(ReceiptLineField.amount)),
-                const SizedBox(width: 8),
-                Expanded(child: _field(ReceiptLineField.discount)),
-              ],
-            ),
-            if (widget.onTargetSelected != null) ...[
-              const SizedBox(height: 8),
-              const Text('Fill from receipt photo'),
-              Wrap(
-                spacing: 6,
-                children: ReceiptLineField.values
-                    .where(
-                      (field) =>
-                          field != ReceiptLineField.piecesPerPack ||
-                          line.unit == PurchaseUnit.pack,
-                    )
-                    .map(
-                      (field) => ChoiceChip(
-                        label: Text(field.label),
-                        selected: widget.selectedField == field,
-                        onSelected: widget.enabled
-                            ? (_) => widget.onTargetSelected!(field)
-                            : null,
-                      ),
-                    )
-                    .toList(),
-              ),
-            ],
             if (widget.problem != null)
               Padding(
                 padding: const EdgeInsets.symmetric(vertical: 8),
@@ -266,7 +274,7 @@ class _LineItemEditorRowState extends State<LineItemEditorRow> {
             if (line.warnings.isNotEmpty) ...[
               const SizedBox(height: 8),
               const Text(
-                'OCR review notes',
+                'Check these details',
                 style: TextStyle(fontWeight: FontWeight.w600),
               ),
               for (final warning in line.warnings.toSet())
@@ -291,7 +299,10 @@ class _LineItemEditorRowState extends State<LineItemEditorRow> {
             CheckboxListTile(
               contentPadding: EdgeInsets.zero,
               controlAffinity: ListTileControlAffinity.leading,
-              title: const Text('I checked product, quantity and line amount'),
+              title: const Text('I checked this item'),
+              subtitle: const Text(
+                'Product, quantity and amount paid are correct',
+              ),
               value: line.confirmed,
               onChanged: widget.enabled && widget.onConfirm != null
                   ? (_) => widget.onConfirm!()

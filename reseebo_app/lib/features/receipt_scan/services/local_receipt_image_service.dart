@@ -73,6 +73,16 @@ Uint8List _transformImage(Map<String, Object> input) {
       }
     }
   }
+  final contrast = input['contrast'] as double? ?? 1;
+  if (contrast != 1) {
+    for (final pixel in image) {
+      pixel.setRgb(
+        ((pixel.r - 128) * contrast + 128).round().clamp(0, 255),
+        ((pixel.g - 128) * contrast + 128).round().clamp(0, 255),
+        ((pixel.b - 128) * contrast + 128).round().clamp(0, 255),
+      );
+    }
+  }
   return Uint8List.fromList(img.encodeJpg(image, quality: 95));
 }
 
@@ -137,8 +147,30 @@ class LocalReceiptImageService {
 
   /// Bakes orientation into a cache JPEG and optionally stretches grayscale
   /// contrast. The original is never overwritten; OCR bounds refer to this copy.
-  Future<String> prepareRecognition(String path, {bool enhance = true}) =>
-      _writeTransform({'path': path, 'enhance': enhance});
+  Future<String> prepareRecognition(
+    String path, {
+    bool enhance = true,
+    double contrast = 1,
+  }) {
+    if (!contrast.isFinite || contrast < .5 || contrast > 2) {
+      throw const AppException('Choose contrast between 0.5 and 2.');
+    }
+    return _writeTransform({'path': path, 'enhance': enhance, 'contrast': contrast});
+  }
+
+  /// Cleanup is limited to cache files created by this service, never originals
+  /// or user-selected photos. Failure to clean cache must not discard a draft.
+  Future<void> deleteGenerated(Iterable<String?> paths, {required String originalPath}) async {
+    for (final path in paths.whereType<String>().toSet()) {
+      if (path == originalPath || !path.split('/').last.startsWith('reseebo_recognition_')) continue;
+      try {
+        final file = File(path);
+        if (await file.exists()) await file.delete();
+      } catch (_) {
+        // The operating system can remove leftover temporary cache files.
+      }
+    }
+  }
 
   Future<String> hash(String path) async {
     final file = File(path);

@@ -20,6 +20,7 @@ abstract final class AppTheme {
   static ThemeData get lightTheme {
     return ThemeData(
       useMaterial3: true,
+      fontFamily: 'Inter',
       colorScheme: const ColorScheme.light(
         primary: AppColors.primary,
         onPrimary: AppColors.textInverse,
@@ -31,13 +32,15 @@ abstract final class AppTheme {
         onError: AppColors.textInverse,
       ),
       scaffoldBackgroundColor: AppColors.background,
-      appBarTheme: const AppBarTheme(
+      appBarTheme: AppBarTheme(
         backgroundColor: AppColors.surfaceCard,
         foregroundColor: AppColors.textPrimary,
         elevation: 0.0,
         scrolledUnderElevation: 1.0,
         centerTitle: false,
-        titleTextStyle: AppTypography.headingMedium,
+        titleTextStyle: AppTypography.headingMedium.copyWith(
+          fontFamily: 'Inter',
+        ),
         iconTheme: IconThemeData(color: AppColors.textPrimary),
       ),
       cardTheme: CardThemeData(
@@ -59,6 +62,7 @@ abstract final class AppTheme {
             borderRadius: BorderRadius.circular(AppSpacing.radiusS),
           ),
           textStyle: const TextStyle(
+            fontFamily: 'Inter',
             fontSize: 15.0,
             fontWeight: FontWeight.w600,
           ),
@@ -73,6 +77,7 @@ abstract final class AppTheme {
             borderRadius: BorderRadius.circular(AppSpacing.radiusS),
           ),
           textStyle: const TextStyle(
+            fontFamily: 'Inter',
             fontSize: 15.0,
             fontWeight: FontWeight.w600,
           ),
@@ -98,8 +103,10 @@ abstract final class AppTheme {
         ),
         errorBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(AppSpacing.radiusS),
-          borderSide:
-              const BorderSide(color: AppColors.priceIncrease, width: 1.5),
+          borderSide: const BorderSide(
+            color: AppColors.priceIncrease,
+            width: 1.5,
+          ),
         ),
       ),
       dividerTheme: const DividerThemeData(

@@ -5,10 +5,10 @@ const maxQuantity = 1000000;
 
 class StoreProfile {
   const StoreProfile({
-    this.name = '',
+    this.name = 'Sari-sari Store',
     this.ownerName = '',
     this.photoPath,
-    this.defaultMarkupPercent,
+    this.defaultMarkupPercent = 20.0,
   });
   final String name;
   final String ownerName;
@@ -16,7 +16,7 @@ class StoreProfile {
   final double? defaultMarkupPercent;
 
   String get storeName => name;
-  double get defaultMarkupPercentage => defaultMarkupPercent ?? 15.0;
+  double get defaultMarkupPercentage => defaultMarkupPercent ?? 20.0;
 
   StoreProfile copyWith({
     String? name,

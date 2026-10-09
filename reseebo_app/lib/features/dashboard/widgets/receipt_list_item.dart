@@ -54,19 +54,19 @@ class ReceiptListItem extends StatelessWidget {
                   overflow: TextOverflow.ellipsis,
                 ),
                 const SizedBox(height: 2),
-                Row(
+                Wrap(
+                  spacing: AppSpacing.s,
+                  runSpacing: 2,
                   children: [
                     Text(
                       DateFormatter.format(receipt.purchaseDate),
                       style: AppTypography.caption,
                     ),
-                    const SizedBox(width: AppSpacing.s),
                     Text(
                       '•  ${receipt.itemCount} ${receipt.itemCount == 1 ? 'item' : 'items'}',
                       style: AppTypography.caption,
                     ),
                     if (receipt.receiptNumber.isNotEmpty) ...[
-                      const SizedBox(width: AppSpacing.s),
                       Text(
                         '#${receipt.receiptNumber}',
                         style: AppTypography.caption.copyWith(

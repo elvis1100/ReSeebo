@@ -94,7 +94,7 @@ class ReceiptValidator {
       if (total != draft.detectedTotalCents &&
           !draft.totalDifferenceConfirmed) {
         throw const ValidationException(
-          'The item amounts do not match the printed total. Review discounts or confirm the difference before saving.',
+          'The item amounts do not match the printed total. Review the amounts paid or confirm the difference before saving.',
         );
       }
     }
