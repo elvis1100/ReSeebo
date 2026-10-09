@@ -41,6 +41,8 @@ The intended result is less manual encoding and easier buying decisions, with th
 
 | Feature | What it helps the owner do |
 | --- | --- |
+| Local store profile | Save the store name, optional owner name/photo/logo, and preferred default markup without an account. |
+| Product photos | Identify saved products using an optional camera/gallery photo stored on the phone. |
 | Scan a receipt | Capture purchase information without typing every line. |
 | Review extracted details | Correct unclear names, quantities, or prices before saving. |
 | Recognize previously saved products | Connect different receipt descriptions to the same confirmed product. |
@@ -96,11 +98,15 @@ The app calculates cost per piece from the confirmed quantity and amount, then a
 
 ### Step 5: View comparisons
 
-The owner opens a product and sees tables comparing the latest recorded price per supplier and the price history at a selected supplier. Each price includes its purchase date and a link to the source receipt.
+The owner opens a product and sees tables comparing the latest recorded price per supplier and the price history at a selected supplier. Each price includes its purchase date and a link to the source receipt. Show the optional product photo and supplier branch/location where available.
 
-### Step 6: Plan a purchase or selling price
+### Optional: Adjust restock or pricing on the comparison screen
 
-The owner enters a planned restock quantity or selling price. The app shows estimated purchase costs, savings, or gross profit per piece.
+Suggested selling prices appear using the owner's chosen markup: a product override when set, otherwise the store default. If neither is set, ask for a markup. The owner can optionally enter a restock quantity or adjust markup/selling price on this screen to see estimated purchase costs, savings, or gross profit per piece. Keep any owner-set selling price separately labeled from the calculated suggestion.
+
+### Local data for the MVP
+
+Use six entities: Store profile, Products, Product aliases, Suppliers, Receipts, and Purchase lines. Store one local profile and one optional photo per product. Product aliases connect owner-confirmed receipt descriptions to products; ambiguous matches still need confirmation. Optional barcodes, categories, supplier branch/location/notes, and receipt numbers/notes help identify records. Keep created/updated timestamps separate from purchase dates, and retain historical purchase quantities/costs when settings change. Store images in persistent app-local files with references in SQLite.
 
 ## 6. The most valuable comparisons
 
