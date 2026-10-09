@@ -263,24 +263,10 @@ This guarantees:
 
 ---
 
-## 7. Cloned Skills & Tooling Verification
+## 7. Optional Local Tooling
 
-From the reference repos in `the-pickle` and GitHub, the following have been established in this repository:
-1. **Reference Repositories (`TeamCus/reference-repos/`):**
-   - [agentic-awesome-skills](file:///c:/Users/Christopher/Documents/GitHub/TeamCus/reference-repos/agentic-awesome-skills) (25,000+ files, comprehensive agent skills library)
-   - [better-icons](file:///c:/Users/Christopher/Documents/GitHub/TeamCus/reference-repos/better-icons) (Iconify CLI & MCP server)
-   - [superdesign](file:///c:/Users/Christopher/Documents/GitHub/TeamCus/reference-repos/superdesign) (design system generation)
-   - [ui-ux-pro-max-skill](file:///c:/Users/Christopher/Documents/GitHub/TeamCus/reference-repos/ui-ux-pro-max-skill) (multi-framework UI/UX intelligence)
-   - [i-have-adhd](file:///c:/Users/Christopher/Documents/GitHub/TeamCus/reference-repos/i-have-adhd) (high-density concise agent workflow skill)
-2. **Active Agent Skills (`TeamCus/.agents/skills/`):**
-   - [ui-ux-pro-max](file:///c:/Users/Christopher/Documents/GitHub/TeamCus/.agents/skills/ui-ux-pro-max) (rules, style guides, Flutter design data)
-   - [ui-styling](file:///c:/Users/Christopher/Documents/GitHub/TeamCus/.agents/skills/ui-styling)
-   - [design-system](file:///c:/Users/Christopher/Documents/GitHub/TeamCus/.agents/skills/design-system)
-   - [design](file:///c:/Users/Christopher/Documents/GitHub/TeamCus/.agents/skills/design)
-   - [brand](file:///c:/Users/Christopher/Documents/GitHub/TeamCus/.agents/skills/brand)
-   - [banner-design](file:///c:/Users/Christopher/Documents/GitHub/TeamCus/.agents/skills/banner-design)
-   - [slides](file:///c:/Users/Christopher/Documents/GitHub/TeamCus/.agents/skills/slides)
-   - [better-icons](file:///c:/Users/Christopher/Documents/GitHub/TeamCus/.agents/skills/better-icons)
-   - [i-have-adhd](file:///c:/Users/Christopher/Documents/GitHub/TeamCus/.agents/skills/i-have-adhd)
-3. **Repository Cleanliness:**
-   - [`.gitignore`](file:///c:/Users/Christopher/Documents/GitHub/TeamCus/.gitignore) protects `.agents/` and `reference-repos/` from cluttering Git tracking.
+The app builds from `reseebo_app/` using Flutter and the dependencies in `pubspec.yaml`. Agent skills and reference repositories are optional development tools; they are not app dependencies or assumed to be installed.
+
+Developers may keep reference repositories in `reference-repos/` and locally installed agent skills in `.agents/skills/`, relative to the project root. Use relative paths when documenting them so the project remains portable across computers and operating systems.
+
+[`.gitignore`](.gitignore) excludes `.agents/` and `reference-repos/` from version control. Install and verify any optional tools separately before relying on them.
