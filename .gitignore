@@ -1,0 +1,9 @@
+# Flutter / Dart
+.dart_tool/
+.packages
+build/
+*.log
+
+# Local agent configuration and references
+.agents/
+reference-repos/
