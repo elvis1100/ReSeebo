@@ -1,0 +1,472 @@
+{
+  "id": "pos_demo",
+  "provenance": "Actual ML Kit Latin OCR after app crop and enhancement on Android, offline 2026-10-10. Vendor demonstration. Sanitized item/discount/total region; no transcription corrections.",
+  "lines": [
+    {
+      "text": "Item",
+      "left": 75.0,
+      "top": 390.0,
+      "width": 49.0,
+      "height": 18.0,
+      "tokens": [
+        {
+          "text": "Item",
+          "left": 75.0,
+          "top": 390.0,
+          "width": 49.0,
+          "height": 18.0
+        }
+      ]
+    },
+    {
+      "text": "Del Monte Fruit Cocktail 825g",
+      "left": 31.0,
+      "top": 447.0,
+      "width": 393.0,
+      "height": 21.0,
+      "tokens": [
+        {
+          "text": "Del",
+          "left": 31.0,
+          "top": 447.0,
+          "width": 39.0,
+          "height": 21.0
+        },
+        {
+          "text": "Monte",
+          "left": 85.0,
+          "top": 447.0,
+          "width": 66.0,
+          "height": 21.0
+        },
+        {
+          "text": "Fruit",
+          "left": 169.0,
+          "top": 447.0,
+          "width": 63.0,
+          "height": 21.0
+        },
+        {
+          "text": "Cocktail",
+          "left": 251.0,
+          "top": 447.0,
+          "width": 105.0,
+          "height": 21.0
+        },
+        {
+          "text": "825g",
+          "left": 373.0,
+          "top": 447.0,
+          "width": 51.0,
+          "height": 21.0
+        }
+      ]
+    },
+    {
+      "text": "Argentina C/Beef 158g",
+      "left": 31.0,
+      "top": 501.0,
+      "width": 284.0,
+      "height": 25.0,
+      "tokens": [
+        {
+          "text": "Argentina",
+          "left": 31.0,
+          "top": 501.0,
+          "width": 121.0,
+          "height": 25.0
+        },
+        {
+          "text": "C/Beef",
+          "left": 169.0,
+          "top": 501.0,
+          "width": 77.0,
+          "height": 25.0
+        },
+        {
+          "text": "158g",
+          "left": 264.0,
+          "top": 501.0,
+          "width": 51.0,
+          "height": 25.0
+        }
+      ]
+    },
+    {
+      "text": "TOTAL:",
+      "left": 31.0,
+      "top": 702.0,
+      "width": 77.0,
+      "height": 18.0,
+      "tokens": [
+        {
+          "text": "TOTAL:",
+          "left": 31.0,
+          "top": 702.0,
+          "width": 77.0,
+          "height": 18.0
+        }
+      ]
+    },
+    {
+      "text": "Ambroxol Tab 75mg",
+      "left": 30.0,
+      "top": 557.0,
+      "width": 230.0,
+      "height": 24.0,
+      "tokens": [
+        {
+          "text": "Ambroxol",
+          "left": 30.0,
+          "top": 557.0,
+          "width": 107.0,
+          "height": 23.0
+        },
+        {
+          "text": "Tab",
+          "left": 154.0,
+          "top": 559.0,
+          "width": 37.0,
+          "height": 21.0
+        },
+        {
+          "text": "75mg",
+          "left": 209.0,
+          "top": 559.0,
+          "width": 51.0,
+          "height": 22.0
+        }
+      ]
+    },
+    {
+      "text": "Less 12% VAT",
+      "left": 87.0,
+      "top": 613.0,
+      "width": 157.0,
+      "height": 23.0,
+      "tokens": [
+        {
+          "text": "Less",
+          "left": 87.0,
+          "top": 615.0,
+          "width": 47.0,
+          "height": 21.0
+        },
+        {
+          "text": "12%",
+          "left": 154.0,
+          "top": 614.0,
+          "width": 38.0,
+          "height": 21.0
+        },
+        {
+          "text": "VAT",
+          "left": 208.0,
+          "top": 613.0,
+          "width": 36.0,
+          "height": 21.0
+        }
+      ]
+    },
+    {
+      "text": "Qty",
+      "left": 182.0,
+      "top": 390.0,
+      "width": 38.0,
+      "height": 23.0,
+      "tokens": [
+        {
+          "text": "Qty",
+          "left": 182.0,
+          "top": 390.0,
+          "width": 38.0,
+          "height": 23.0
+        }
+      ]
+    },
+    {
+      "text": "Less 20% 5C Discount",
+      "left": 87.0,
+      "top": 645.0,
+      "width": 268.0,
+      "height": 18.0,
+      "tokens": [
+        {
+          "text": "Less",
+          "left": 87.0,
+          "top": 645.0,
+          "width": 49.0,
+          "height": 18.0
+        },
+        {
+          "text": "20%",
+          "left": 155.0,
+          "top": 645.0,
+          "width": 39.0,
+          "height": 18.0
+        },
+        {
+          "text": "5C",
+          "left": 211.0,
+          "top": 645.0,
+          "width": 21.0,
+          "height": 18.0
+        },
+        {
+          "text": "Discount",
+          "left": 251.0,
+          "top": 645.0,
+          "width": 104.0,
+          "height": 18.0
+        }
+      ]
+    },
+    {
+      "text": "1",
+      "left": 210.0,
+      "top": 475.0,
+      "width": 9.0,
+      "height": 17.0,
+      "tokens": [
+        {
+          "text": "1",
+          "left": 210.0,
+          "top": 475.0,
+          "width": 9.0,
+          "height": 17.0
+        }
+      ]
+    },
+    {
+      "text": "1",
+      "left": 210.0,
+      "top": 532.0,
+      "width": 9.0,
+      "height": 17.0,
+      "tokens": [
+        {
+          "text": "1",
+          "left": 210.0,
+          "top": 532.0,
+          "width": 9.0,
+          "height": 17.0
+        }
+      ]
+    },
+    {
+      "text": "2",
+      "left": 210.0,
+      "top": 588.0,
+      "width": 9.0,
+      "height": 18.0,
+      "tokens": [
+        {
+          "text": "2",
+          "left": 210.0,
+          "top": 588.0,
+          "width": 9.0,
+          "height": 18.0
+        }
+      ]
+    },
+    {
+      "text": "4 Items",
+      "left": 223.0,
+      "top": 700.0,
+      "width": 91.0,
+      "height": 20.0,
+      "tokens": [
+        {
+          "text": "4",
+          "left": 223.0,
+          "top": 701.0,
+          "width": 10.0,
+          "height": 17.0
+        },
+        {
+          "text": "Items",
+          "left": 251.0,
+          "top": 701.0,
+          "width": 63.0,
+          "height": 18.0
+        }
+      ]
+    },
+    {
+      "text": "Price",
+      "left": 318.0,
+      "top": 387.0,
+      "width": 64.0,
+      "height": 22.0,
+      "tokens": [
+        {
+          "text": "Price",
+          "left": 318.0,
+          "top": 387.0,
+          "width": 64.0,
+          "height": 22.0
+        }
+      ]
+    },
+    {
+      "text": "99.75",
+      "left": 333.0,
+      "top": 471.0,
+      "width": 60.0,
+      "height": 23.0,
+      "tokens": [
+        {
+          "text": "99.75",
+          "left": 333.0,
+          "top": 471.0,
+          "width": 60.0,
+          "height": 23.0
+        }
+      ]
+    },
+    {
+      "text": "30.25",
+      "left": 333.0,
+      "top": 532.0,
+      "width": 62.0,
+      "height": 18.0,
+      "tokens": [
+        {
+          "text": "30.25",
+          "left": 333.0,
+          "top": 532.0,
+          "width": 62.0,
+          "height": 18.0
+        }
+      ]
+    },
+    {
+      "text": "22.90",
+      "left": 333.0,
+      "top": 588.0,
+      "width": 63.0,
+      "height": 18.0,
+      "tokens": [
+        {
+          "text": "22.90",
+          "left": 333.0,
+          "top": 588.0,
+          "width": 63.0,
+          "height": 18.0
+        }
+      ]
+    },
+    {
+      "text": "Amount",
+      "left": 468.0,
+      "top": 388.0,
+      "width": 76.0,
+      "height": 20.0,
+      "tokens": [
+        {
+          "text": "Amount",
+          "left": 468.0,
+          "top": 388.0,
+          "width": 76.0,
+          "height": 20.0
+        }
+      ]
+    },
+    {
+      "text": "99.75v",
+      "left": 497.0,
+      "top": 475.0,
+      "width": 77.0,
+      "height": 18.0,
+      "tokens": [
+        {
+          "text": "99.75v",
+          "left": 497.0,
+          "top": 475.0,
+          "width": 77.0,
+          "height": 18.0
+        }
+      ]
+    },
+    {
+      "text": "30.25v",
+      "left": 497.0,
+      "top": 532.0,
+      "width": 76.0,
+      "height": 18.0,
+      "tokens": [
+        {
+          "text": "30.25v",
+          "left": 497.0,
+          "top": 532.0,
+          "width": 76.0,
+          "height": 18.0
+        }
+      ]
+    },
+    {
+      "text": "44.09v",
+      "left": 496.0,
+      "top": 588.0,
+      "width": 78.0,
+      "height": 18.0,
+      "tokens": [
+        {
+          "text": "44.09v",
+          "left": 496.0,
+          "top": 588.0,
+          "width": 78.0,
+          "height": 18.0
+        }
+      ]
+    },
+    {
+      "text": "-4.71",
+      "left": 497.0,
+      "top": 617.0,
+      "width": 63.0,
+      "height": 18.0,
+      "tokens": [
+        {
+          "text": "-4.71",
+          "left": 497.0,
+          "top": 617.0,
+          "width": 63.0,
+          "height": 18.0
+        }
+      ]
+    },
+    {
+      "text": "161.45",
+      "left": 484.0,
+      "top": 702.0,
+      "width": 76.0,
+      "height": 18.0,
+      "tokens": [
+        {
+          "text": "161.45",
+          "left": 484.0,
+          "top": 702.0,
+          "width": 76.0,
+          "height": 18.0
+        }
+      ]
+    },
+    {
+      "text": "-7.86",
+      "left": 497.0,
+      "top": 642.0,
+      "width": 61.0,
+      "height": 22.0,
+      "tokens": [
+        {
+          "text": "-7.86",
+          "left": 497.0,
+          "top": 642.0,
+          "width": 61.0,
+          "height": 22.0
+        }
+      ]
+    }
+  ]
+}

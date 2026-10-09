@@ -16,6 +16,12 @@ abstract class IReseeboDataAdapter {
   Future<List<Product>> getProducts({String? query});
   Future<Product?> getProductById(String id);
   Future<void> saveProduct(Product product);
+  Future<List<String>> getProductCategories();
+  Future<void> addProductCategory(String name);
+
+  /// Removes the category and clears its product assignments atomically.
+  /// Products and purchase history remain intact.
+  Future<void> removeProductCategory(String name);
   Future<List<Supplier>> getSuppliers();
   Future<Supplier?> getSupplierById(String id) async {
     final list = await getSuppliers();

@@ -163,6 +163,41 @@ class SqliteReseeboDataAdapter implements IReseeboDataAdapter {
   }
 
   @override
+  Future<List<String>> getProductCategories() async => (await _db.rawQuery('''
+    SELECT name FROM product_categories
+    UNION SELECT trim(category) COLLATE NOCASE FROM products WHERE trim(category) != ''
+    ORDER BY name COLLATE NOCASE
+  ''')).map((row) => row['name'] as String).toList();
+
+  @override
+  Future<void> addProductCategory(String name) => _write(() async {
+    final value = name.trim();
+    if (value.isEmpty) {
+      throw const ValidationException('Enter a category name.');
+    }
+    await _db.insert('product_categories', {
+      'name': value,
+    }, conflictAlgorithm: sqlite.ConflictAlgorithm.ignore);
+  });
+
+  @override
+  Future<void> removeProductCategory(String name) => _write(() async {
+    await _db.transaction((txn) async {
+      await txn.update(
+        'products',
+        {'category': '', 'updated_at': _now},
+        where: 'trim(category) = ? COLLATE NOCASE',
+        whereArgs: [name.trim()],
+      );
+      await txn.delete(
+        'product_categories',
+        where: 'name = ? COLLATE NOCASE',
+        whereArgs: [name.trim()],
+      );
+    });
+  });
+
+  @override
   Future<void> saveProduct(Product product) => _write(() async {
     if ([
       product.id,
@@ -188,11 +223,16 @@ class SqliteReseeboDataAdapter implements IReseeboDataAdapter {
         'Keep the confirmed product identity. Create a separate product for a different item.',
       );
     }
-    if (old != null &&
-        !old.nameOnly &&
-        (_key(old.brand) != _key(product.brand) ||
-            _key(old.variant) != _key(product.variant) ||
-            _key(old.size) != _key(product.size))) {
+    final identityChanged =
+        old != null &&
+        (old.nameOnly
+            ? old.size.trim().isNotEmpty &&
+                  (_key(old.name) != _key(product.name) ||
+                      _key(old.size) != _key(product.size))
+            : (_key(old.brand) != _key(product.brand) ||
+                  _key(old.variant) != _key(product.variant) ||
+                  _key(old.size) != _key(product.size)));
+    if (identityChanged) {
       final history = await _db.query(
         'purchase_lines',
         columns: ['id'],
@@ -202,7 +242,7 @@ class SqliteReseeboDataAdapter implements IReseeboDataAdapter {
       );
       if (history.isNotEmpty) {
         throw const ValidationException(
-          'This product has purchase history. Keep its brand, variant and size, or create a separate product for a different item.',
+          'This product has purchase history. Keep its identity and size, or create a separate product for a different item.',
         );
       }
     }
@@ -232,20 +272,29 @@ class SqliteReseeboDataAdapter implements IReseeboDataAdapter {
         'selling_price_cents': product.sellingPriceCents,
         'updated_at': now,
       };
-      if (old == null) {
-        await _db.insert('products', {
-          'id': product.id,
-          ...values,
-          'created_at': now,
-        });
-      } else {
-        await _db.update(
-          'products',
-          values,
-          where: 'id = ?',
-          whereArgs: [product.id],
-        );
-      }
+      await _db.transaction((txn) async {
+        if (product.category.trim().isNotEmpty) {
+          await txn.insert(
+            'product_categories',
+            {'name': product.category.trim()},
+            conflictAlgorithm: sqlite.ConflictAlgorithm.ignore,
+          );
+        }
+        if (old == null) {
+          await txn.insert('products', {
+            'id': product.id,
+            ...values,
+            'created_at': now,
+          });
+        } else {
+          await txn.update(
+            'products',
+            values,
+            where: 'id = ?',
+            whereArgs: [product.id],
+          );
+        }
+      });
     } catch (_) {
       if (copied?.created ?? false) await _files.remove(copied!.path);
       rethrow;

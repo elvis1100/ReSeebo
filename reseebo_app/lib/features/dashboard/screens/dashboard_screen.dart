@@ -10,6 +10,7 @@ import '../../../core/widgets/shared_widgets.dart' show ErrorState;
 import '../../catalog/screens/product_editor_screen.dart';
 import '../widgets/receipt_list_item.dart';
 import '../widgets/stat_header.dart';
+import '../../insights/screens/insights_screen.dart';
 
 /// Main hub of Reseebo providing store owners quick access to recent
 /// scanned receipts, tracked product prices, and fast scanning actions.
@@ -203,6 +204,13 @@ class _DashboardScreenState extends State<DashboardScreen>
                             StatHeader(
                               profile: _storeProfile!,
                               onSettingsTap: widget.onSettingsPressed,
+                              onInsightsTap: () => Navigator.of(context).push(
+                                MaterialPageRoute(
+                                  builder: (_) => InsightsScreen(
+                                    adapter: widget.dataAdapter,
+                                  ),
+                                ),
+                              ),
                             ),
                           const SizedBox(height: AppSpacing.m),
                           Row(
@@ -317,7 +325,7 @@ class _DashboardScreenState extends State<DashboardScreen>
                                   tabs: [
                                     Tab(
                                       text:
-                                          'Recent Receipts (${_filteredReceipts.length})',
+                                          'Receipts (${_filteredReceipts.length})',
                                     ),
                                     Tab(
                                       text:

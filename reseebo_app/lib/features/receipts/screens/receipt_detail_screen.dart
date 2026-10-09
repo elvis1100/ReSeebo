@@ -1,13 +1,10 @@
-import 'dart:io';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import '../../../core/adapters/i_reseebo_data_adapter.dart';
-import '../../../core/constants/formatters.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/widgets/shared_widgets.dart';
 import '../../comparison/screens/product_comparison_screen.dart';
 import '../state/receipt_detail_controller.dart';
-import '../widgets/receipt_purchase_card.dart';
+import '../widgets/saved_digital_receipt.dart';
 
 class ReceiptDetailScreen extends StatefulWidget {
   const ReceiptDetailScreen({
@@ -46,7 +43,7 @@ class _ReceiptDetailScreenState extends State<ReceiptDetailScreen> {
     builder: (context, _) {
       final detail = controller.detail;
       return Scaffold(
-        appBar: AppBar(title: const Text('Saved receipt')),
+        appBar: AppBar(title: const Text('Receipt details')),
         body: controller.loading
             ? const Center(child: CircularProgressIndicator())
             : controller.error != null
@@ -68,101 +65,22 @@ class _ReceiptDetailScreenState extends State<ReceiptDetailScreen> {
                     ),
                     const SizedBox(height: AppSpacing.lg),
                   ],
-                  Text(
-                    detail.receipt.supplier.label,
-                    style: Theme.of(context).textTheme.headlineSmall,
-                  ),
-                  const SizedBox(height: AppSpacing.sm),
-                  Text(
-                    purchaseDate(
-                      detail.receipt.purchasedAt,
-                      withTime: detail.receipt.hasPurchaseTime,
-                    ),
-                  ),
-                  if (detail.receipt.receiptNumber.isNotEmpty)
-                    Text('Receipt no. ${detail.receipt.receiptNumber}'),
-                  const SizedBox(height: AppSpacing.lg),
-                  ReceiptImagesPreview(paths: detail.receipt.imagePaths),
-                  const SizedBox(height: AppSpacing.lg),
-                  for (final line in detail.lines)
-                    ReceiptPurchaseCard(
-                      line: line,
-                      product: controller.products[line.productId],
-                      onCompare: () => Navigator.push<void>(
-                        context,
-                        MaterialPageRoute(
-                          builder: (_) => ProductComparisonScreen(
-                            dataAdapter: widget.adapter,
-                            productId: line.productId,
-                          ),
+                  SavedDigitalReceipt(
+                    detail: detail,
+                    products: controller.products,
+                    onCompare: (line) => Navigator.push<void>(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) => ProductComparisonScreen(
+                          dataAdapter: widget.adapter,
+                          productId: line.productId,
                         ),
                       ),
                     ),
-                  Wrap(
-                    alignment: WrapAlignment.spaceBetween,
-                    spacing: AppSpacing.md,
-                    runSpacing: AppSpacing.sm,
-                    children: [
-                      const Text('Recorded purchase total'),
-                      CurrencyText.cents(
-                        cents: detail.receipt.totalCents,
-                        style: Theme.of(context).textTheme.titleLarge,
-                      ),
-                    ],
-                  ),
-                  if (detail.receipt.notes.isNotEmpty)
-                    Padding(
-                      padding: const EdgeInsets.only(top: AppSpacing.lg),
-                      child: Text('Notes: ${detail.receipt.notes}'),
-                    ),
-                  const SizedBox(height: AppSpacing.lg),
-                  Text(
-                    'Saved on ${purchaseDate(detail.receipt.createdAt, withTime: true)}',
-                    style: Theme.of(context).textTheme.bodySmall,
                   ),
                 ],
               ),
       );
     },
   );
-}
-
-class ReceiptImagesPreview extends StatelessWidget {
-  final List<String> paths;
-  const ReceiptImagesPreview({super.key, required this.paths});
-
-  @override
-  Widget build(BuildContext context) {
-    if (paths.isEmpty) return const SizedBox.shrink();
-    return SizedBox(
-      height: 180,
-      child: ListView.separated(
-        scrollDirection: Axis.horizontal,
-        itemCount: paths.length,
-        separatorBuilder: (context, index) => const SizedBox(width: 8),
-        itemBuilder: (context, index) => ClipRRect(
-          borderRadius: BorderRadius.circular(8),
-          child: kIsWeb
-              ? Image.network(
-                  paths[index],
-                  fit: BoxFit.cover,
-                  errorBuilder: (context, error, stackTrace) => Container(
-                    width: 120,
-                    color: AppColors.surfaceSubtle,
-                    child: const Icon(Icons.receipt_long, color: AppColors.textMuted),
-                  ),
-                )
-              : Image.file(
-                  File(paths[index]),
-                  fit: BoxFit.cover,
-                  errorBuilder: (context, error, stackTrace) => Container(
-                    width: 120,
-                    color: AppColors.surfaceSubtle,
-                    child: const Icon(Icons.receipt_long, color: AppColors.textMuted),
-                  ),
-                ),
-        ),
-      ),
-    );
-  }
 }

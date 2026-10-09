@@ -110,3 +110,14 @@ native navigation attempt was interrupted and did not establish that result.
 5. Record the phone/OS, receipt samples, failed readings and correction effort.
    Add anonymized actual OCR outputs as fixtures when available. Never treat a
    store name as proof that one fixed layout applies to every branch or till.
+
+
+## Receipt autofill follow-up — 10 October 2026
+
+See [receipt autofill results](receipt_autofill_results.md) for the implementation,
+six downloaded public samples, actual native OCR replay fixtures, limitations,
+and repeatable isolated device-test commands. The offline native smoke/public
+sample tests and a separate process-restart receipt check passed. Actual source
+photos are retained under `/tmp`, not app assets; manual corrections in the saved
+Savemore sample are explicitly excluded from automatic extraction claims.
+The exact chat-attached Wellbest and DALI photos still need native verification.

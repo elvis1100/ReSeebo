@@ -4,6 +4,7 @@ import '../../../core/constants/formatters.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/widgets/app_card.dart';
 import '../widgets/receipt_scan_steps.dart';
+import '../widgets/receipt_save_preview.dart';
 import '../../suppliers/screens/supplier_editor_screen.dart';
 import '../state/receipt_review_state.dart';
 import '../widgets/duplicate_review_dialog.dart';
@@ -33,6 +34,26 @@ class _ReviewMatchScreenState extends State<ReviewMatchScreen> {
   late final ReceiptReviewState _review;
   final ScrollController _scroll = ScrollController();
   bool _photosExpanded = false;
+  bool _confirming = false;
+
+  void _back() {
+    if (_review.saving) return;
+    if (_confirming) {
+      setState(() => _confirming = false);
+    } else {
+      (widget.onBack ?? () => Navigator.maybePop(context))();
+    }
+  }
+
+  void _continue() {
+    FocusScope.of(context).unfocus();
+    final issue = _review.problem;
+    if (issue != null) {
+      _message(issue);
+      return;
+    }
+    setState(() => _confirming = true);
+  }
 
   @override
   void initState() {
@@ -225,198 +246,215 @@ class _ReviewMatchScreenState extends State<ReviewMatchScreen> {
   @override
   Widget build(BuildContext context) {
     final draft = _review.draft;
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Review receipt'),
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back),
-          onPressed: _review.saving
-              ? null
-              : widget.onBack ?? () => Navigator.maybePop(context),
+    return PopScope(
+      canPop: !_confirming && !_review.saving,
+      onPopInvokedWithResult: (didPop, result) {
+        if (!didPop && !_review.saving) _back();
+      },
+      child: Scaffold(
+        appBar: AppBar(
+          title: Text(_confirming ? 'Confirm receipt' : 'Review receipt'),
+          leading: IconButton(
+            icon: const Icon(Icons.arrow_back),
+            onPressed: _review.saving ? null : _back,
+          ),
         ),
-      ),
-      body: _review.loading
-          ? const Center(child: CircularProgressIndicator())
-          : _review.error != null
-          ? Center(
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Text(_review.error!),
-                  TextButton(
-                    onPressed: _review.load,
-                    child: const Text('Retry'),
-                  ),
-                ],
-              ),
-            )
-          : ListView(
-              controller: _scroll,
-              padding: const EdgeInsets.all(16),
-              children: [
-                const ReceiptScanSteps(activeStep: 1),
-                const SizedBox(height: 20),
-                Text(
-                  'Let’s check your receipt',
-                  style: Theme.of(context).textTheme.headlineSmall,
-                ),
-                const SizedBox(height: 6),
-                const Text(
-                  'Check where you bought the items, then confirm each product and amount.',
-                ),
-                const SizedBox(height: 20),
-                AppCard(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 16,
-                    vertical: 4,
-                  ),
-                  child: Column(
-                    children: [
-                      ListTile(
-                        contentPadding: EdgeInsets.zero,
-                        leading: const Icon(
-                          Icons.receipt_long_outlined,
-                          color: AppColors.primary,
-                        ),
-                        title: const Text('Receipt photos'),
-                        subtitle: Text(
-                          '${_review.pages.length} photo${_review.pages.length == 1 ? '' : 's'} · Check the original anytime',
-                        ),
-                        trailing: Icon(
-                          _photosExpanded
-                              ? Icons.expand_less
-                              : Icons.expand_more,
-                        ),
-                        onTap: () =>
-                            setState(() => _photosExpanded = !_photosExpanded),
-                      ),
-                      if (_photosExpanded) _photos(),
-                    ],
-                  ),
-                ),
-                if (draft.warnings.isNotEmpty) ...[
-                  const SizedBox(height: 12),
-                  AppCard(
-                    backgroundColor: AppColors.softAmber,
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        const Text(
-                          'Please check',
-                          style: TextStyle(fontWeight: FontWeight.w600),
-                        ),
-                        for (final warning in draft.warnings)
-                          Padding(
-                            padding: const EdgeInsets.only(top: 6),
-                            child: Text(
-                              warning,
-                              style: const TextStyle(
-                                color: AppColors.amberText,
-                              ),
-                            ),
-                          ),
-                      ],
-                    ),
-                  ),
-                ],
-                const SizedBox(height: 16),
-                AppCard(
-                  child: ReceiptMetadataEditor(
-                    draft: draft,
-                    onSupplierChanged: _review.refreshDateSuggestion,
-                    onDateCandidate: (candidate, remember) =>
-                        _review.chooseDateCandidate(candidate, remember: remember),
-                    suppliers: _review.suppliers,
-                    enabled: !_review.saving,
-                    onChanged: () => _review.changed(),
-                    onEditSupplier: _editSupplier,
-                  ),
-                ),
-                const SizedBox(height: 20),
-                Row(
+        body: _review.loading
+            ? const Center(child: CircularProgressIndicator())
+            : _review.error != null
+            ? Center(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
                   children: [
-                    Expanded(
-                      child: Text(
-                        'Items (${draft.lines.length})',
-                        style: Theme.of(context).textTheme.titleLarge,
-                      ),
-                    ),
-                    TextButton.icon(
-                      onPressed: _review.saving ? null : _review.addLine,
-                      icon: const Icon(Icons.add),
-                      label: const Text('Add item'),
+                    Text(_review.error!),
+                    TextButton(
+                      onPressed: _review.load,
+                      child: const Text('Retry'),
                     ),
                   ],
                 ),
-                Padding(
-                  padding: const EdgeInsets.only(bottom: 16),
-                  child: Text(
-                    '${_review.confirmedCount} of ${draft.lines.length} items checked',
-                    style: const TextStyle(color: AppColors.textSecondary),
+              )
+            : _confirming
+            ? ReceiptSavePreview(review: _review, onBack: _back)
+            : ListView(
+                controller: _scroll,
+                padding: const EdgeInsets.all(16),
+                children: [
+                  const ReceiptScanSteps(activeStep: 1),
+                  const SizedBox(height: 20),
+                  Text(
+                    'Let’s check your receipt',
+                    style: Theme.of(context).textTheme.headlineSmall,
                   ),
-                ),
-                const Padding(
-                  padding: EdgeInsets.only(bottom: 16),
-                  child: Text(
-                    'Unmatched items are added to your catalog when saved.',
-                    style: TextStyle(color: AppColors.textSecondary),
+                  const SizedBox(height: 6),
+                  const Text(
+                    'Check where you bought the items, then confirm each product and amount.',
                   ),
-                ),
-                if (draft.lines.isEmpty)
-                  const AppCard(
+                  const SizedBox(height: 20),
+                  AppCard(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 16,
+                      vertical: 4,
+                    ),
                     child: Column(
                       children: [
-                        Icon(
-                          Icons.playlist_add_rounded,
-                          size: 36,
-                          color: AppColors.primary,
+                        ListTile(
+                          contentPadding: EdgeInsets.zero,
+                          leading: const Icon(
+                            Icons.receipt_long_outlined,
+                            color: AppColors.primary,
+                          ),
+                          title: const Text('Receipt photos'),
+                          subtitle: Text(
+                            '${_review.pages.length} photo${_review.pages.length == 1 ? '' : 's'} · Check the original anytime',
+                          ),
+                          trailing: Icon(
+                            _photosExpanded
+                                ? Icons.expand_less
+                                : Icons.expand_more,
+                          ),
+                          onTap: () => setState(
+                            () => _photosExpanded = !_photosExpanded,
+                          ),
                         ),
-                        SizedBox(height: 8),
-                        Text(
-                          'No items found yet',
-                          style: TextStyle(fontWeight: FontWeight.w600),
-                        ),
-                        SizedBox(height: 4),
-                        Text(
-                          'Tap Add item to enter a product from your receipt.',
-                        ),
+                        if (_photosExpanded) _photos(),
                       ],
                     ),
                   ),
-                ...draft.lines.indexed.map(
-                  (entry) => _line(entry.$2, entry.$1),
-                ),
-                AppCard(
-                  backgroundColor: AppColors.softPrimary,
-                  child: _totals(),
-                ),
-                const SizedBox(height: 24),
-              ],
-            ),
-      bottomNavigationBar: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.all(16),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              if (!_review.loading && _review.problem != null)
-                Padding(
-                  padding: const EdgeInsets.only(bottom: 8),
-                  child: Text(
-                    _review.problem!,
-                    style: const TextStyle(color: AppColors.amberText),
+                  if (draft.warnings.isNotEmpty) ...[
+                    const SizedBox(height: 12),
+                    AppCard(
+                      backgroundColor: AppColors.softAmber,
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          const Text(
+                            'Please check',
+                            style: TextStyle(fontWeight: FontWeight.w600),
+                          ),
+                          for (final warning in draft.warnings)
+                            Padding(
+                              padding: const EdgeInsets.only(top: 6),
+                              child: Text(
+                                warning,
+                                style: const TextStyle(
+                                  color: AppColors.amberText,
+                                ),
+                              ),
+                            ),
+                        ],
+                      ),
+                    ),
+                  ],
+                  const SizedBox(height: 16),
+                  AppCard(
+                    child: ReceiptMetadataEditor(
+                      draft: draft,
+                      onSupplierChanged: _review.refreshDateSuggestion,
+                      onDateCandidate: (candidate, remember) => _review
+                          .chooseDateCandidate(candidate, remember: remember),
+                      suppliers: _review.suppliers,
+                      enabled: !_review.saving,
+                      onChanged: () => _review.changed(),
+                      onEditSupplier: _editSupplier,
+                    ),
+                  ),
+                  const SizedBox(height: 20),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: Text(
+                          'Items (${draft.lines.length})',
+                          style: Theme.of(context).textTheme.titleLarge,
+                        ),
+                      ),
+                      TextButton.icon(
+                        onPressed: _review.saving ? null : _review.addLine,
+                        icon: const Icon(Icons.add),
+                        label: const Text('Add item'),
+                      ),
+                    ],
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.only(bottom: 16),
+                    child: Text(
+                      '${_review.confirmedCount} of ${draft.lines.length} items checked',
+                      style: const TextStyle(color: AppColors.textSecondary),
+                    ),
+                  ),
+                  const Padding(
+                    padding: EdgeInsets.only(bottom: 16),
+                    child: Text(
+                      'Unmatched items are added to your catalog when saved.',
+                      style: TextStyle(color: AppColors.textSecondary),
+                    ),
+                  ),
+                  if (draft.lines.isEmpty)
+                    const AppCard(
+                      child: Column(
+                        children: [
+                          Icon(
+                            Icons.playlist_add_rounded,
+                            size: 36,
+                            color: AppColors.primary,
+                          ),
+                          SizedBox(height: 8),
+                          Text(
+                            'No items found yet',
+                            style: TextStyle(fontWeight: FontWeight.w600),
+                          ),
+                          SizedBox(height: 4),
+                          Text(
+                            'Tap Add item to enter a product from your receipt.',
+                          ),
+                        ],
+                      ),
+                    ),
+                  ...draft.lines.indexed.map(
+                    (entry) => _line(entry.$2, entry.$1),
+                  ),
+                  AppCard(
+                    backgroundColor: AppColors.softPrimary,
+                    child: _totals(),
+                  ),
+                  const SizedBox(height: 24),
+                ],
+              ),
+        bottomNavigationBar: SafeArea(
+          child: Padding(
+            padding: const EdgeInsets.all(16),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                if (!_review.loading && _review.problem != null)
+                  Padding(
+                    padding: const EdgeInsets.only(bottom: 8),
+                    child: Text(
+                      _review.problem!,
+                      style: const TextStyle(color: AppColors.amberText),
+                    ),
+                  ),
+                FilledButton.icon(
+                  onPressed:
+                      _review.saving || _review.loading || _review.error != null
+                      ? null
+                      : _confirming
+                      ? _save
+                      : _continue,
+                  icon: Icon(
+                    _confirming ? Icons.save_alt : Icons.arrow_forward,
+                  ),
+                  label: Text(
+                    _review.saving
+                        ? 'Saving...'
+                        : _confirming
+                        ? 'Save receipt'
+                        : 'Continue to save',
                   ),
                 ),
-              FilledButton.icon(
-                onPressed:
-                    _review.saving || _review.loading || _review.error != null
-                    ? null
-                    : _save,
-                icon: const Icon(Icons.save_alt),
-                label: Text(_review.saving ? 'Saving...' : 'Save receipt'),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
       ),

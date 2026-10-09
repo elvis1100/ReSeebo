@@ -56,8 +56,8 @@ class Product {
   final String variant;
   final String size;
 
-  /// Receipt-created entries have no inferred brand, variant, or size.
-  /// Completing those details converts the entry to a fixed product identity.
+  /// Uses the owner-entered name rather than separate brand/variant fields.
+  /// Receipt imports can lack a size; exact automatic matching requires one.
   final bool nameOnly;
   final String category;
   final String barcode;

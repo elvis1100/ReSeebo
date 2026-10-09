@@ -76,6 +76,11 @@ class ReceiptReviewState extends ChangeNotifier {
         line.description = text;
         line.productId = null;
         line.matchOrigin = null;
+        final product = exactProductMatch(text, products);
+        if (product != null) {
+          line.productId = product.id;
+          line.matchOrigin = 'Matched from receipt';
+        }
       case ReceiptLineField.quantity:
         line.quantity = parseQuantity(text);
         line.quantityEdited = true;
@@ -132,15 +137,21 @@ class ReceiptReviewState extends ChangeNotifier {
         }
       }
       refreshDateSuggestion();
-      // Only a unique mapping previously confirmed by the owner may prefill
+      // Unique confirmed aliases or complete exact catalog identities prefill
       // product identity. Similar catalog names still need an explicit choice.
       final aliases = <String, List<ProductMatchSuggestion>>{};
       for (final line in draft.lines) {
         if (line.productId != null || line.description.trim().isEmpty) continue;
-        final key = _key(line.description);
+        final description = line.description;
+        final key = _key(description);
         final matches = aliases[key] ??= await adapter.matchAliases(
-          line.description,
+          description,
         );
+        if (_disposed ||
+            line.description != description ||
+            line.productId != null) {
+          continue;
+        }
         final exactIds = matches
             .where((match) => match.exactAlias)
             .map((match) => match.product.id)
@@ -213,7 +224,9 @@ class ReceiptReviewState extends ChangeNotifier {
         ),
       );
     }
-    if (_disposed || draft.supplierId != supplierId || draft.dateManuallyEdited) {
+    if (_disposed ||
+        draft.supplierId != supplierId ||
+        draft.dateManuallyEdited) {
       return;
     }
     draft.purchasedAt = candidate.date;

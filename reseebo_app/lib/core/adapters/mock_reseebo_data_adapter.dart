@@ -8,6 +8,42 @@ import 'i_reseebo_data_adapter.dart';
 /// In-memory mock adapter pre-loaded with realistic sari-sari store fixtures.
 /// Enables immediate, offline frontend prototyping and lightweight Web testing.
 class MockReseeboDataAdapter implements IReseeboDataAdapter {
+  final Set<String> _categories = {};
+  @override
+  Future<List<String>> getProductCategories() async {
+    final values = <String, String>{};
+    for (final name in [..._categories, ..._products.map((p) => p.category)]) {
+      if (name.trim().isNotEmpty) {
+        values.putIfAbsent(name.trim().toLowerCase(), () => name.trim());
+      }
+    }
+    return values.values.toList()
+      ..sort((a, b) => a.toLowerCase().compareTo(b.toLowerCase()));
+  }
+
+  @override
+  Future<void> addProductCategory(String name) async {
+    if (name.trim().isEmpty) {
+      throw const ValidationException('Enter a category name.');
+    }
+    if (!(await getProductCategories()).any(
+      (value) => value.toLowerCase() == name.trim().toLowerCase(),
+    )) {
+      _categories.add(name.trim());
+    }
+  }
+
+  @override
+  Future<void> removeProductCategory(String name) async {
+    final key = name.trim().toLowerCase();
+    _categories.removeWhere((value) => value.toLowerCase() == key);
+    for (var index = 0; index < _products.length; index++) {
+      if (_products[index].category.trim().toLowerCase() == key) {
+        _products[index] = _products[index].copyWith(category: '');
+      }
+    }
+  }
+
   StoreProfile _profile = const StoreProfile(
     name: "Aling Nena's Sari-Sari Store",
     ownerName: 'Elena Santos',

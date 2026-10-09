@@ -57,6 +57,60 @@ ReceiptDraft _validDraft() => ReceiptDraft(
 );
 
 void main() {
+  testWidgets(
+    'digital receipt fits enlarged text and opens original photos before save',
+    (tester) async {
+      tester.view.physicalSize = const Size(360, 800);
+      tester.view.devicePixelRatio = 1;
+      addTearDown(tester.view.resetPhysicalSize);
+      addTearDown(tester.view.resetDevicePixelRatio);
+      final adapter = _ReviewAdapter();
+      final draft = _validDraft()
+        ..supplierBranch = 'Main branch'
+        ..receiptNumber = '123';
+      await tester.pumpWidget(
+        MaterialApp(
+          builder: (context, child) => MediaQuery(
+            data: MediaQuery.of(
+              context,
+            ).copyWith(textScaler: const TextScaler.linear(1.4)),
+            child: child!,
+          ),
+          home: ReviewMatchScreen(dataAdapter: adapter, initialDraft: draft),
+        ),
+      );
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Continue to save'));
+      await tester.pumpAndSettle();
+      expect(find.text('Reviewed purchase'), findsOneWidget);
+      expect(find.text('Main branch'), findsOneWidget);
+      expect(find.text('2 pieces'), findsOneWidget);
+      expect(find.text('RECORDED TOTAL'), findsOneWidget);
+      expect(find.text('₱20.00'), findsNWidgets(2));
+      expect(adapter.saved, isNull);
+      await tester.scrollUntilVisible(
+        find.text('View original receipt photos'),
+        250,
+        scrollable: find.byType(Scrollable).first,
+      );
+      await tester.pumpAndSettle();
+      expect(tester.takeException(), isNull);
+      await tester.tap(find.text('View original receipt photos'));
+      await tester.pumpAndSettle();
+      expect(
+        tester
+            .widget<ReceiptImageViewer>(find.byType(ReceiptImageViewer))
+            .imagePath,
+        'original.jpg',
+      );
+      await tester.tap(find.byTooltip('Close photos'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Save receipt'));
+      await tester.pumpAndSettle();
+      expect(adapter.saved!.receiptNumber, '123');
+    },
+  );
+
   testWidgets('review controls fit a 360dp phone with enlarged text', (
     tester,
   ) async {
@@ -127,7 +181,12 @@ void main() {
       );
       await tester.enterText(find.byKey(const ValueKey('quantity')), '4');
       await tester.pumpAndSettle();
-      await tester.tap(find.text('Save receipt'));
+      await tester.tap(find.text('Continue to save'));
+      await tester.pumpAndSettle();
+      if (find.text('Save receipt').evaluate().isNotEmpty) {
+        expect(adapter.saved, isNull);
+        await tester.tap(find.text('Save receipt'));
+      }
       await tester.pumpAndSettle();
       expect(adapter.saved, isNull);
       expect(
@@ -136,6 +195,40 @@ void main() {
       );
     },
   );
+
+  testWidgets('save preview returns to review before returning to photos', (
+    tester,
+  ) async {
+    final adapter = _ReviewAdapter();
+    var returnedToPhotos = false;
+    await tester.pumpWidget(
+      MaterialApp(
+        home: ReviewMatchScreen(
+          dataAdapter: adapter,
+          initialDraft: _validDraft(),
+          onBack: () => returnedToPhotos = true,
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Continue to save'));
+    await tester.pumpAndSettle();
+    expect(find.text('Ready to save?'), findsOneWidget);
+    expect(adapter.saved, isNull);
+    await tester.scrollUntilVisible(
+      find.text('Back to review'),
+      200,
+      scrollable: find.byType(Scrollable).first,
+    );
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Back to review'));
+    await tester.pumpAndSettle();
+    expect(find.text('Continue to save'), findsOneWidget);
+    expect(returnedToPhotos, isFalse);
+    await tester.tap(find.byIcon(Icons.arrow_back));
+    await tester.pumpAndSettle();
+    expect(returnedToPhotos, isTrue);
+  });
 
   testWidgets(
     'receipt evidence stays read-only and manual edits require confirmation',
@@ -199,7 +292,12 @@ void main() {
       );
       await tester.enterText(find.byKey(const ValueKey('quantity')), '12');
       await tester.pumpAndSettle();
-      await tester.tap(find.text('Save receipt'));
+      await tester.tap(find.text('Continue to save'));
+      await tester.pumpAndSettle();
+      if (find.text('Save receipt').evaluate().isNotEmpty) {
+        expect(adapter.saved, isNull);
+        await tester.tap(find.text('Save receipt'));
+      }
       await tester.pumpAndSettle();
       expect(adapter.saved, isNull);
       expect(
@@ -223,7 +321,12 @@ void main() {
         ),
       );
       await tester.pumpAndSettle();
-      await tester.tap(find.text('Save receipt'));
+      await tester.tap(find.text('Continue to save'));
+      await tester.pumpAndSettle();
+      if (find.text('Save receipt').evaluate().isNotEmpty) {
+        expect(adapter.saved, isNull);
+        await tester.tap(find.text('Save receipt'));
+      }
       await tester.pumpAndSettle();
       expect(find.text('Possible duplicate receipt'), findsOneWidget);
       expect(adapter.saved, isNull);
@@ -269,7 +372,12 @@ void main() {
         ),
       );
       await tester.pumpAndSettle();
-      await tester.tap(find.text('Save receipt'));
+      await tester.tap(find.text('Continue to save'));
+      await tester.pumpAndSettle();
+      if (find.text('Save receipt').evaluate().isNotEmpty) {
+        expect(adapter.saved, isNull);
+        await tester.tap(find.text('Save receipt'));
+      }
       await tester.pumpAndSettle();
       expect(saved, isTrue);
       expect(adapter.saved!.operationId, 'operation');
@@ -305,7 +413,12 @@ void main() {
       expect(find.text('Match exact product (optional)'), findsOneWidget);
       expect(find.text('Check brand, variant and size'), findsNothing);
       expect(find.byKey(const ValueKey('description')), findsOneWidget);
-      await tester.tap(find.text('Save receipt'));
+      await tester.tap(find.text('Continue to save'));
+      await tester.pumpAndSettle();
+      if (find.text('Save receipt').evaluate().isNotEmpty) {
+        expect(adapter.saved, isNull);
+        await tester.tap(find.text('Save receipt'));
+      }
       await tester.pumpAndSettle();
       expect(adapter.saved, isNull);
       expect(
@@ -319,7 +432,12 @@ void main() {
       );
       await tester.tap(find.text('I checked this item'));
       await tester.pumpAndSettle();
-      await tester.tap(find.text('Save receipt'));
+      await tester.tap(find.text('Continue to save'));
+      await tester.pumpAndSettle();
+      if (find.text('Save receipt').evaluate().isNotEmpty) {
+        expect(adapter.saved, isNull);
+        await tester.tap(find.text('Save receipt'));
+      }
       await tester.pumpAndSettle();
       expect(adapter.saved, isNotNull);
       expect(adapter.saved!.lines.single.productId, isNull);

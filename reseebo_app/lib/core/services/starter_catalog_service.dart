@@ -62,6 +62,11 @@ class StarterCatalogService {
           ],
         );
         if (existing.isEmpty) {
+          if (product.category.trim().isNotEmpty) {
+            await transaction.insert('product_categories', {
+              'name': product.category.trim(),
+            }, conflictAlgorithm: ConflictAlgorithm.ignore);
+          }
           await transaction.insert('products', {
             'id': product.id,
             'name': product.name,

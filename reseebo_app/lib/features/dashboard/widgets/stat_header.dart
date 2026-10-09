@@ -4,14 +4,19 @@ import '../../../core/models/store_profile.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_spacing.dart';
 import '../../../core/theme/app_typography.dart';
-import '../../../core/utils/currency_formatter.dart';
 
 /// Compact store identity; receipt and product counts belong to the tabs.
 class StatHeader extends StatelessWidget {
   final StoreProfile profile;
   final VoidCallback? onSettingsTap;
+  final VoidCallback? onInsightsTap;
 
-  const StatHeader({super.key, required this.profile, this.onSettingsTap});
+  const StatHeader({
+    super.key,
+    required this.profile,
+    this.onSettingsTap,
+    this.onInsightsTap,
+  });
 
   @override
   Widget build(BuildContext context) => Tooltip(
@@ -65,23 +70,25 @@ class StatHeader extends StatelessWidget {
                   ),
                 ),
                 const SizedBox(width: AppSpacing.s),
-                Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 10,
-                    vertical: 4,
-                  ),
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(AppSpacing.radiusPill),
-                  ),
-                  child: Text(
-                    profile.defaultMarkupPercent == null
-                        ? 'Set markup'
-                        : '${CurrencyFormatter.formatPercentage(profile.defaultMarkupPercent!)} markup',
-                    style: AppTypography.caption.copyWith(
-                      color: AppColors.primaryDark,
-                      fontWeight: FontWeight.w700,
-                      fontSize: 11,
+                Material(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(AppSpacing.radiusPill),
+                  clipBehavior: Clip.antiAlias,
+                  child: InkWell(
+                    onTap: onInsightsTap,
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 10,
+                        vertical: 4,
+                      ),
+                      child: Text(
+                        'View insights',
+                        style: AppTypography.caption.copyWith(
+                          color: AppColors.primaryDark,
+                          fontWeight: FontWeight.w700,
+                          fontSize: 11,
+                        ),
+                      ),
                     ),
                   ),
                 ),

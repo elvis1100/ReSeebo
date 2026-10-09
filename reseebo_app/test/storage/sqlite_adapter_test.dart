@@ -120,7 +120,111 @@ void main() {
   });
 
   test(
-    'fresh local database has eight versioned tables and no sample receipts',
+    'categories persist, deduplicate and unassign without losing receipts',
+    () async {
+      await adapter.saveProduct(coffee.copyWith(category: 'Beverages'));
+      final saved = await adapter.saveConfirmedReceipt(
+        await draft(operation: 'category-history'),
+      );
+      final before = await adapter.getReceipt(saved.receiptId);
+      await adapter.addProductCategory(' Household ');
+      await adapter.addProductCategory('household');
+      await adapter.close();
+      adapter = await openAdapter();
+      db = await databaseFactoryFfi.openDatabase(databasePath);
+      expect(await adapter.getProductCategories(), ['Beverages', 'Household']);
+      await expectLater(
+        adapter.addProductCategory(' '),
+        throwsA(isA<ValidationException>()),
+      );
+      await adapter.removeProductCategory('BEVERAGES');
+      expect((await adapter.getProductById(coffee.id))!.category, isEmpty);
+      final after = await adapter.getReceipt(saved.receiptId);
+      expect(after.receipt.totalCents, before.receipt.totalCents);
+      expect(after.receipt.imagePaths, before.receipt.imagePaths);
+      expect(after.lines.single.productId, before.lines.single.productId);
+      expect(
+        after.lines.single.netAmountCents,
+        before.lines.single.netAmountCents,
+      );
+      expect(await adapter.getProductCategories(), ['Household']);
+      await adapter.close();
+      adapter = await openAdapter();
+      db = await databaseFactoryFfi.openDatabase(databasePath);
+      expect(await adapter.getProductCategories(), ['Household']);
+    },
+  );
+
+  test(
+    'version 5 migration imports categories and preserves product values',
+    () async {
+      await adapter.saveProduct(
+        coffee.copyWith(
+          category: 'Beverages',
+          barcode: 'saved-code',
+          markupPercent: 12,
+        ),
+      );
+      final saved = await adapter.saveConfirmedReceipt(
+        await draft(operation: 'category-upgrade'),
+      );
+      await db.execute('DROP TABLE product_categories');
+      await db.setVersion(5);
+      await adapter.close();
+      adapter = await openAdapter();
+      db = await databaseFactoryFfi.openDatabase(databasePath);
+      expect(await db.getVersion(), 6);
+      expect(await adapter.getProductCategories(), ['Beverages']);
+      final product = (await adapter.getProductById(coffee.id))!;
+      expect(product.brand, coffee.brand);
+      expect(product.variant, coffee.variant);
+      expect(product.barcode, 'saved-code');
+      expect(product.markupPercent, 12);
+      expect((await adapter.getReceipt(saved.receiptId)).lines, hasLength(1));
+    },
+  );
+
+  test(
+    'full-name products with size save locally without separate identity fields',
+    () async {
+      const product = Product(
+        id: 'full-name',
+        name: 'Bear Brand Fortified Milk',
+        brand: '',
+        variant: '',
+        size: '33g',
+        nameOnly: true,
+      );
+      await adapter.saveProduct(product);
+      await adapter.close();
+      adapter = await openAdapter();
+      db = await databaseFactoryFfi.openDatabase(databasePath);
+      final stored = (await adapter.getProductById(product.id))!;
+      expect(stored.name, product.name);
+      expect(stored.size, '33g');
+      expect(stored.nameOnly, isTrue);
+      await adapter.saveConfirmedReceipt(
+        await draft(
+          operation: 'full-name-history',
+          productId: product.id,
+          description: '${product.name} ${product.size}',
+        ),
+      );
+      await expectLater(
+        adapter.saveProduct(stored.copyWith(size: '66g')),
+        throwsA(isA<ValidationException>()),
+      );
+      await expectLater(
+        adapter.saveProduct(stored.copyWith(name: 'Other Milk')),
+        throwsA(isA<ValidationException>()),
+      );
+      await adapter.saveProduct(stored.copyWith(category: 'Milk'));
+      expect((await adapter.getProductById(product.id))!.category, 'Milk');
+    },
+  );
+
+  test(
+    'fresh local database has nine versioned tables and no sample receipts',
     () async {
       final tables = await db.rawQuery(
         "SELECT name FROM sqlite_master WHERE type = 'table' AND name NOT LIKE 'sqlite_%'",
@@ -134,8 +238,9 @@ void main() {
         'purchase_lines',
         'receipt_images',
         'catalog_seed_entries',
+        'product_categories',
       });
-      expect(await db.getVersion(), 5);
+      expect(await db.getVersion(), 6);
       expect(
         (await db.rawQuery('PRAGMA foreign_keys')).single.values.single,
         1,
@@ -145,32 +250,57 @@ void main() {
     },
   );
 
-  test('version 4 upgrade retains receipts and branch date preferences persist', () async {
-    final saved = await adapter.saveConfirmedReceipt(await draft(operation: 'v4-date'));
-    final receiptBefore = await adapter.getReceipt(saved.receiptId);
-    await db.execute('ALTER TABLE suppliers DROP COLUMN date_order');
-    await db.setVersion(4);
-    await adapter.close();
-    adapter = await openAdapter();
-    db = await databaseFactoryFfi.openDatabase(databasePath);
-    expect(await db.getVersion(), 5);
-    final supplier = (await adapter.getSuppliers()).single;
-    expect(supplier.dateOrder, isNull);
-    await adapter.saveSupplier(Supplier(id: supplier.id, name: supplier.name,
-      branch: supplier.branch, notes: supplier.notes, dateOrder: NumericDateOrder.dayFirst));
-    await adapter.close();
-    adapter = await openAdapter();
-    db = await databaseFactoryFfi.openDatabase(databasePath);
-    expect((await adapter.getSuppliers()).single.dateOrder, NumericDateOrder.dayFirst);
-    final after = await adapter.getReceipt(saved.receiptId);
-    expect(after.receipt.purchasedAt, receiptBefore.receipt.purchasedAt);
-    expect(after.lines.single.netAmountCents, receiptBefore.lines.single.netAmountCents);
-    expect(await File(after.receipt.imagePath).exists(), isTrue);
-    await adapter.saveSupplier(Supplier(id: supplier.id, name: supplier.name,
-      branch: supplier.branch, notes: supplier.notes));
-    expect((await adapter.getSuppliers()).single.dateOrder, isNull);
-    expect(await db.rawQuery('PRAGMA foreign_key_check'), isEmpty);
-  });
+  test(
+    'version 4 upgrade retains receipts and branch date preferences persist',
+    () async {
+      final saved = await adapter.saveConfirmedReceipt(
+        await draft(operation: 'v4-date'),
+      );
+      final receiptBefore = await adapter.getReceipt(saved.receiptId);
+      await db.execute('ALTER TABLE suppliers DROP COLUMN date_order');
+      await db.execute('DROP TABLE product_categories');
+      await db.setVersion(4);
+      await adapter.close();
+      adapter = await openAdapter();
+      db = await databaseFactoryFfi.openDatabase(databasePath);
+      expect(await db.getVersion(), 6);
+      final supplier = (await adapter.getSuppliers()).single;
+      expect(supplier.dateOrder, isNull);
+      await adapter.saveSupplier(
+        Supplier(
+          id: supplier.id,
+          name: supplier.name,
+          branch: supplier.branch,
+          notes: supplier.notes,
+          dateOrder: NumericDateOrder.dayFirst,
+        ),
+      );
+      await adapter.close();
+      adapter = await openAdapter();
+      db = await databaseFactoryFfi.openDatabase(databasePath);
+      expect(
+        (await adapter.getSuppliers()).single.dateOrder,
+        NumericDateOrder.dayFirst,
+      );
+      final after = await adapter.getReceipt(saved.receiptId);
+      expect(after.receipt.purchasedAt, receiptBefore.receipt.purchasedAt);
+      expect(
+        after.lines.single.netAmountCents,
+        receiptBefore.lines.single.netAmountCents,
+      );
+      expect(await File(after.receipt.imagePath).exists(), isTrue);
+      await adapter.saveSupplier(
+        Supplier(
+          id: supplier.id,
+          name: supplier.name,
+          branch: supplier.branch,
+          notes: supplier.notes,
+        ),
+      );
+      expect((await adapter.getSuppliers()).single.dateOrder, isNull);
+      expect(await db.rawQuery('PRAGMA foreign_key_check'), isEmpty);
+    },
+  );
 
   test(
     'all receipt pages save atomically, reopen and retain their order',
@@ -422,12 +552,14 @@ void main() {
         'product_aliases',
         'receipt_images',
         'catalog_seed_entries',
+        'product_categories',
       ]) {
         for (final row in await db.query(table)) {
           await legacy.insert(
             table,
-            Map<String, Object?>.of(row)..remove('name_only')
-            ..remove('date_order'),
+            Map<String, Object?>.of(row)
+              ..remove('name_only')
+              ..remove('date_order'),
           );
         }
       }
@@ -441,7 +573,7 @@ void main() {
       );
       try {
         final connection = await databaseFactoryFfi.openDatabase(legacyPath);
-        expect(await connection.getVersion(), 5);
+        expect(await connection.getVersion(), 6);
         expect(await connection.rawQuery('PRAGMA foreign_key_check'), isEmpty);
         expect(
           (await connection.rawQuery(
@@ -475,6 +607,7 @@ void main() {
       // retaining its actual receipts, purchase lines, files and owner profile.
       await db.execute('DROP TABLE catalog_seed_entries');
       await db.execute('ALTER TABLE suppliers DROP COLUMN date_order');
+      await db.execute('DROP TABLE product_categories');
       await db.setVersion(2);
       await adapter.close();
       adapter = await SqliteReseeboDataAdapter.open(
@@ -484,7 +617,7 @@ void main() {
         ocrService: FakeOcr(),
       );
       db = await databaseFactoryFfi.openDatabase(databasePath);
-      expect(await db.getVersion(), 5);
+      expect(await db.getVersion(), 6);
       expect((await adapter.getProducts()).length, greaterThan(200));
       expect((await adapter.getStoreProfile()).name, 'My existing shop');
       expect((await adapter.getStoreProfile()).defaultMarkupPercent, 17);

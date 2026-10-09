@@ -14,38 +14,75 @@ class ReceiptPurchaseCard extends StatelessWidget {
   final Product? product;
   final VoidCallback onCompare;
   @override
-  Widget build(BuildContext context) => Padding(
-    padding: const EdgeInsets.only(bottom: AppSpacing.md),
-    child: AppCard(
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            product?.name ?? line.originalDescription,
-            style: Theme.of(context).textTheme.titleMedium,
-          ),
-          if (product != null) Text(product!.identity),
-          const SizedBox(height: AppSpacing.sm),
-          Text('Photo ${line.sourcePage + 1} · ${line.purchaseLabel}'),
-          Text('Receipt: ${line.originalDescription}'),
-          const SizedBox(height: AppSpacing.sm),
-          Wrap(
-            spacing: AppSpacing.lg,
-            runSpacing: AppSpacing.sm,
-            children: [
-              CurrencyText.cents(cents: line.netAmountCents, prefix: 'Net '),
-              CurrencyText.cents(cents: line.costPerPieceCents, suffix: ' / piece'),
+  Widget build(BuildContext context) {
+    final name = product?.displayName ?? line.originalDescription;
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 8),
+      child: AppCard(
+        padding: const EdgeInsets.fromLTRB(12, 8, 12, 12),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Expanded(
+                  child: Text(
+                    name,
+                    style: Theme.of(context).textTheme.titleSmall,
+                  ),
+                ),
+                IconButton(
+                  onPressed: onCompare,
+                  tooltip: 'Compare prices',
+                  icon: const Icon(Icons.compare_arrows),
+                  visualDensity: VisualDensity.compact,
+                ),
+              ],
+            ),
+            if (product != null &&
+                product!.size.isNotEmpty &&
+                !name.toLowerCase().contains(product!.size.toLowerCase()))
+              Text(product!.size, style: Theme.of(context).textTheme.bodySmall),
+            Text(
+              line.purchaseLabel,
+              style: Theme.of(context).textTheme.bodySmall,
+            ),
+            const SizedBox(height: 4),
+            Wrap(
+              spacing: 16,
+              runSpacing: 4,
+              children: [
+                CurrencyText.cents(
+                  cents: line.netAmountCents,
+                  prefix: 'Amount ',
+                ),
+                CurrencyText.cents(
+                  cents: line.costPerPieceCents,
+                  suffix: ' / piece',
+                ),
+              ],
+            ),
+            if (line.discountCents > 0)
+              CurrencyText.cents(
+                cents: line.discountCents,
+                prefix: 'Line discount ',
+              ),
+            if (line.originalDescription != name) ...[
+              const SizedBox(height: 4),
+              Text(
+                'Receipt: ${line.originalDescription}',
+                style: Theme.of(context).textTheme.bodySmall,
+              ),
             ],
-          ),
-          if (line.discountCents > 0)
-            CurrencyText.cents(cents: line.discountCents, prefix: 'Line discount '),
-          TextButton.icon(
-            onPressed: onCompare,
-            icon: const Icon(Icons.compare_arrows),
-            label: const Text('Compare prices'),
-          ),
-        ],
+            Text(
+              'Source: Photo ${line.sourcePage + 1}',
+              style: Theme.of(
+                context,
+              ).textTheme.labelSmall?.copyWith(color: AppColors.textSecondary),
+            ),
+          ],
+        ),
       ),
-    ),
-  );
+    );
+  }
 }

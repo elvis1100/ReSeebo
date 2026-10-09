@@ -11,6 +11,7 @@ import '../../catalog/screens/product_editor_screen.dart';
 import '../../../core/widgets/app_card.dart';
 import '../widgets/price_history_timeline.dart';
 import '../widgets/supplier_comparison_table.dart';
+import '../../receipts/screens/receipt_detail_screen.dart';
 
 /// Screen allowing sari-sari store owners to compare prices for an identical
 /// product across suppliers and track cost trends over time.
@@ -44,6 +45,23 @@ class _ProductComparisonScreenState extends State<ProductComparisonScreen> {
   void initState() {
     super.initState();
     _loadComparison();
+  }
+
+  void _openReceipt(String receiptId) {
+    final callback = widget.onReceiptTap;
+    if (callback != null) {
+      callback(receiptId);
+      return;
+    }
+    Navigator.push<void>(
+      context,
+      MaterialPageRoute(
+        builder: (_) => ReceiptDetailScreen(
+          adapter: widget.dataAdapter,
+          receiptId: receiptId,
+        ),
+      ),
+    );
   }
 
   Future<void> _loadComparison({bool refresh = false}) async {
@@ -101,7 +119,7 @@ class _ProductComparisonScreenState extends State<ProductComparisonScreen> {
       backgroundColor: AppColors.background,
       appBar: AppBar(
         title: Text(
-          _comparisonData?.product.displayTitle ?? 'Product Comparison',
+          _comparisonData?.product.displayName ?? 'Product details',
           style: AppTypography.headingMedium.copyWith(fontSize: 16),
         ),
         leading: IconButton(
@@ -189,7 +207,7 @@ class _ProductComparisonScreenState extends State<ProductComparisonScreen> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            data.product.displayTitle,
+                            data.product.displayName,
                             style: AppTypography.headingLarge.copyWith(
                               fontSize: 18,
                             ),
@@ -272,7 +290,7 @@ class _ProductComparisonScreenState extends State<ProductComparisonScreen> {
           const SizedBox(height: AppSpacing.s),
           SupplierComparisonTable(
             rows: data.supplierRows,
-            onReceiptTap: widget.onReceiptTap,
+            onReceiptTap: _openReceipt,
           ),
           const SizedBox(height: AppSpacing.lg),
 
@@ -286,7 +304,7 @@ class _ProductComparisonScreenState extends State<ProductComparisonScreen> {
           const SizedBox(height: AppSpacing.m),
           PriceHistoryTimeline(
             records: data.historyRows,
-            onReceiptTap: widget.onReceiptTap,
+            onReceiptTap: _openReceipt,
           ),
           const SizedBox(height: AppSpacing.xxl),
         ],

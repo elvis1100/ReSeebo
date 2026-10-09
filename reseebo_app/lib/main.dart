@@ -172,14 +172,14 @@ class _ReseeboRootNavigationState extends State<ReseeboRootNavigation> {
       MaterialPageRoute(
         builder: (context) => CaptureScreen(
           dataAdapter: widget.dataAdapter,
-          onDraftReady: (draft) {
-            Navigator.of(context).pushReplacement(
+          onDraftReady: (draft) async {
+            final saved = await Navigator.of(context).push<bool>(
               MaterialPageRoute(
                 builder: (context) => ReviewMatchScreen(
                   dataAdapter: widget.dataAdapter,
                   initialDraft: draft,
                   onSaved: (result) {
-                    Navigator.of(context).pop();
+                    Navigator.of(context).pop(true);
                     setState(() {
                       _currentIndex = 0;
                       _dataRevision++;
@@ -188,6 +188,9 @@ class _ReseeboRootNavigationState extends State<ReseeboRootNavigation> {
                 ),
               ),
             );
+            if (saved == true && context.mounted) {
+              Navigator.of(context).pop();
+            }
           },
         ),
       ),

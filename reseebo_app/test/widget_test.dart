@@ -65,7 +65,7 @@ void main() {
     await tester.tap(find.text('Products (4)'));
     await tester.pumpAndSettle();
     expect(find.byTooltip('Add product').hitTestable(), findsOneWidget);
-    await tester.tap(find.text('Recent Receipts (4)'));
+    await tester.tap(find.text('Receipts (4)'));
     await tester.pumpAndSettle();
     expect(find.byTooltip('Add product').hitTestable(), findsNothing);
     await tester.tap(find.text('Settings'));
@@ -164,7 +164,7 @@ void main() {
       expect(add.left, greaterThan(search.right));
       expect((add.center.dy - search.center.dy).abs(), lessThan(1));
       expect(add.right, lessThanOrEqualTo(360));
-      for (final label in ['Recent Receipts (4)', 'Products (4)']) {
+      for (final label in ['Receipts (4)', 'Products (4)']) {
         final paragraph = tester.renderObject<RenderParagraph>(
           find.descendant(
             of: find.text(label),
@@ -187,7 +187,7 @@ void main() {
       );
       await tester.pumpAndSettle();
       expect(find.byTooltip('Add product').hitTestable(), findsOneWidget);
-      await tester.tap(find.text('Recent Receipts (4)'));
+      await tester.tap(find.text('Receipts (4)'));
       await tester.pumpAndSettle();
       expect(find.byTooltip('Add product'), findsNothing);
       expect(tester.takeException(), isNull);
@@ -265,7 +265,7 @@ void main() {
         isA<LinearGradient>(),
       );
       final pointer = await tester.startGesture(
-        tester.getCenter(find.text('Recent Receipts (4)')),
+        tester.getCenter(find.text('Receipts (4)')),
       );
       await tester.pump(const Duration(milliseconds: 100));
       expect(tester.takeException(), isNull);

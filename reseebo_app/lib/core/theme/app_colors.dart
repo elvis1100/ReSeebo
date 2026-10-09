@@ -31,7 +31,7 @@ abstract final class AppColors {
   // Price Trend & Status Signals
   static const Color priceCheaper = Color(0xFF16A34A);
   static const Color priceCheaperBg = Color(0xFFDCFCE7);
-  static const Color priceIncrease = Color(0xFFDC2626);
+  static const Color priceIncrease = Color(0xFF7F1D1D);
   static const Color priceIncreaseBg = Color(0xFFFEE2E2);
   static const Color warning = Color(0xFFF59E0B);
   static const Color warningBg = Color(0xFFFEF3C7);
@@ -42,7 +42,7 @@ abstract final class AppColors {
   static const Color surface = Color(0xFFFFFFFF);
   static const Color text = Color(0xFF0F172A);
   static const Color muted = Color(0xFF64748B);
-  static const Color danger = Color(0xFFB91C1C);
+  static const Color danger = priceIncrease;
   static const Color amber = Color(0xFFD97706);
   static const Color softPrimary = Color(0xFFEAF3EE);
   static const Color softAmber = Color(0xFFFFF7ED);

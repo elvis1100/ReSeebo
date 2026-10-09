@@ -1,5 +1,7 @@
 # Receipt format references
 
+**10 October update:** Public photos have now been downloaded, visually inspected, and tested with native on-device OCR. See [receipt autofill results](receipt_autofill_results.md) for current evidence. The fetch limitations below describe the earlier 9 October research run.
+
 Checked on **2026-10-09**. These references inform review and synthetic parser
 cases. A sample does not establish a universal format across branches, POS
 versions, dates, or payment methods.

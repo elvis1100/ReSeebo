@@ -420,7 +420,9 @@ void main() {
         expect(draft.lines, hasLength(1));
         expect(
           draft.lines.single.description,
-          '$count packs Coffee Original 26G',
+          count == '2.00'
+              ? 'Coffee Original 26G'
+              : '$count packs Coffee Original 26G',
         );
         expect(draft.lines.single.quantity, count == '2.00' ? 2 : null);
         expect(
@@ -447,14 +449,14 @@ void main() {
         'SUPPLIER A',
         '2026-10-09',
         'COFFEE ORIGINAL 26G',
-        '2.00 168.00',
+        '2.00 X 168.00',
         'TOTAL 168.00',
       ]);
       expect(draft.lines.single.description, 'COFFEE ORIGINAL 26G');
       expect(draft.lines.single.quantity, 2);
       expect(draft.lines.single.unit, isNull);
       expect(draft.lines.single.grossAmountCents, 16800);
-      expect(draft.rawText, contains('COFFEE ORIGINAL 26G\n2.00 168.00'));
+      expect(draft.rawText, contains('COFFEE ORIGINAL 26G\n2.00 X 168.00'));
     },
   );
 
@@ -514,7 +516,7 @@ void main() {
         isTrue,
       );
       final wrapped = parseRows(['Supplier A', 'Coffee 26G', '2 84.00 168.00']);
-      expect(wrapped.lines.single.grossAmountCents, isNull);
+      expect(wrapped.lines.single.grossAmountCents, 16800);
     },
   );
 
@@ -630,14 +632,8 @@ void main() {
       );
       expect(draft.lines, hasLength(2));
       expect(draft.lines.last.possibleDuplicateOf, draft.lines.first.id);
-      expect(
-        draft.lines.first.description,
-        'Brand-X Coffee Original 26G 2 packs',
-      );
-      expect(
-        draft.lines.last.description,
-        '2.00 packs BRAND X COFFEE ORIGINAL 26G',
-      );
+      expect(draft.lines.first.description, 'Brand-X Coffee Original 26G');
+      expect(draft.lines.last.description, 'BRAND X COFFEE ORIGINAL 26G');
       expect(
         draft.lines.every((line) => line.grossAmountCents == 16800),
         isTrue,
@@ -705,7 +701,7 @@ void main() {
         '2.00 packs Coffee Original 26G 84.00 168.00',
       ]);
       expect(ambiguous.lines.single.quantity, 2);
-      expect(ambiguous.lines.single.grossAmountCents, isNull);
+      expect(ambiguous.lines.single.grossAmountCents, 16800);
     },
   );
 

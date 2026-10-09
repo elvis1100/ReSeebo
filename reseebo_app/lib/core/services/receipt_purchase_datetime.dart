@@ -43,8 +43,11 @@ class ReceiptPurchaseDateTime {
     for (var index = 0; index < rows.length; index++) {
       final text = rows[index];
       if (_unrelated.hasMatch(text) ||
-          (index > 0 && _unrelated.hasMatch(rows[index - 1]) &&
-           RegExp(r'^[\d./:\s-]+$').hasMatch(text))) continue;
+          (index > 0 &&
+              _unrelated.hasMatch(rows[index - 1]) &&
+              RegExp(r'^[\d./:\s-]+$').hasMatch(text))) {
+        continue;
+      }
       void accept(DateTime? date, {bool ambiguous = false}) {
         if (date != null) {
           dates.add(date);
@@ -138,8 +141,11 @@ class ReceiptPurchaseDateTime {
     for (var index = 0; index < rows.length; index++) {
       final text = rows[index];
       if (_unrelated.hasMatch(text) ||
-          (index > 0 && _unrelated.hasMatch(rows[index - 1]) &&
-           RegExp(r'^[\d./:\s-]+$').hasMatch(text))) continue;
+          (index > 0 &&
+              _unrelated.hasMatch(rows[index - 1]) &&
+              RegExp(r'^[\d./:\s-]+$').hasMatch(text))) {
+        continue;
+      }
       final matches = _clock.allMatches(text).toList();
       final labeled = _timeLabel.hasMatch(text);
       final adjacent =

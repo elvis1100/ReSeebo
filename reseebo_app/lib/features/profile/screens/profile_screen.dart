@@ -210,12 +210,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         onPressed: _saveProfile,
                       ),
                       const SizedBox(height: 24),
-                      const Text(
-                        'Reseebo v1.0.0',
-                        textAlign: TextAlign.center,
-                        style: AppTypography.bodySmall,
-                      ),
-                      const SizedBox(height: 16),
                       const ProductPhotoCredits(),
                     ],
                   ),
