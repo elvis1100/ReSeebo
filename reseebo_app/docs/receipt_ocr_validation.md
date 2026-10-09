@@ -1,8 +1,11 @@
 # Receipt OCR validation
 
 The capture flow prepares local cache copies for bundled ML Kit recognition.
-Crop, right-angle rotation, small angle correction and optional grayscale contrast
-stretching leave original photos intact. Small/blank/blurred inputs stop before
+The full-screen photo editor stages crop, right-angle rotation, small angle
+correction, contrast, and optional faded-text enhancement. Apply keeps changes;
+Cancel preserves the previous selection. Original/Enhanced chooses the image
+read by OCR, while original photos remain intact. Reading locks competing
+controls and back navigation. Small/blank/blurred inputs stop before
 OCR; the owner can explicitly continue or use manual entry. Quality measurements
 are conservative pixel heuristics and still need calibration on real phones.
 
@@ -27,7 +30,7 @@ including source-inspired format cases. They are not captured ML Kit output and
 do not measure recognition accuracy. The suite also checks real SQLite atomic
 saves, original-image retention, duplicate handling and database reopening.
 
-On 9 October 2026, `flutter test --no-pub --reporter expanded --timeout 60s` passed all 159
+On 9 October 2026, `flutter test --no-pub --reporter expanded --timeout 60s` passed all 170
 local tests, and `flutter analyze --no-pub` reported no issues. The corpus
 contains 23 synthetic JSON fixtures. These results cover
 parser, image, review UI/state and SQLite behavior; they do not substitute for
@@ -73,7 +76,11 @@ Emulator airplane mode and Wi-Fi settings were restored after the attempt.
 
 A separate verification app (`com.reseebo.reseebo.verification`) was installed on the connected Samsung SM-A576B. Wi-Fi and mobile data were disabled before test launch and restored afterward; the existing Reseebo app/data were preserved. The native integration test passed with bundled OCR on a generated receipt containing an English month-first date and a separate AM/PM time row. Date/time, quantity, amount and word bounds were recognized. All 265 bundled catalog entries loaded without downloads. The receipt, cost and byte-identical original image persisted after closing and reopening SQLite.
 
-This is a generated-image native smoke test, not measured recognition accuracy on real grocery receipts. The database reopen check alone is not a full application process restart.
+A separate fresh-launch check rendered the native Home offline, verified all 265 products and the 20% default markup, and saved verification-only settings and a product price. Flutter removes its temporary integration app afterward, so that check alone does not prove persistence across a subsequent ordinary app launch.
+
+A guarded verification build then seeded settings and one product price through the native adapter on its first offline launch only. After force-stopping and relaunching that app, both saved values and all 265 products remained. Scrolling down a long product list and reversing the gesture restored Home search and tabs without reloading. The verification app was removed and connectivity restored afterward. This proves process-restart persistence for settings and a product price; receipt history and original images were checked separately by SQLite reopening.
+
+The OCR check uses a generated-image native smoke test, not measured recognition accuracy on real grocery receipts.
 
 ## Physical-phone acceptance
 

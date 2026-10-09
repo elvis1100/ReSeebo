@@ -14,7 +14,6 @@ class CapturePage {
   bool enhance = true;
   double contrast = 1;
   String get editedPath => recognitionPath ?? originalPath;
-  String get previewPath => useOriginal
-      ? originalPath
-      : preparedPath ?? editedPath;
+  String get previewPath =>
+      useOriginal ? originalPath : preparedPath ?? editedPath;
 }

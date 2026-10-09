@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:io';
 
 import 'package:flutter/services.dart';
@@ -6,6 +7,7 @@ import 'package:image/image.dart' as img;
 import 'package:reseebo_app/core/adapters/mock_reseebo_data_adapter.dart';
 import 'package:reseebo_app/core/models/models.dart';
 import 'package:reseebo_app/features/receipt_scan/state/capture_state.dart';
+import 'package:reseebo_app/features/receipt_scan/state/receipt_photo_editor_state.dart';
 
 class CaptureAdapter extends MockReseeboDataAdapter {
   List<String>? originals;
@@ -19,6 +21,24 @@ class CaptureAdapter extends MockReseeboDataAdapter {
     originals = List.of(localImagePaths);
     adjusted = List.of(recognitionImagePaths!);
     return ReceiptDraft(imagePath: originals!.first, imagePaths: originals);
+  }
+}
+
+class BlockingCaptureAdapter extends CaptureAdapter {
+  final entered = Completer<void>();
+  final release = Completer<void>();
+
+  @override
+  Future<ReceiptDraft> processReceiptImages(
+    List<String> localImagePaths, {
+    List<String>? recognitionImagePaths,
+  }) async {
+    entered.complete();
+    await release.future;
+    return super.processReceiptImages(
+      localImagePaths,
+      recognitionImagePaths: recognitionImagePaths,
+    );
   }
 }
 
@@ -127,4 +147,99 @@ void main() {
     expect(image.getPixel(32, 43).r, greaterThan(120));
     expect(adapter.originals, [original]);
   });
+  test(
+    'staged crop and contrast use the exact enhanced preview for OCR; original choice bypasses edits',
+    () async {
+      final original = await photo('editor');
+      final bytes = await File(original).readAsBytes();
+      await state.addImages([original]);
+      final page = state.pages.single;
+      expect(state.beginPhotoEdit(), isTrue);
+      final editor = ReceiptPhotoEditorState(page: page);
+      await editor.initialize();
+      await editor.transform(crop: [.1, .1, .9, .9]);
+      await editor.setContrast(1.5);
+      expect(page.recognitionPath, isNull);
+      final applied = editor.apply()!;
+      state.finishPhotoEdit(page, applied);
+      editor.dispose();
+      await state.recognize();
+      expect(adapter.adjusted, [applied.enhancedPath]);
+      final cropped = img.decodeImage(
+        await File(adapter.adjusted!.single).readAsBytes(),
+      )!;
+      expect(cropped.width, 320);
+      expect(cropped.height, 480);
+
+      expect(state.beginPhotoEdit(), isTrue);
+      final originalEditor = ReceiptPhotoEditorState(page: page);
+      await originalEditor.initialize();
+      originalEditor.selectOriginal(true);
+      state.finishPhotoEdit(page, originalEditor.apply());
+      originalEditor.dispose();
+      await state.recognize();
+      expect(adapter.adjusted!.single, isNot(applied.enhancedPath));
+      final unedited = img.decodeImage(
+        await File(adapter.adjusted!.single).readAsBytes(),
+      )!;
+      expect(unedited.width, 400);
+      expect(unedited.height, 600);
+      expect(unedited.getPixel(32, 43).r, greaterThan(120));
+      expect(adapter.originals, [original]);
+      expect(await File(original).readAsBytes(), bytes);
+    },
+  );
+
+  test(
+    'canceling staged edits keeps selected settings and original evidence intact',
+    () async {
+      final original = await photo('cancel-editor');
+      final bytes = await File(original).readAsBytes();
+      await state.addImages([original]);
+      final page = state.pages.single;
+      final preview = page.preparedPath;
+      expect(state.beginPhotoEdit(), isTrue);
+      final editor = ReceiptPhotoEditorState(page: page);
+      await editor.transform(rotate: true);
+      editor.selectOriginal(true);
+      state.finishPhotoEdit(page, null);
+      editor.dispose();
+      expect(page.preparedPath, preview);
+      expect(page.recognitionPath, isNull);
+      expect(page.useOriginal, isFalse);
+      expect(state.busy, isFalse);
+      expect(await File(preview!).exists(), isTrue);
+      expect(await File(original).readAsBytes(), bytes);
+    },
+  );
+
+  test(
+    'reading locks page selection, removal, edits, additions and duplicate reads',
+    () async {
+      state.dispose();
+      final blocking = BlockingCaptureAdapter();
+      adapter = blocking;
+      state = CaptureState(adapter: blocking);
+      final original = await photo('busy-reading');
+      await state.addImages([original]);
+      final pending = state.recognize();
+      await blocking.entered.future;
+      expect(state.busy, isTrue);
+      state.removeSelectedPage();
+      state.selectPage(1);
+      state.moveSelectedPage(1);
+      await state.transform(rotate: true);
+      await state.addImages([original]);
+      state.setEnhanceForOcr(false);
+      expect(state.beginPhotoEdit(), isFalse);
+      expect(await state.recognize(), isNull);
+      expect(state.pages.single.originalPath, original);
+      expect(state.pages.single.recognitionPath, isNull);
+      expect(state.selectedIndex, 0);
+      expect(state.enhanceForOcr, isTrue);
+      blocking.release.complete();
+      expect(await pending, isNotNull);
+      expect(state.busy, isFalse);
+    },
+  );
 }

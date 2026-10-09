@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:io';
 import 'dart:ui' as ui;
 import 'package:flutter/material.dart';
@@ -20,6 +21,14 @@ class ReceiptImageViewer extends StatefulWidget {
   final Set<int> selectedTokens;
   final ValueChanged<int>? onTokenSelected;
   final String imageLabel;
+  final bool showContrastControl;
+  final int? displayCacheWidth;
+  final bool isEnhanced;
+  final Widget? topOverlay;
+
+  /// Reports raw touch ownership so a surrounding scroll view can suspend
+  /// its drag recognizer before it competes with a staggered two-finger pinch.
+  final ValueChanged<bool>? onInteractionActiveChanged;
 
   const ReceiptImageViewer({
     super.key,
@@ -29,6 +38,11 @@ class ReceiptImageViewer extends StatefulWidget {
     this.selectedTokens = const {},
     this.onTokenSelected,
     this.imageLabel = 'Original receipt',
+    this.showContrastControl = true,
+    this.displayCacheWidth,
+    this.isEnhanced = false,
+    this.topOverlay,
+    this.onInteractionActiveChanged,
   });
 
   @override
@@ -41,6 +55,19 @@ class _ReceiptImageViewerState extends State<ReceiptImageViewer> {
   bool _highContrast = false;
   Size? _imageSize;
   int _imageGeneration = 0;
+  final Set<int> _activePointers = {};
+
+  void _pointerDown(PointerDownEvent event) {
+    if (_activePointers.add(event.pointer) && _activePointers.length == 1) {
+      widget.onInteractionActiveChanged?.call(true);
+    }
+  }
+
+  void _pointerEnd(PointerEvent event) {
+    if (_activePointers.remove(event.pointer) && _activePointers.isEmpty) {
+      widget.onInteractionActiveChanged?.call(false);
+    }
+  }
 
   @override
   void initState() {
@@ -91,6 +118,12 @@ class _ReceiptImageViewerState extends State<ReceiptImageViewer> {
 
   @override
   void dispose() {
+    if (_activePointers.isNotEmpty) {
+      final release = widget.onInteractionActiveChanged;
+      // A keyed image can be replaced during a rebuild. Release the parent's
+      // scroll lock after that build, rather than calling setState inside it.
+      scheduleMicrotask(() => release?.call(false));
+    }
     _transformController.dispose();
     super.dispose();
   }
@@ -109,80 +142,85 @@ class _ReceiptImageViewerState extends State<ReceiptImageViewer> {
         children: [
           // Pinch-to-zoom interactive area
           Positioned.fill(
-            child: LayoutBuilder(
-              builder: (context, constraints) => InteractiveViewer(
-                transformationController: _transformController,
-                minScale: 1.0,
-                maxScale: 4.5,
-                child: SizedBox.fromSize(
-                  size: constraints.biggest,
-                  child: Stack(
-                    fit: StackFit.expand,
-                    children: [
-                      ColorFiltered(
-                        colorFilter: _highContrast
-                            ? const ColorFilter.matrix(<double>[
-                                1.8, 0, 0, 0, -50, // R
-                                0, 1.8, 0, 0, -50, // G
-                                0, 0, 1.8, 0, -50, // B
-                                0, 0, 0, 1, 0, // A
-                              ])
-                            : const ColorFilter.mode(
-                                Colors.transparent,
-                                BlendMode.dst,
-                              ),
-                        child: _buildImageWidget(),
-                      ),
-                      if (_imageSize != null && widget.onTokenSelected != null)
-                        ...widget.tokens.indexed
-                            .where(
-                              (entry) =>
-                                  entry.$2.width > 0 && entry.$2.height > 0,
-                            )
-                            .map((entry) {
-                              final token = entry.$2;
-                              final selected = widget.selectedTokens.contains(
-                                entry.$1,
-                              );
-                              return Positioned.fromRect(
-                                rect: fitReceiptBounds(
-                                  Rect.fromLTWH(
-                                    token.left,
-                                    token.top,
-                                    token.width,
-                                    token.height,
-                                  ),
-                                  imageSize: _imageSize!,
-                                  viewport: constraints.biggest,
+            child: Listener(
+              onPointerDown: _pointerDown,
+              onPointerUp: _pointerEnd,
+              onPointerCancel: _pointerEnd,
+              child: LayoutBuilder(
+                builder: (context, constraints) => InteractiveViewer(
+                  transformationController: _transformController,
+                  minScale: 1.0,
+                  maxScale: 4.5,
+                  child: SizedBox.fromSize(
+                    size: constraints.biggest,
+                    child: Stack(
+                      fit: StackFit.expand,
+                      children: [
+                        ColorFiltered(
+                          colorFilter: _highContrast
+                              ? const ColorFilter.matrix(<double>[
+                                  1.8, 0, 0, 0, -50, // R
+                                  0, 1.8, 0, 0, -50, // G
+                                  0, 0, 1.8, 0, -50, // B
+                                  0, 0, 0, 1, 0, // A
+                                ])
+                              : const ColorFilter.mode(
+                                  Colors.transparent,
+                                  BlendMode.dst,
                                 ),
-                                child: Semantics(
-                                  button: true,
-                                  selected: selected,
-                                  label: 'Select receipt text ${token.text}',
-                                  child: GestureDetector(
-                                    behavior: HitTestBehavior.opaque,
-                                    onTap: () =>
-                                        widget.onTokenSelected!(entry.$1),
-                                    child: Container(
-                                      decoration: BoxDecoration(
-                                        color: selected
-                                            ? AppColors.primaryLight.withValues(
-                                                alpha: 0.25,
-                                              )
-                                            : Colors.transparent,
-                                        border: Border.all(
+                          child: _buildImageWidget(),
+                        ),
+                        if (_imageSize != null &&
+                            widget.onTokenSelected != null)
+                          ...widget.tokens.indexed
+                              .where(
+                                (entry) =>
+                                    entry.$2.width > 0 && entry.$2.height > 0,
+                              )
+                              .map((entry) {
+                                final token = entry.$2;
+                                final selected = widget.selectedTokens.contains(
+                                  entry.$1,
+                                );
+                                return Positioned.fromRect(
+                                  rect: fitReceiptBounds(
+                                    Rect.fromLTWH(
+                                      token.left,
+                                      token.top,
+                                      token.width,
+                                      token.height,
+                                    ),
+                                    imageSize: _imageSize!,
+                                    viewport: constraints.biggest,
+                                  ),
+                                  child: Semantics(
+                                    button: true,
+                                    selected: selected,
+                                    label: 'Select receipt text ${token.text}',
+                                    child: GestureDetector(
+                                      behavior: HitTestBehavior.opaque,
+                                      onTap: () =>
+                                          widget.onTokenSelected!(entry.$1),
+                                      child: Container(
+                                        decoration: BoxDecoration(
                                           color: selected
                                               ? AppColors.primaryLight
-                                              : AppColors.info,
-                                          width: selected ? 2 : 1,
+                                                    .withValues(alpha: 0.25)
+                                              : Colors.transparent,
+                                          border: Border.all(
+                                            color: selected
+                                                ? AppColors.primaryLight
+                                                : AppColors.info,
+                                            width: selected ? 2 : 1,
+                                          ),
                                         ),
                                       ),
                                     ),
                                   ),
-                                ),
-                              );
-                            }),
-                    ],
+                                );
+                              }),
+                      ],
+                    ),
                   ),
                 ),
               ),
@@ -196,20 +234,22 @@ class _ReceiptImageViewerState extends State<ReceiptImageViewer> {
             child: Row(
               mainAxisSize: MainAxisSize.min,
               children: [
+                if (widget.showContrastControl)
+                  _buildActionButton(
+                    icon: _highContrast
+                        ? Icons.contrast_rounded
+                        : Icons.tonality_rounded,
+                    tooltip: 'Toggle high contrast for faint receipts',
+                    isActive: _highContrast,
+                    onPressed: () {
+                      setState(() => _highContrast = !_highContrast);
+                    },
+                  ),
+                if (widget.showContrastControl)
+                  const SizedBox(width: AppSpacing.xs),
                 _buildActionButton(
-                  icon: _highContrast
-                      ? Icons.contrast_rounded
-                      : Icons.tonality_rounded,
-                  tooltip: 'Toggle high contrast for faint receipts',
-                  isActive: _highContrast,
-                  onPressed: () {
-                    setState(() => _highContrast = !_highContrast);
-                  },
-                ),
-                const SizedBox(width: AppSpacing.xs),
-                _buildActionButton(
-                  icon: Icons.refresh_rounded,
-                  tooltip: 'Reset zoom',
+                  icon: Icons.fit_screen_rounded,
+                  tooltip: 'Fit photo to screen',
                   isActive: false,
                   onPressed: _resetZoom,
                 ),
@@ -217,26 +257,69 @@ class _ReceiptImageViewerState extends State<ReceiptImageViewer> {
             ),
           ),
 
-          // Image info badge
           Positioned(
             top: AppSpacing.s,
             left: AppSpacing.s,
-            child: Container(
-              padding: const EdgeInsets.symmetric(
-                horizontal: AppSpacing.s,
-                vertical: 2.0,
-              ),
-              decoration: BoxDecoration(
-                color: Colors.black.withValues(alpha: 0.6),
-                borderRadius: BorderRadius.circular(AppSpacing.radiusXs),
-              ),
-              child: Text(
-                '${widget.imageLabel} · pinch to zoom',
-                style: AppTypography.caption.copyWith(
-                  color: Colors.white70,
-                  fontSize: 10,
+            right: AppSpacing.s,
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Expanded(
+                  child: Align(
+                    alignment: Alignment.topLeft,
+                    child:
+                        widget.topOverlay ??
+                        IgnorePointer(
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: AppSpacing.s,
+                              vertical: 2,
+                            ),
+                            decoration: BoxDecoration(
+                              color: Colors.black.withValues(alpha: .6),
+                              borderRadius: BorderRadius.circular(
+                                AppSpacing.radiusXs,
+                              ),
+                            ),
+                            child: Text(
+                              widget.isEnhanced
+                                  ? 'Pinch to zoom'
+                                  : '${widget.imageLabel} · pinch to zoom',
+                              maxLines: 2,
+                              overflow: TextOverflow.ellipsis,
+                              style: AppTypography.caption.copyWith(
+                                color: Colors.white70,
+                                fontSize: 10,
+                              ),
+                            ),
+                          ),
+                        ),
+                  ),
                 ),
-              ),
+                if (widget.isEnhanced) ...[
+                  const SizedBox(width: AppSpacing.s),
+                  IgnorePointer(
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 8,
+                        vertical: 5,
+                      ),
+                      decoration: BoxDecoration(
+                        color: AppColors.primary,
+                        borderRadius: BorderRadius.circular(AppSpacing.radiusS),
+                      ),
+                      child: const Text(
+                        'Enhanced',
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 11,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ],
             ),
           ),
         ],
@@ -257,6 +340,7 @@ class _ReceiptImageViewerState extends State<ReceiptImageViewer> {
     if (file.existsSync()) {
       return Image.file(
         file,
+        cacheWidth: widget.displayCacheWidth,
         fit: BoxFit.contain,
         errorBuilder: (context, error, stackTrace) => _buildPlaceholder(),
       );

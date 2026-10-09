@@ -152,4 +152,34 @@ void main() {
       throwsA(isA<AppException>()),
     );
   });
+  test(
+    'manual contrast changes recognition pixels without modifying original geometry or bytes',
+    () async {
+      final path = await writeImage('manual-contrast', receipt(faded: true));
+      final original = await File(path).readAsBytes();
+      final low = await service.prepareRecognition(
+        path,
+        enhance: false,
+        contrast: .5,
+      );
+      final high = await service.prepareRecognition(
+        path,
+        enhance: false,
+        contrast: 2,
+      );
+      final lowImage = img.decodeImage(await File(low).readAsBytes())!;
+      final highImage = img.decodeImage(await File(high).readAsBytes())!;
+      expect(
+        highImage.getPixel(48, 53).r,
+        greaterThan(lowImage.getPixel(48, 53).r),
+      );
+      expect(highImage.width, 600);
+      expect(highImage.height, 800);
+      expect(await File(path).readAsBytes(), original);
+      expect(
+        () => service.prepareRecognition(path, contrast: 4),
+        throwsA(isA<AppException>()),
+      );
+    },
+  );
 }

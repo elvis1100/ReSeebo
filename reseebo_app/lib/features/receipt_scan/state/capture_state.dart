@@ -1,7 +1,10 @@
+import 'dart:async';
+
 import 'package:flutter/foundation.dart';
 import 'package:image_picker/image_picker.dart';
 import '../../../core/adapters/i_reseebo_data_adapter.dart';
 import '../models/capture_page.dart';
+import '../models/receipt_photo_edits.dart';
 import '../services/local_receipt_image_service.dart';
 
 class CaptureState extends ChangeNotifier {
@@ -32,7 +35,10 @@ class CaptureState extends ChangeNotifier {
   bool busy = false;
   bool ocrFailed = false;
   bool qualityRejected = false;
-  bool enhanceForOcr = true;
+  bool _defaultEnhance = true;
+  bool get enhanceForOcr => selectedPage?.enhance ?? _defaultEnhance;
+  bool _editorOpen = false;
+  bool _draftProduced = false;
   bool _disposed = false;
   void _changed() {
     if (!_disposed) notifyListeners();
@@ -100,7 +106,13 @@ class CaptureState extends ChangeNotifier {
           'Use no more than $maxReceiptPages photos for one receipt.',
         );
       }
-      _pages.add(CapturePage(originalPath: path, originalHash: hash));
+      final page = CapturePage(originalPath: path, originalHash: hash)
+        ..enhance = _defaultEnhance;
+      page.preparedPath = await _images.prepareRecognition(
+        path,
+        enhance: page.enhance,
+      );
+      _pages.add(page);
       selectedIndex = _pages.length - 1;
       ocrFailed = false;
       qualityRejected = false;
@@ -130,7 +142,14 @@ class CaptureState extends ChangeNotifier {
 
   void removeSelectedPage() {
     if (busy || _pages.isEmpty) return;
-    _pages.removeAt(selectedIndex);
+    final removed = _pages.removeAt(selectedIndex);
+    unawaited(
+      _images.deleteGenerated([
+        removed.recognitionPath,
+        removed.preparedPath,
+        removed.originalPreparedPath,
+      ], originalPath: removed.originalPath),
+    );
     selectedIndex = _pages.isEmpty
         ? 0
         : selectedIndex.clamp(0, _pages.length - 1);
@@ -153,12 +172,17 @@ class CaptureState extends ChangeNotifier {
     _changed();
     try {
       page.recognitionPath = await _images.transform(
-        page.previewPath,
+        page.editedPath,
         rotate: rotate,
         crop: crop,
         angleDegrees: angleDegrees,
       );
-      page.preparedPath = null;
+      page.preparedPath = await _images.prepareRecognition(
+        page.editedPath,
+        enhance: page.enhance,
+        contrast: page.contrast,
+      );
+      page.useOriginal = false;
       qualityRejected = false;
       ocrFailed = false;
     } catch (failure) {
@@ -180,10 +204,50 @@ class CaptureState extends ChangeNotifier {
 
   void setEnhanceForOcr(bool enabled) {
     if (busy || enhanceForOcr == enabled) return;
-    enhanceForOcr = enabled;
+    _defaultEnhance = enabled;
     for (final page in _pages) {
+      unawaited(
+        _images.deleteGenerated([
+          page.preparedPath,
+        ], originalPath: page.originalPath),
+      );
+      page.enhance = enabled;
       page.preparedPath = null;
     }
+    _changed();
+  }
+
+  /// Locks selection, additions, removal and recognition while the editor is
+  /// open. The page itself is unchanged until a successful Apply edits result.
+  bool beginPhotoEdit() {
+    if (busy || _disposed || selectedPage == null) return false;
+    _editorOpen = true;
+    busy = true;
+    _changed();
+    return true;
+  }
+
+  void finishPhotoEdit(CapturePage page, ReceiptPhotoEdits? edits) {
+    if (!_editorOpen) return;
+    _editorOpen = false;
+    if (edits != null && !_disposed && _pages.contains(page)) {
+      final obsolete = [
+        page.recognitionPath,
+        page.preparedPath,
+      ].where((path) => path != edits.editedPath && path != edits.enhancedPath);
+      unawaited(
+        _images.deleteGenerated(obsolete, originalPath: page.originalPath),
+      );
+      page.recognitionPath = edits.editedPath;
+      page.preparedPath = edits.enhancedPath;
+      page.useOriginal = edits.useOriginal;
+      page.enhance = edits.enhance;
+      page.contrast = edits.contrast;
+      error = null;
+      qualityRejected = false;
+      ocrFailed = false;
+    }
+    busy = false;
     _changed();
   }
 
@@ -197,7 +261,9 @@ class CaptureState extends ChangeNotifier {
     try {
       for (var index = 0; index < _pages.length; index++) {
         final page = _pages[index];
-        final quality = await _images.inspectQuality(page.previewPath);
+        final quality = await _images.inspectQuality(
+          page.useOriginal ? page.originalPath : page.editedPath,
+        );
         if (quality.needsRetake && !allowLowQuality) {
           qualityRejected = true;
           selectedIndex = index;
@@ -205,17 +271,31 @@ class CaptureState extends ChangeNotifier {
             'Page ${index + 1} looks blurred, faint, or too small. Hold steady in brighter light, crop the receipt, or choose Use photo anyway.',
           );
         }
-        page.preparedPath ??= await _images.prepareRecognition(
-          page.previewPath,
-          enhance: enhanceForOcr,
-        );
+        if (page.useOriginal) {
+          page.originalPreparedPath ??= await _images.prepareRecognition(
+            page.originalPath,
+            enhance: false,
+          );
+        } else {
+          page.preparedPath ??= await _images.prepareRecognition(
+            page.editedPath,
+            enhance: page.enhance,
+            contrast: page.contrast,
+          );
+        }
       }
-      return await adapter.processReceiptImages(
+      final draft = await adapter.processReceiptImages(
         _pages.map((page) => page.originalPath).toList(),
         recognitionImagePaths: _pages
-            .map((page) => page.preparedPath!)
+            .map(
+              (page) => page.useOriginal
+                  ? page.originalPreparedPath!
+                  : page.preparedPath!,
+            )
             .toList(),
       );
+      _draftProduced = true;
+      return draft;
     } catch (failure) {
       error = userMessage(failure);
       ocrFailed = true;
@@ -234,6 +314,17 @@ class CaptureState extends ChangeNotifier {
   @override
   void dispose() {
     _disposed = true;
+    if (!busy && !_draftProduced) {
+      for (final page in _pages) {
+        unawaited(
+          _images.deleteGenerated([
+            page.recognitionPath,
+            page.preparedPath,
+            page.originalPreparedPath,
+          ], originalPath: page.originalPath),
+        );
+      }
+    }
     super.dispose();
   }
 }

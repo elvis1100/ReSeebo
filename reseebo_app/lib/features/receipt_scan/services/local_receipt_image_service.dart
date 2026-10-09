@@ -155,14 +155,24 @@ class LocalReceiptImageService {
     if (!contrast.isFinite || contrast < .5 || contrast > 2) {
       throw const AppException('Choose contrast between 0.5 and 2.');
     }
-    return _writeTransform({'path': path, 'enhance': enhance, 'contrast': contrast});
+    return _writeTransform({
+      'path': path,
+      'enhance': enhance,
+      'contrast': contrast,
+    });
   }
 
   /// Cleanup is limited to cache files created by this service, never originals
   /// or user-selected photos. Failure to clean cache must not discard a draft.
-  Future<void> deleteGenerated(Iterable<String?> paths, {required String originalPath}) async {
+  Future<void> deleteGenerated(
+    Iterable<String?> paths, {
+    required String originalPath,
+  }) async {
     for (final path in paths.whereType<String>().toSet()) {
-      if (path == originalPath || !path.split('/').last.startsWith('reseebo_recognition_')) continue;
+      if (path == originalPath ||
+          !path.split('/').last.startsWith('reseebo_recognition_')) {
+        continue;
+      }
       try {
         final file = File(path);
         if (await file.exists()) await file.delete();

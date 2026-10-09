@@ -10,14 +10,16 @@ import '../services/local_receipt_image_service.dart';
 /// Edits are staged separately from CapturePage until Apply edits. Every
 /// generated preview is the exact enhanced file later handed to recognition.
 class ReceiptPhotoEditorState extends ChangeNotifier {
-  ReceiptPhotoEditorState({required CapturePage page, LocalReceiptImageService? imageService})
-    : originalPath = page.originalPath,
-      editedPath = page.recognitionPath,
-      enhancedPath = page.preparedPath,
-      useOriginal = page.useOriginal,
-      enhance = page.enhance,
-      contrast = page.contrast,
-      _images = imageService ?? LocalReceiptImageService();
+  ReceiptPhotoEditorState({
+    required CapturePage page,
+    LocalReceiptImageService? imageService,
+  }) : originalPath = page.originalPath,
+       editedPath = page.recognitionPath,
+       enhancedPath = page.preparedPath,
+       useOriginal = page.useOriginal,
+       enhance = page.enhance,
+       contrast = page.contrast,
+       _images = imageService ?? LocalReceiptImageService();
 
   final String originalPath;
   final LocalReceiptImageService _images;
@@ -32,7 +34,8 @@ class ReceiptPhotoEditorState extends ChangeNotifier {
   bool _disposed = false;
   Set<String> _retainedPaths = {};
   String get geometryPath => editedPath ?? originalPath;
-  String get previewPath => useOriginal ? originalPath : enhancedPath ?? geometryPath;
+  String get previewPath =>
+      useOriginal ? originalPath : enhancedPath ?? geometryPath;
 
   void _changed() {
     if (!_disposed) notifyListeners();
@@ -43,7 +46,11 @@ class ReceiptPhotoEditorState extends ChangeNotifier {
   }
 
   Future<void> _prepare() async {
-    final path = await _images.prepareRecognition(geometryPath, enhance: enhance, contrast: contrast);
+    final path = await _images.prepareRecognition(
+      geometryPath,
+      enhance: enhance,
+      contrast: contrast,
+    );
     _ownedPaths.add(path);
     enhancedPath = path;
   }
@@ -60,7 +67,10 @@ class ReceiptPhotoEditorState extends ChangeNotifier {
     } finally {
       busy = false;
       if (_disposed) {
-        await _images.deleteGenerated(_ownedPaths.difference(_retainedPaths), originalPath: originalPath);
+        await _images.deleteGenerated(
+          _ownedPaths.difference(_retainedPaths),
+          originalPath: originalPath,
+        );
       } else {
         _changed();
       }
@@ -73,9 +83,18 @@ class ReceiptPhotoEditorState extends ChangeNotifier {
     _changed();
   }
 
-  Future<void> transform({bool rotate = false, List<double>? crop, double angleDegrees = 0}) => _run(() async {
+  Future<void> transform({
+    bool rotate = false,
+    List<double>? crop,
+    double angleDegrees = 0,
+  }) => _run(() async {
     final previous = editedPath;
-    final path = await _images.transform(geometryPath, rotate: rotate, crop: crop, angleDegrees: angleDegrees);
+    final path = await _images.transform(
+      geometryPath,
+      rotate: rotate,
+      crop: crop,
+      angleDegrees: angleDegrees,
+    );
     _ownedPaths.add(path);
     editedPath = path;
     try {
@@ -120,14 +139,16 @@ class ReceiptPhotoEditorState extends ChangeNotifier {
       await _prepare();
       useOriginal = false;
     } catch (_) {
-      (editedPath, contrast, enhance) = previous;
+      editedPath = previous.$1;
+      contrast = previous.$2;
+      enhance = previous.$3;
       rethrow;
     }
   });
 
   ReceiptPhotoEdits? apply() {
     if (busy || _disposed || enhancedPath == null) return null;
-    _retainedPaths = {if (editedPath != null) editedPath!, enhancedPath!};
+    _retainedPaths = [editedPath, enhancedPath].whereType<String>().toSet();
     return ReceiptPhotoEdits(
       editedPath: editedPath,
       enhancedPath: enhancedPath!,
@@ -141,7 +162,12 @@ class ReceiptPhotoEditorState extends ChangeNotifier {
   void dispose() {
     _disposed = true;
     if (!busy) {
-      unawaited(_images.deleteGenerated(_ownedPaths.difference(_retainedPaths), originalPath: originalPath));
+      unawaited(
+        _images.deleteGenerated(
+          _ownedPaths.difference(_retainedPaths),
+          originalPath: originalPath,
+        ),
+      );
     }
     super.dispose();
   }

@@ -54,7 +54,8 @@ class _DashboardScreenState extends State<DashboardScreen>
   @override
   void initState() {
     super.initState();
-    _tabController = TabController(length: 2, vsync: this);
+    _tabController = TabController(length: 2, vsync: this)
+      ..addListener(_onTabChanged);
     _searchController.addListener(_onSearchChanged);
     _loadData();
   }
@@ -68,10 +69,15 @@ class _DashboardScreenState extends State<DashboardScreen>
   @override
   void dispose() {
     _request++;
+    _tabController.removeListener(_onTabChanged);
     _tabController.dispose();
     _searchController.removeListener(_onSearchChanged);
     _searchController.dispose();
     super.dispose();
+  }
+
+  void _onTabChanged() {
+    if (mounted) setState(() {});
   }
 
   void _onSearchChanged() {
@@ -180,8 +186,10 @@ class _DashboardScreenState extends State<DashboardScreen>
           : RefreshIndicator(
               color: AppColors.primary,
               onRefresh: _loadData,
-              child: CustomScrollView(
-                slivers: [
+              child: NestedScrollView(
+                key: const ValueKey('dashboard-scroll'),
+                floatHeaderSlivers: true,
+                headerSliverBuilder: (context, innerBoxIsScrolled) => [
                   SliverToBoxAdapter(
                     child: Padding(
                       padding: const EdgeInsets.fromLTRB(
@@ -196,98 +204,145 @@ class _DashboardScreenState extends State<DashboardScreen>
                           if (_storeProfile != null)
                             StatHeader(
                               profile: _storeProfile!,
-                              totalReceipts: _receipts.length,
-                              totalProducts: _products.length,
                               onSettingsTap: widget.onSettingsPressed,
                             ),
                           const SizedBox(height: AppSpacing.m),
-                          TextField(
-                            controller: _searchController,
-                            style: AppTypography.bodyRegular,
-                            decoration: InputDecoration(
-                              hintText: 'Search products or suppliers...',
-                              prefixIcon: const Icon(
-                                Icons.search_rounded,
-                                color: AppColors.textMuted,
-                                size: 20,
+                          Row(
+                            children: [
+                              Expanded(
+                                child: TextField(
+                                  key: const ValueKey('dashboard-search'),
+                                  controller: _searchController,
+                                  style: AppTypography.bodyRegular,
+                                  decoration: InputDecoration(
+                                    hintText: _tabController.index == 1
+                                        ? 'Search products...'
+                                        : 'Search suppliers or receipts...',
+                                    prefixIcon: const Icon(
+                                      Icons.search_rounded,
+                                      color: AppColors.textMuted,
+                                      size: 20,
+                                    ),
+                                    suffixIcon: _searchQuery.isNotEmpty
+                                        ? IconButton(
+                                            icon: const Icon(
+                                              Icons.clear_rounded,
+                                              size: 18,
+                                            ),
+                                            onPressed: () {
+                                              _searchController.clear();
+                                            },
+                                          )
+                                        : null,
+                                  ),
+                                ),
                               ),
-                              suffixIcon: _searchQuery.isNotEmpty
-                                  ? IconButton(
-                                      icon: const Icon(
-                                        Icons.clear_rounded,
-                                        size: 18,
+                              if (_tabController.index == 1) ...[
+                                const SizedBox(width: AppSpacing.s),
+                                Tooltip(
+                                  message: 'Add product',
+                                  child: Semantics(
+                                    label: 'Add product',
+                                    child: OutlinedButton.icon(
+                                      clipBehavior: Clip.antiAlias,
+                                      key: const ValueKey(
+                                        'dashboard-add-product',
                                       ),
-                                      onPressed: () {
-                                        _searchController.clear();
-                                      },
-                                    )
-                                  : null,
-                            ),
+                                      onPressed: _addProduct,
+                                      icon: const Icon(
+                                        Icons.add_rounded,
+                                        size: 20,
+                                      ),
+                                      label: const Text('Add'),
+                                      style: OutlinedButton.styleFrom(
+                                        minimumSize: const Size(0, 48),
+                                        padding: const EdgeInsets.symmetric(
+                                          horizontal: 12,
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ],
                           ),
                           const SizedBox(height: AppSpacing.m),
                           // Modern segmented pill tab bar
-                          Container(
-                            height: 40,
-                            padding: const EdgeInsets.all(3),
-                            decoration: BoxDecoration(
-                              color: AppColors.surfaceSubtle,
-                              borderRadius: BorderRadius.circular(
-                                AppSpacing.radiusS,
-                              ),
+                          Material(
+                            key: const ValueKey('dashboard-tabs-surface'),
+                            color: AppColors.surfaceSubtle,
+                            borderRadius: BorderRadius.circular(
+                              AppSpacing.radiusS,
                             ),
-                            child: TabBar(
-                              controller: _tabController,
-                              labelColor: AppColors.textPrimary,
-                              unselectedLabelColor: AppColors.textSecondary,
-                              indicatorSize: TabBarIndicatorSize.tab,
-                              indicator: BoxDecoration(
-                                color: Colors.white,
-                                borderRadius: BorderRadius.circular(
-                                  AppSpacing.radiusXs + 2,
-                                ),
-                                boxShadow: [
-                                  BoxShadow(
-                                    color: Colors.black.withValues(alpha: 0.05),
-                                    blurRadius: 3,
-                                    offset: const Offset(0, 1),
+                            clipBehavior: Clip.antiAlias,
+                            child: SizedBox(
+                              height: 40,
+                              child: Padding(
+                                padding: const EdgeInsets.all(3),
+                                child: TabBar(
+                                  controller: _tabController,
+                                  dividerHeight: 0,
+                                  dividerColor: Colors.transparent,
+                                  labelPadding: EdgeInsets.zero,
+                                  labelColor: AppColors.textPrimary,
+                                  unselectedLabelColor: AppColors.textSecondary,
+                                  indicatorSize: TabBarIndicatorSize.tab,
+                                  automaticIndicatorColorAdjustment: false,
+                                  splashBorderRadius: BorderRadius.circular(
+                                    AppSpacing.radiusXs + 2,
                                   ),
-                                ],
-                              ),
-                              labelStyle: const TextStyle(
-                                fontSize: 13,
-                                fontWeight: FontWeight.w700,
-                              ),
-                              unselectedLabelStyle: const TextStyle(
-                                fontSize: 13,
-                                fontWeight: FontWeight.w500,
-                              ),
-                              tabs: [
-                                Tab(
-                                  text:
-                                      'Recent Receipts (${_filteredReceipts.length})',
+                                  indicator: BoxDecoration(
+                                    color: Colors.white,
+                                    borderRadius: BorderRadius.circular(
+                                      AppSpacing.radiusXs + 2,
+                                    ),
+                                    boxShadow: [
+                                      BoxShadow(
+                                        color: Colors.black.withValues(
+                                          alpha: 0.05,
+                                        ),
+                                        blurRadius: 3,
+                                        offset: const Offset(0, 1),
+                                      ),
+                                    ],
+                                  ),
+                                  labelStyle: const TextStyle(
+                                    fontFamily: 'Inter',
+                                    fontSize: 13,
+                                    fontWeight: FontWeight.w700,
+                                  ),
+                                  unselectedLabelStyle: const TextStyle(
+                                    fontFamily: 'Inter',
+                                    fontSize: 13,
+                                    fontWeight: FontWeight.w500,
+                                  ),
+                                  tabs: [
+                                    Tab(
+                                      text:
+                                          'Recent Receipts (${_filteredReceipts.length})',
+                                    ),
+                                    Tab(
+                                      text:
+                                          'Products (${_filteredProducts.length})',
+                                    ),
+                                  ],
                                 ),
-                                Tab(
-                                  text:
-                                      'Products (${_filteredProducts.length})',
-                                ),
-                              ],
+                              ),
                             ),
                           ),
                         ],
                       ),
                     ),
                   ),
-                  SliverFillRemaining(
-                    hasScrollBody: true,
-                    child: TabBarView(
-                      controller: _tabController,
-                      children: [_buildReceiptsTab(), _buildProductsTab()],
-                    ),
-                  ),
                 ],
+                body: TabBarView(
+                  controller: _tabController,
+                  children: [_buildReceiptsTab(), _buildProductsTab()],
+                ),
               ),
             ),
       floatingActionButton: FloatingActionButton.extended(
+        clipBehavior: Clip.antiAlias,
         backgroundColor: AppColors.primary,
         foregroundColor: Colors.white,
         elevation: 2,
@@ -301,39 +356,54 @@ class _DashboardScreenState extends State<DashboardScreen>
     );
   }
 
+  Widget _scrollableEmpty(String storageKey, Widget child) => LayoutBuilder(
+    builder: (context, constraints) => ListView(
+      key: PageStorageKey(storageKey),
+      primary: true,
+      physics: const AlwaysScrollableScrollPhysics(),
+      children: [SizedBox(height: constraints.maxHeight, child: child)],
+    ),
+  );
+
   Widget _buildReceiptsTab() {
     if (_filteredReceipts.isEmpty) {
-      return Center(
-        child: Padding(
-          padding: const EdgeInsets.all(AppSpacing.xl),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              const Icon(
-                Icons.receipt_outlined,
-                size: 40,
-                color: AppColors.textMuted,
-              ),
-              const SizedBox(height: AppSpacing.s),
-              Text(
-                _searchQuery.isEmpty
-                    ? 'No receipts recorded yet'
-                    : 'No matching receipts',
-                style: AppTypography.headingSmall,
-              ),
-              const SizedBox(height: 4),
-              const Text(
-                'Scan wholesale delivery receipts to start comparing prices.',
-                textAlign: TextAlign.center,
-                style: AppTypography.bodySmall,
-              ),
-            ],
+      return _scrollableEmpty(
+        'dashboard-receipts-list',
+        Center(
+          child: Padding(
+            padding: const EdgeInsets.all(AppSpacing.xl),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const Icon(
+                  Icons.receipt_outlined,
+                  size: 40,
+                  color: AppColors.textMuted,
+                ),
+                const SizedBox(height: AppSpacing.s),
+                Text(
+                  _searchQuery.isEmpty
+                      ? 'No receipts recorded yet'
+                      : 'No matching receipts',
+                  style: AppTypography.headingSmall,
+                ),
+                const SizedBox(height: 4),
+                const Text(
+                  'Scan wholesale delivery receipts to start comparing prices.',
+                  textAlign: TextAlign.center,
+                  style: AppTypography.bodySmall,
+                ),
+              ],
+            ),
           ),
         ),
       );
     }
 
     return ListView.separated(
+      key: const PageStorageKey('dashboard-receipts-list'),
+      primary: true,
+      physics: const AlwaysScrollableScrollPhysics(),
       padding: const EdgeInsets.symmetric(
         horizontal: AppSpacing.m,
         vertical: AppSpacing.s,
@@ -353,62 +423,45 @@ class _DashboardScreenState extends State<DashboardScreen>
     );
   }
 
-  Widget _buildProductsTab() => Column(
-    crossAxisAlignment: CrossAxisAlignment.stretch,
-    children: [
-      Padding(
-        padding: const EdgeInsets.fromLTRB(
-          AppSpacing.m,
-          AppSpacing.s,
-          AppSpacing.m,
-          0,
-        ),
-        child: Align(
-          alignment: Alignment.centerRight,
-          child: OutlinedButton.icon(
-            onPressed: _addProduct,
-            icon: const Icon(Icons.add_rounded),
-            label: const Text('Add product'),
-          ),
-        ),
-      ),
-      Expanded(child: _buildProductList()),
-    ],
-  );
-
-  Widget _buildProductList() {
+  Widget _buildProductsTab() {
     if (_filteredProducts.isEmpty) {
-      return Center(
-        child: Padding(
-          padding: const EdgeInsets.all(AppSpacing.xl),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              const Icon(
-                Icons.inventory_2_outlined,
-                size: 40,
-                color: AppColors.textMuted,
-              ),
-              const SizedBox(height: AppSpacing.s),
-              Text(
-                _searchQuery.isEmpty
-                    ? 'No products in catalog'
-                    : 'No matching products',
-                style: AppTypography.headingSmall,
-              ),
-              const SizedBox(height: 4),
-              const Text(
-                'Add a product here or while reviewing a receipt. Recorded prices appear after saving purchases.',
-                textAlign: TextAlign.center,
-                style: AppTypography.bodySmall,
-              ),
-            ],
+      return _scrollableEmpty(
+        'dashboard-products-list',
+        Center(
+          child: Padding(
+            padding: const EdgeInsets.all(AppSpacing.xl),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const Icon(
+                  Icons.inventory_2_outlined,
+                  size: 40,
+                  color: AppColors.textMuted,
+                ),
+                const SizedBox(height: AppSpacing.s),
+                Text(
+                  _searchQuery.isEmpty
+                      ? 'No products in catalog'
+                      : 'No matching products',
+                  style: AppTypography.headingSmall,
+                ),
+                const SizedBox(height: 4),
+                const Text(
+                  'Add a product here or while reviewing a receipt. Recorded prices appear after saving purchases.',
+                  textAlign: TextAlign.center,
+                  style: AppTypography.bodySmall,
+                ),
+              ],
+            ),
           ),
         ),
       );
     }
 
     return ListView.separated(
+      key: const PageStorageKey('dashboard-products-list'),
+      primary: true,
+      physics: const AlwaysScrollableScrollPhysics(),
       padding: const EdgeInsets.symmetric(
         horizontal: AppSpacing.m,
         vertical: AppSpacing.s,
