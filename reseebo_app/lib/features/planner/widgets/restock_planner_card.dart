@@ -51,65 +51,30 @@ class RestockPlannerCard extends StatelessWidget {
                 Container(
                   padding: const EdgeInsets.symmetric(
                     horizontal: 8,
-                    vertical: 3,
+                    vertical: 2.5,
                   ),
                   decoration: BoxDecoration(
                     color: AppColors.primary,
                     borderRadius: BorderRadius.circular(AppSpacing.radiusPill),
                   ),
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      const Icon(
-                        Icons.thumb_up_alt_rounded,
-                        size: 12,
-                        color: Colors.white,
-                      ),
-                      const SizedBox(width: 4),
-                      Text(
-                        'BEST OPTION',
-                        style: AppTypography.caption.copyWith(
-                          color: Colors.white,
-                          fontWeight: FontWeight.w800,
-                          fontSize: 10,
-                        ),
-                      ),
-                    ],
+                  child: Text(
+                    'LOWEST TOTAL',
+                    style: AppTypography.caption.copyWith(
+                      color: Colors.white,
+                      fontWeight: FontWeight.w800,
+                      fontSize: 10,
+                      letterSpacing: 0.3,
+                    ),
                   ),
                 ),
             ],
           ),
-          const SizedBox(height: AppSpacing.xs),
-
-          // Ceil pack calculation pill
-          Container(
-            padding: const EdgeInsets.symmetric(
-              horizontal: AppSpacing.s + 2,
-              vertical: AppSpacing.xs + 2,
-            ),
-            decoration: BoxDecoration(
-              color: AppColors.surfaceSubtle,
-              borderRadius: BorderRadius.circular(AppSpacing.radiusS),
-              border: Border.all(color: AppColors.border),
-            ),
-            child: Row(
-              children: [
-                const Icon(
-                  Icons.all_inbox_rounded,
-                  size: 16,
-                  color: AppColors.primary,
-                ),
-                const SizedBox(width: AppSpacing.s),
-                Expanded(
-                  child: Text(
-                    'Need $targetPieces pcs → Buy ${option.packsNeeded} packs (${option.totalPiecesPurchased} pcs @ ${CurrencyFormatter.format(option.packCost)}/pack)',
-                    style: AppTypography.caption.copyWith(
-                      color: AppColors.textPrimary,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                ),
-              ],
+          const SizedBox(height: 2),
+          Text(
+            'Buy ${option.packsNeeded} packs (${option.totalPiecesPurchased} pcs) @ ${CurrencyFormatter.format(option.packCost)}/pack',
+            style: AppTypography.bodySmall.copyWith(
+              color: AppColors.textSecondary,
+              fontSize: 12,
             ),
           ),
           const SizedBox(height: AppSpacing.s),

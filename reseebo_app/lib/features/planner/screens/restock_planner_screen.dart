@@ -232,38 +232,6 @@ class _RestockPlannerScreenState extends State<RestockPlannerScreen> {
                   ),
                   const SizedBox(height: AppSpacing.m),
 
-                  // Ceil rounding policy reassurance notice
-                  Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: AppSpacing.m,
-                      vertical: AppSpacing.s,
-                    ),
-                    decoration: BoxDecoration(
-                      color: AppColors.primarySurface,
-                      borderRadius: BorderRadius.circular(AppSpacing.radiusS),
-                    ),
-                    child: Row(
-                      children: [
-                        const Icon(
-                          Icons.verified_rounded,
-                          size: 18,
-                          color: AppColors.primary,
-                        ),
-                        const SizedBox(width: AppSpacing.s),
-                        Expanded(
-                          child: Text(
-                            'Packs are automatically rounded UP to whole packs so your store always meets or exceeds target piece count.',
-                            style: AppTypography.caption.copyWith(
-                              color: AppColors.primaryDark,
-                              fontWeight: FontWeight.w600,
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  const SizedBox(height: AppSpacing.m),
-
                   // Profit & Tubo Simulation Card
                   if (_profitCalc != null) ...[
                     ProfitTuboCard(
