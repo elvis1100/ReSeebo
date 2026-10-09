@@ -94,9 +94,11 @@ class StatHeader extends StatelessWidget {
           const Divider(height: 20),
           Row(
             children: [
-              _buildMiniMetric(
-                label: 'Receipts',
-                value: '$totalReceipts',
+              Expanded(
+                child: _buildMiniMetric(
+                  label: 'Receipts',
+                  value: '$totalReceipts',
+                ),
               ),
               Container(
                 width: 1,
@@ -104,19 +106,11 @@ class StatHeader extends StatelessWidget {
                 color: AppColors.border,
                 margin: const EdgeInsets.symmetric(horizontal: AppSpacing.m),
               ),
-              _buildMiniMetric(
-                label: 'Tracked Items',
-                value: '$totalProducts',
-              ),
-              Container(
-                width: 1,
-                height: 24,
-                color: AppColors.border,
-                margin: const EdgeInsets.symmetric(horizontal: AppSpacing.m),
-              ),
-              _buildMiniMetric(
-                label: 'Storage',
-                value: 'On-Device',
+              Expanded(
+                child: _buildMiniMetric(
+                  label: 'Tracked Items',
+                  value: '$totalProducts',
+                ),
               ),
             ],
           ),
