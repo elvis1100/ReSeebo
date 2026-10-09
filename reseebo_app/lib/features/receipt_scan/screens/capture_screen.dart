@@ -72,7 +72,7 @@ class _CaptureScreenState extends State<CaptureScreen> {
   Future<void> _processImagePath(String localPath) async {
     setState(() {
       _isProcessing = true;
-      _statusMessage = 'Reading receipt lines on-device...';
+      _statusMessage = 'Reading receipt lines...';
     });
 
     try {
@@ -235,7 +235,7 @@ class _CaptureScreenState extends State<CaptureScreen> {
                       ),
                       const SizedBox(height: AppSpacing.xs),
                       Text(
-                        _statusMessage ?? 'Extracting products & prices on-device',
+                        _statusMessage ?? 'Extracting products & prices...',
                         textAlign: TextAlign.center,
                         style: AppTypography.bodySmall,
                       ),
