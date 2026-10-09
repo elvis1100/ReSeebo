@@ -1,5 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:reseebo/main.dart';
+import 'package:reseebo_app/main.dart';
 
 void main() {
   testWidgets('ReseeboApp boots and renders offline dashboard', (WidgetTester tester) async {
