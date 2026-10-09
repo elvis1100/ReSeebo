@@ -65,7 +65,7 @@ class ReceiptListItem extends StatelessWidget {
                       '•  ${receipt.itemCount} ${receipt.itemCount == 1 ? 'item' : 'items'}',
                       style: AppTypography.caption,
                     ),
-                    if (receipt.receiptNumber != null) ...[
+                    if (receipt.receiptNumber.isNotEmpty) ...[
                       const SizedBox(width: AppSpacing.s),
                       Text(
                         '#${receipt.receiptNumber}',

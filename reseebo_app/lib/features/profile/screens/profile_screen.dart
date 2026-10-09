@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import '../../../core/adapters/reseebo_data_adapter.dart';
-import '../../../core/models/store_profile.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_spacing.dart';
 import '../../../core/theme/app_typography.dart';
@@ -56,7 +55,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
       setState(() {
         _profile = profile;
         _storeNameController.text = profile.storeName;
-        _ownerNameController.text = profile.ownerName ?? '';
+        _ownerNameController.text = profile.ownerName;
         _photoPath = profile.photoPath;
         _markupPercentage = profile.defaultMarkupPercentage;
         _isLoading = false;

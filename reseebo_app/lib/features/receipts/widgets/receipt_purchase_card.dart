@@ -33,12 +33,12 @@ class ReceiptPurchaseCard extends StatelessWidget {
             spacing: AppSpacing.lg,
             runSpacing: AppSpacing.sm,
             children: [
-              CurrencyText(cents: line.netAmountCents, prefix: 'Net '),
-              CurrencyText(cents: line.costPerPieceCents, suffix: ' / piece'),
+              CurrencyText.cents(cents: line.netAmountCents, prefix: 'Net '),
+              CurrencyText.cents(cents: line.costPerPieceCents, suffix: ' / piece'),
             ],
           ),
           if (line.discountCents > 0)
-            CurrencyText(cents: line.discountCents, prefix: 'Line discount '),
+            CurrencyText.cents(cents: line.discountCents, prefix: 'Line discount '),
           TextButton.icon(
             onPressed: onCompare,
             icon: const Icon(Icons.compare_arrows),

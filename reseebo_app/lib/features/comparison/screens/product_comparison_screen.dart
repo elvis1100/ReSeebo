@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import '../../../core/adapters/reseebo_data_adapter.dart';
-import '../../../core/models/comparison.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_spacing.dart';
 import '../../../core/theme/app_typography.dart';
@@ -193,7 +192,7 @@ class _ProductComparisonScreenState extends State<ProductComparisonScreen> {
                           ),
                           const SizedBox(height: 2),
                           Text(
-                            'Size: ${data.product.sizeUnit} • ${data.product.category ?? "General Store Item"}',
+                            'Size: ${data.product.sizeUnit} • ${data.product.category.isEmpty ? "General Store Item" : data.product.category}',
                             style: AppTypography.bodySmall,
                           ),
                         ],

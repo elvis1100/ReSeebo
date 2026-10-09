@@ -81,12 +81,12 @@ class BasketResults extends StatelessWidget {
                   ),
                   const SizedBox(height: AppSpacing.xs),
                   Text(best.supplier.label),
-                  CurrencyText(
+                  CurrencyText.cents(
                     cents: best.knownTotalCents,
                     suffix: ' including extra cost',
                   ),
                   if (savings != null)
-                    CurrencyText(
+                    CurrencyText.cents(
                       cents: savings.abs(),
                       prefix: savings >= 0
                           ? 'Savings vs grouped total: '
@@ -221,7 +221,7 @@ class _Amount extends StatelessWidget {
       runSpacing: AppSpacing.xs,
       children: [
         Text('$label:'),
-        CurrencyText(
+        CurrencyText.cents(
           cents: cents,
           style: TextStyle(
             fontWeight: bold ? FontWeight.w700 : FontWeight.w500,

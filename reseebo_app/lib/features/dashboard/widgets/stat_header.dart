@@ -51,11 +51,10 @@ class StatHeader extends StatelessWidget {
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                     ),
-                    if (profile.ownerName != null &&
-                        profile.ownerName!.trim().isNotEmpty) ...[
+                    if (profile.ownerName.trim().isNotEmpty) ...[
                       const SizedBox(height: 2),
                       Text(
-                        profile.ownerName!,
+                        profile.ownerName,
                         style: AppTypography.bodySmall.copyWith(
                           fontSize: 12,
                           color: AppColors.textSecondary,

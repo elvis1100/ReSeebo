@@ -1,10 +1,11 @@
+import 'dart:io';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import '../../../core/adapters/i_reseebo_data_adapter.dart';
 import '../../../core/constants/formatters.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/widgets/shared_widgets.dart';
 import '../../comparison/screens/product_comparison_screen.dart';
-import '../../receipt_scan/widgets/receipt_image_viewer.dart';
 import '../state/receipt_detail_controller.dart';
 import '../widgets/receipt_purchase_card.dart';
 
@@ -91,7 +92,7 @@ class _ReceiptDetailScreenState extends State<ReceiptDetailScreen> {
                         context,
                         MaterialPageRoute(
                           builder: (_) => ProductComparisonScreen(
-                            adapter: widget.adapter,
+                            dataAdapter: widget.adapter,
                             productId: line.productId,
                           ),
                         ),
@@ -103,7 +104,7 @@ class _ReceiptDetailScreenState extends State<ReceiptDetailScreen> {
                     runSpacing: AppSpacing.sm,
                     children: [
                       const Text('Recorded purchase total'),
-                      CurrencyText(
+                      CurrencyText.cents(
                         cents: detail.receipt.totalCents,
                         style: Theme.of(context).textTheme.titleLarge,
                       ),
@@ -124,4 +125,44 @@ class _ReceiptDetailScreenState extends State<ReceiptDetailScreen> {
       );
     },
   );
+}
+
+class ReceiptImagesPreview extends StatelessWidget {
+  final List<String> paths;
+  const ReceiptImagesPreview({super.key, required this.paths});
+
+  @override
+  Widget build(BuildContext context) {
+    if (paths.isEmpty) return const SizedBox.shrink();
+    return SizedBox(
+      height: 180,
+      child: ListView.separated(
+        scrollDirection: Axis.horizontal,
+        itemCount: paths.length,
+        separatorBuilder: (context, index) => const SizedBox(width: 8),
+        itemBuilder: (context, index) => ClipRRect(
+          borderRadius: BorderRadius.circular(8),
+          child: kIsWeb
+              ? Image.network(
+                  paths[index],
+                  fit: BoxFit.cover,
+                  errorBuilder: (context, error, stackTrace) => Container(
+                    width: 120,
+                    color: AppColors.surfaceSubtle,
+                    child: const Icon(Icons.receipt_long, color: AppColors.textMuted),
+                  ),
+                )
+              : Image.file(
+                  File(paths[index]),
+                  fit: BoxFit.cover,
+                  errorBuilder: (context, error, stackTrace) => Container(
+                    width: 120,
+                    color: AppColors.surfaceSubtle,
+                    child: const Icon(Icons.receipt_long, color: AppColors.textMuted),
+                  ),
+                ),
+        ),
+      ),
+    );
+  }
 }

@@ -1,9 +1,5 @@
 import 'package:flutter/material.dart';
 import '../../../core/adapters/reseebo_data_adapter.dart';
-import '../../../core/models/product.dart';
-import '../../../core/models/receipt.dart';
-import '../../../core/models/store_profile.dart';
-import '../../../core/models/supplier.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_spacing.dart';
 import '../../../core/theme/app_typography.dart';
@@ -95,7 +91,7 @@ class _DashboardScreenState extends State<DashboardScreen>
     return _receipts.where((r) {
       final supplier =
           _suppliersMap[r.supplierId]?.displayName.toLowerCase() ?? '';
-      final receiptNum = r.receiptNumber?.toLowerCase() ?? '';
+      final receiptNum = r.receiptNumber.toLowerCase();
       return supplier.contains(_searchQuery) ||
           receiptNum.contains(_searchQuery);
     }).toList();
@@ -105,7 +101,7 @@ class _DashboardScreenState extends State<DashboardScreen>
     if (_searchQuery.isEmpty) return _products;
     return _products.where((p) {
       final name = p.displayTitle.toLowerCase();
-      final cat = p.category?.toLowerCase() ?? '';
+      final cat = p.category.toLowerCase();
       return name.contains(_searchQuery) || cat.contains(_searchQuery);
     }).toList();
   }

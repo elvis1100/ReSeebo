@@ -58,7 +58,7 @@ class ProductCatalogItem extends StatelessWidget {
                 const SizedBox(height: 2),
                 Row(
                   children: [
-                    if (product.category != null) ...[
+                    if (product.category.isNotEmpty) ...[
                       Container(
                         padding: const EdgeInsets.symmetric(
                           horizontal: 6,
@@ -69,7 +69,7 @@ class ProductCatalogItem extends StatelessWidget {
                           borderRadius: BorderRadius.circular(4),
                         ),
                         child: Text(
-                          product.category!,
+                          product.category,
                           style: AppTypography.caption.copyWith(
                             fontSize: 10,
                             fontWeight: FontWeight.w600,

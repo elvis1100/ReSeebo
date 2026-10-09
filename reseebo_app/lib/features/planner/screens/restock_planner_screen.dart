@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
 import '../../../core/adapters/reseebo_data_adapter.dart';
-import '../../../core/models/product.dart';
-import '../../../core/models/restock_estimate.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_spacing.dart';
 import '../../../core/theme/app_typography.dart';

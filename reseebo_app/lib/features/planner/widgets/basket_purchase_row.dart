@@ -29,7 +29,7 @@ class BasketPurchaseRow extends StatelessWidget {
               ? 'Target ${item.estimate.targetPieces} pcs → ${item.estimate.packsToBuy} packs × ${item.estimate.purchase.piecesPerPack} = ${item.estimate.purchasedPieces} pcs'
               : '${item.estimate.purchasedPieces} pcs to buy',
         ),
-        CurrencyText(
+        CurrencyText.cents(
           cents: item.estimate.subtotalCents,
           prefix: 'Product cost ',
         ),

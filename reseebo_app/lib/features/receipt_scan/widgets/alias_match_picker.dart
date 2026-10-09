@@ -74,7 +74,7 @@ class _AliasMatchPickerState extends State<AliasMatchPicker> {
     if (_query.isEmpty) return widget.availableProducts;
     return widget.availableProducts.where((p) {
       return p.displayTitle.toLowerCase().contains(_query) ||
-          (p.category?.toLowerCase().contains(_query) ?? false);
+          p.category.toLowerCase().contains(_query);
     }).toList();
   }
 

@@ -135,7 +135,8 @@ class RestockPlannerCard extends StatelessWidget {
                   ),
                 ],
               ),
-              if (option.netSavingsAfterTravel > 0)
+              if (option.netSavingsAfterTravel != null &&
+                  option.netSavingsAfterTravel! > 0)
                 Container(
                   padding: const EdgeInsets.symmetric(
                     horizontal: 8,

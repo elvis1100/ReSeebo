@@ -37,7 +37,9 @@ class LineItemEditorRow extends StatelessWidget {
   Widget build(BuildContext context) {
     final hasProduct = matchedProduct != null;
     final isAmbiguous = line.isAmbiguous || !hasProduct;
-    final totalPieces = (line.quantity * (line.piecesPerPack <= 0 ? 1 : line.piecesPerPack)).round();
+    final qty = line.quantity ?? 1;
+    final pcs = (line.piecesPerPack ?? 1) <= 0 ? 1 : (line.piecesPerPack ?? 1);
+    final totalPieces = qty * pcs;
 
     return AppCard(
       padding: const EdgeInsets.symmetric(
@@ -145,9 +147,7 @@ class LineItemEditorRow extends StatelessWidget {
               Expanded(
                 child: _buildCompactField(
                   label: 'Packs / Qty',
-                  value: line.quantity.toStringAsFixed(
-                    line.quantity.truncateToDouble() == line.quantity ? 0 : 2,
-                  ),
+                  value: '${line.quantity ?? 1}',
                   onChanged: (val) {
                     final d = double.tryParse(val) ?? 1.0;
                     if (d > 0) onQuantityChanged(d);

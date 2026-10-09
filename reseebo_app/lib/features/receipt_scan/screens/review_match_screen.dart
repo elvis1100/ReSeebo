@@ -1,9 +1,5 @@
 import 'package:flutter/material.dart';
 import '../../../core/adapters/reseebo_data_adapter.dart';
-import '../../../core/models/product.dart';
-import '../../../core/models/purchase_line.dart';
-import '../../../core/models/receipt.dart';
-import '../../../core/models/supplier.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_spacing.dart';
 import '../../../core/theme/app_typography.dart';
@@ -53,7 +49,7 @@ class _ReviewMatchScreenState extends State<ReviewMatchScreen> {
     _lines = List.from(widget.initialDraft.lines);
     _purchaseDate = widget.initialDraft.purchaseDate;
     _receiptNumberController = TextEditingController(
-      text: widget.initialDraft.receiptNumber ?? '',
+      text: widget.initialDraft.receiptNumber,
     );
     _scannedTotal = widget.initialDraft.totalAmount;
     _loadSuppliersAndProducts();
@@ -75,8 +71,8 @@ class _ReviewMatchScreenState extends State<ReviewMatchScreen> {
     }
 
     Supplier? matched;
-    if (widget.initialDraft.supplierName != null) {
-      final target = widget.initialDraft.supplierName!.toLowerCase();
+    if (widget.initialDraft.supplierName.isNotEmpty) {
+      final target = widget.initialDraft.supplierName.toLowerCase();
       matched = suppliers.cast<Supplier?>().firstWhere(
             (s) => s?.displayName.toLowerCase().contains(target) ?? false,
             orElse: () => null,
@@ -177,9 +173,7 @@ class _ReviewMatchScreenState extends State<ReviewMatchScreen> {
         supplierName: _selectedSupplier?.displayName ?? 'Saved Supplier',
         branchLocation: _selectedSupplier?.branchLocation,
         purchaseDate: _purchaseDate,
-        receiptNumber: _receiptNumberController.text.trim().isEmpty
-            ? null
-            : _receiptNumberController.text.trim(),
+        receiptNumber: _receiptNumberController.text.trim(),
         lines: _lines,
       );
 
@@ -455,7 +449,7 @@ class _ReviewMatchScreenState extends State<ReviewMatchScreen> {
                       onSelectProduct: () => _handleMatchProduct(index),
                       onQuantityChanged: (q) {
                         setState(() {
-                          line.quantity = q;
+                          line.quantity = q.round();
                         });
                       },
                       onPiecesPerPackChanged: (pcs) {
