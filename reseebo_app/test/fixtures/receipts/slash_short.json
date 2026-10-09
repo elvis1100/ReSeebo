@@ -1,0 +1,16 @@
+{
+  "synthetic": true,
+  "name": "unambiguous short month-first dates",
+  "lines": [
+    {
+      "text": "SUPPLIER A"
+    },
+    {
+      "text": "DATE 10/19/26"
+    }
+  ],
+  "expected": {
+    "date": "2026-10-19",
+    "lines": []
+  }
+}

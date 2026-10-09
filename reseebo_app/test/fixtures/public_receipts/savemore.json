@@ -1,0 +1,374 @@
+{
+  "id": "savemore",
+  "provenance": "Actual ML Kit Latin OCR on connected Android phone, 2026-10-10; sanitized to item/total region. No transcription corrections.",
+  "lines": [
+    {
+      "text": "2 01SHIPATATA24G @7.95",
+      "left": 121.0,
+      "top": 1138.0,
+      "width": 563.0,
+      "height": 74.0,
+      "tokens": [
+        {
+          "text": "2",
+          "left": 121.0,
+          "top": 1145.0,
+          "width": 21.0,
+          "height": 67.0
+        },
+        {
+          "text": "01SHIPATATA24G",
+          "left": 172.0,
+          "top": 1140.0,
+          "width": 359.0,
+          "height": 71.0
+        },
+        {
+          "text": "@7.95",
+          "left": 572.0,
+          "top": 1138.0,
+          "width": 112.0,
+          "height": 68.0
+        }
+      ]
+    },
+    {
+      "text": "1 MondeNissinBtr12s @37.95",
+      "left": 148.0,
+      "top": 1199.0,
+      "width": 642.0,
+      "height": 65.0,
+      "tokens": [
+        {
+          "text": "1",
+          "left": 148.0,
+          "top": 1199.0,
+          "width": 19.0,
+          "height": 65.0
+        },
+        {
+          "text": "MondeNissinBtr12s",
+          "left": 173.0,
+          "top": 1199.0,
+          "width": 441.0,
+          "height": 65.0
+        },
+        {
+          "text": "@37.95",
+          "left": 642.0,
+          "top": 1199.0,
+          "width": 148.0,
+          "height": 65.0
+        }
+      ]
+    },
+    {
+      "text": "1 ChocoMuchoCrm130G @10.25",
+      "left": 152.0,
+      "top": 1245.0,
+      "width": 640.0,
+      "height": 72.0,
+      "tokens": [
+        {
+          "text": "1",
+          "left": 152.0,
+          "top": 1258.0,
+          "width": 17.0,
+          "height": 59.0
+        },
+        {
+          "text": "ChocoMuchoCrm130G",
+          "left": 172.0,
+          "top": 1249.0,
+          "width": 441.0,
+          "height": 68.0
+        },
+        {
+          "text": "@10.25",
+          "left": 643.0,
+          "top": 1246.0,
+          "width": 149.0,
+          "height": 62.0
+        }
+      ]
+    },
+    {
+      "text": "3 TangOrangeMango 19g @21",
+      "left": 142.0,
+      "top": 1312.0,
+      "width": 588.0,
+      "height": 66.0,
+      "tokens": [
+        {
+          "text": "3",
+          "left": 142.0,
+          "top": 1320.0,
+          "width": 16.0,
+          "height": 58.0
+        },
+        {
+          "text": "TangOrangeMango",
+          "left": 175.0,
+          "top": 1314.0,
+          "width": 384.0,
+          "height": 63.0
+        },
+        {
+          "text": "19g",
+          "left": 570.0,
+          "top": 1313.0,
+          "width": 67.0,
+          "height": 59.0
+        },
+        {
+          "text": "@21",
+          "left": 668.0,
+          "top": 1312.0,
+          "width": 62.0,
+          "height": 59.0
+        }
+      ]
+    },
+    {
+      "text": "2 TangPwdrMango19g @20.50",
+      "left": 120.0,
+      "top": 1366.0,
+      "width": 646.0,
+      "height": 75.0,
+      "tokens": [
+        {
+          "text": "2",
+          "left": 120.0,
+          "top": 1378.0,
+          "width": 25.0,
+          "height": 63.0
+        },
+        {
+          "text": "TangPwdrMango19g",
+          "left": 180.0,
+          "top": 1369.0,
+          "width": 419.0,
+          "height": 71.0
+        },
+        {
+          "text": "@20.50",
+          "left": 617.0,
+          "top": 1366.0,
+          "width": 149.0,
+          "height": 66.0
+        }
+      ]
+    },
+    {
+      "text": "1 BEARBRAND 200m1 @29.50",
+      "left": 143.0,
+      "top": 1419.0,
+      "width": 614.0,
+      "height": 77.0,
+      "tokens": [
+        {
+          "text": "1",
+          "left": 143.0,
+          "top": 1432.0,
+          "width": 18.0,
+          "height": 64.0
+        },
+        {
+          "text": "BEARBRAND",
+          "left": 172.0,
+          "top": 1426.0,
+          "width": 231.0,
+          "height": 69.0
+        },
+        {
+          "text": "200m1",
+          "left": 440.0,
+          "top": 1423.0,
+          "width": 130.0,
+          "height": 67.0
+        },
+        {
+          "text": "@29.50",
+          "left": 602.0,
+          "top": 1419.0,
+          "width": 155.0,
+          "height": 67.0
+        }
+      ]
+    },
+    {
+      "text": "10 Item(s)",
+      "left": 100.0,
+      "top": 1490.0,
+      "width": 248.0,
+      "height": 69.0,
+      "tokens": [
+        {
+          "text": "10",
+          "left": 100.0,
+          "top": 1490.0,
+          "width": 58.0,
+          "height": 69.0
+        },
+        {
+          "text": "Item(s)",
+          "left": 174.0,
+          "top": 1490.0,
+          "width": 174.0,
+          "height": 69.0
+        }
+      ]
+    },
+    {
+      "text": "TOTAL DUE",
+      "left": 68.0,
+      "top": 1547.0,
+      "width": 228.0,
+      "height": 64.0,
+      "tokens": [
+        {
+          "text": "TOTAL",
+          "left": 68.0,
+          "top": 1548.0,
+          "width": 124.0,
+          "height": 63.0
+        },
+        {
+          "text": "DUE",
+          "left": 223.0,
+          "top": 1547.0,
+          "width": 73.0,
+          "height": 62.0
+        }
+      ]
+    },
+    {
+      "text": "PHP",
+      "left": 642.0,
+      "top": 1544.0,
+      "width": 149.0,
+      "height": 57.0,
+      "tokens": [
+        {
+          "text": "PHP",
+          "left": 642.0,
+          "top": 1544.0,
+          "width": 149.0,
+          "height": 57.0
+        }
+      ]
+    },
+    {
+      "text": "15.90",
+      "left": 1032.0,
+      "top": 1138.0,
+      "width": 126.0,
+      "height": 52.0,
+      "tokens": [
+        {
+          "text": "15.90",
+          "left": 1032.0,
+          "top": 1138.0,
+          "width": 126.0,
+          "height": 52.0
+        }
+      ]
+    },
+    {
+      "text": "37.95",
+      "left": 1030.0,
+      "top": 1195.0,
+      "width": 129.0,
+      "height": 50.0,
+      "tokens": [
+        {
+          "text": "37.95",
+          "left": 1030.0,
+          "top": 1195.0,
+          "width": 129.0,
+          "height": 50.0
+        }
+      ]
+    },
+    {
+      "text": "10.,25",
+      "left": 1037.0,
+      "top": 1246.0,
+      "width": 124.0,
+      "height": 57.0,
+      "tokens": [
+        {
+          "text": "10.,25",
+          "left": 1037.0,
+          "top": 1246.0,
+          "width": 124.0,
+          "height": 57.0
+        }
+      ]
+    },
+    {
+      "text": "63.00",
+      "left": 1032.0,
+      "top": 1312.0,
+      "width": 131.0,
+      "height": 50.0,
+      "tokens": [
+        {
+          "text": "63.00",
+          "left": 1032.0,
+          "top": 1312.0,
+          "width": 131.0,
+          "height": 50.0
+        }
+      ]
+    },
+    {
+      "text": "41.00",
+      "left": 1035.0,
+      "top": 1369.0,
+      "width": 128.0,
+      "height": 52.0,
+      "tokens": [
+        {
+          "text": "41.00",
+          "left": 1035.0,
+          "top": 1369.0,
+          "width": 128.0,
+          "height": 52.0
+        }
+      ]
+    },
+    {
+      "text": "29.50",
+      "left": 1035.0,
+      "top": 1427.0,
+      "width": 131.0,
+      "height": 55.0,
+      "tokens": [
+        {
+          "text": "29.50",
+          "left": 1035.0,
+          "top": 1427.0,
+          "width": 131.0,
+          "height": 55.0
+        }
+      ]
+    },
+    {
+      "text": "197.60",
+      "left": 863.0,
+      "top": 1541.0,
+      "width": 299.0,
+      "height": 58.0,
+      "tokens": [
+        {
+          "text": "197.60",
+          "left": 863.0,
+          "top": 1541.0,
+          "width": 299.0,
+          "height": 58.0
+        }
+      ]
+    }
+  ]
+}

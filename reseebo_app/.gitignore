@@ -70,5 +70,12 @@ migrate_working_dir/
 **/ios/Flutter/ephemeral/
 **/ios/Runner/GeneratedPluginRegistrant.*
 
+# Android Studio will place build artifacts here
+/android/.kotlin/
+/android/app/debug
+/android/app/profile
+/android/app/release
+
 # Exceptions to above rules.
 !/packages/flutter_tools/test/data/create_test/dot_idea
+

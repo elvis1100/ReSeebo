@@ -23,10 +23,7 @@ class AppCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    Widget content = Padding(
-      padding: padding,
-      child: child,
-    );
+    Widget content = Padding(padding: padding, child: child);
 
     if (title != null || trailing != null) {
       content = Column(
@@ -70,23 +67,21 @@ class AppCard extends StatelessWidget {
       );
     }
 
-    final card = Container(
-      decoration: BoxDecoration(
-        color: backgroundColor ?? AppColors.surfaceCard,
+    final card = Material(
+      color: backgroundColor ?? AppColors.surfaceCard,
+      clipBehavior: Clip.antiAlias,
+      shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(AppSpacing.radiusM),
-        border: Border.all(color: AppColors.border, width: 1.0),
+        side: const BorderSide(color: AppColors.border),
       ),
-      child: content,
+      child: onTap == null
+          ? content
+          : InkWell(
+              onTap: onTap,
+              borderRadius: BorderRadius.circular(AppSpacing.radiusM),
+              child: content,
+            ),
     );
-
-    if (onTap != null) {
-      return InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(AppSpacing.radiusM),
-        child: card,
-      );
-    }
-
     return card;
   }
 }

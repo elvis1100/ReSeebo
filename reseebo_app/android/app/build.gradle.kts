@@ -22,6 +22,9 @@ android {
     defaultConfig {
         // TODO: Specify your own unique Application ID (https://developer.android.com/studio/build/application-id.html).
         applicationId = "com.reseebo.reseebo"
+        // Opt-in isolated device tests must never install over the owner's app.
+        // Set ORG_GRADLE_PROJECT_reseeboVerification=true for Flutter tests.
+        applicationIdSuffix = if (providers.gradleProperty("reseeboVerification").orNull == "true") ".verification" else ""
         // You can update the following values to match your application needs.
         // For more information, see: https://flutter.dev/to/review-gradle-config.
         minSdk = flutter.minSdkVersion

@@ -1,0 +1,27 @@
+{
+  "synthetic": true,
+  "name": "explicit @ arithmetic conflict stays unresolved",
+  "layoutFamily": "grocery_at_conflict",
+  "lines": [
+    {
+      "text": "GROCERY A"
+    },
+    {
+      "text": "2026-10-09"
+    },
+    {
+      "text": "2 PC COFFEE ORIGINAL 26G @15.00 38.00"
+    }
+  ],
+  "expected": {
+    "date": "2026-10-09",
+    "lines": [
+      {
+        "description": "COFFEE ORIGINAL 26G",
+        "quantity": 2,
+        "unit": "piece",
+        "amount": null
+      }
+    ]
+  }
+}

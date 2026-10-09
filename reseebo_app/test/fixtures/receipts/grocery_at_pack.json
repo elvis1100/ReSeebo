@@ -1,0 +1,27 @@
+{
+  "synthetic": true,
+  "name": "explicit pack count with @ does not imply pack conversion",
+  "layoutFamily": "grocery_at_pack",
+  "lines": [
+    {
+      "text": "GROCERY A"
+    },
+    {
+      "text": "2026-10-09"
+    },
+    {
+      "text": "2 PACK COFFEE ORIGINAL 26G @150 300.00"
+    }
+  ],
+  "expected": {
+    "date": "2026-10-09",
+    "lines": [
+      {
+        "description": "COFFEE ORIGINAL 26G",
+        "quantity": 2,
+        "unit": "pack",
+        "amount": 30000
+      }
+    ]
+  }
+}

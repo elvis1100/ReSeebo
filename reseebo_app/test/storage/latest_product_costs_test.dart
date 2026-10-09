@@ -2,8 +2,8 @@ import 'dart:io';
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:path/path.dart' as p;
-import 'package:reseebo/core/adapters/i_reseebo_data_adapter.dart';
-import 'package:reseebo/core/adapters/sqlite_reseebo_data_adapter.dart';
+import 'package:reseebo_app/core/adapters/i_reseebo_data_adapter.dart';
+import 'package:reseebo_app/core/adapters/sqlite_reseebo_data_adapter.dart';
 import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 
 import 'sqlite_adapter_test.dart' as fixtures;
@@ -97,6 +97,7 @@ void main() {
       databasePath: p.join(root.path, 'records.sqlite'),
       mediaDirectory: Directory(p.join(root.path, 'media')),
       ocrService: fixtures.FakeOcr(),
+      starterProducts: const [],
       clock: () =>
           DateTime.fromMillisecondsSinceEpoch(recordedMillis, isUtc: true),
     );

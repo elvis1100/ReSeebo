@@ -2,71 +2,73 @@ import '../constants/formatters.dart';
 import '../models/models.dart';
 import '../errors/app_exception.dart';
 import 'receipt_layout.dart';
+import 'receipt_purchase_datetime.dart';
+import 'receipt_numeric_row.dart';
 
 /// Layout heuristics provide editable suggestions, never confirmed purchases.
-/// Unlabeled pack conversion, ambiguous dates and discounts stay owner decisions.
+/// Unlabeled pack conversion and ambiguous dates stay owner decisions.
 class ReceiptParser {
+  final _purchaseDateTime = ReceiptPurchaseDateTime();
   ReceiptDraft parse({
     required String imagePath,
     required List<OcrTextLine> textLines,
     String? recognitionImagePath,
   }) {
-    final rows = prepareReceiptRows(textLines);
+    final rows = prepareReceiptLayout(textLines);
     final draft = ReceiptDraft(
       imagePath: imagePath,
       recognitionImagePath: recognitionImagePath,
       textLines: List.of(textLines),
       rawText: recognizedReceiptText(textLines),
+      ocrPages: [
+        ReceiptOcrPage(
+          imagePath: imagePath,
+          recognitionImagePath: recognitionImagePath,
+          textLines: List.of(textLines),
+        ),
+      ],
     );
+    final purchase = _purchaseDateTime.suggest(
+      recognizedReceiptText(textLines).split('\n'),
+    );
+    draft.purchasedAt = purchase.purchasedAt;
+    draft.hasPurchaseTime = purchase.hasPurchaseTime;
+    draft.dateCandidates = purchase.candidates;
+    draft.dateFromReceipt = purchase.purchasedAt != null;
+    draft.warnings.addAll(purchase.warnings);
     final amountPattern = RegExp(
-      r'(?:₱|PHP\s*)?(-?\d[\d,]*\.\d{2})\s*(?:[A-Z*])?\s*$',
+      r'(?:(?<![a-z0-9])(?:₱\s*|PHP\s*|P\s*))?(-?\d[\d,]*\.\d{2})\s*(VE|[\p{L}*])?\s*$',
       caseSensitive: false,
+      unicode: true,
     );
+    int? printedUnitCount;
     var reachedTotal = false;
+    var inItemTable = false;
     for (var index = 0; index < rows.length; index++) {
-      final text = rows[index].trim();
+      final row = rows[index];
+      if (row.item != null) {
+        if (!reachedTotal) draft.lines.add(row.item!.resolve());
+        continue;
+      }
+      final text = row.text.trim();
       if (text.isEmpty) continue;
+      final count = RegExp(
+        r'^(?:total\s+items|items\s+purchased)\s*:?\s*(\d+)$|^(\d+)\s+item(?:\(s\)|s)?$',
+        caseSensitive: false,
+      ).firstMatch(text);
+      if (count != null) printedUnitCount = int.tryParse(count[1] ?? count[2]!);
+      if (RegExp(
+            r'\b(?:description|item|product)\b',
+            caseSensitive: false,
+          ).hasMatch(text) &&
+          RegExp(
+            r'\b(?:qty|quantity|price|amount)\b',
+            caseSensitive: false,
+          ).hasMatch(text)) {
+        inItemTable = true;
+      }
       if (draft.supplierName.isEmpty && index < 6 && _supplierCandidate(text)) {
         draft.supplierName = text;
-      }
-      if (draft.purchasedAt == null) {
-        final parsedDate = _date(text);
-        if (parsedDate != null) {
-          draft.purchasedAt = parsedDate;
-          final time = _time(text);
-          if (time != null) {
-            draft.purchasedAt = DateTime(
-              parsedDate.year,
-              parsedDate.month,
-              parsedDate.day,
-              time.$1,
-              time.$2,
-              time.$3,
-            );
-            draft.hasPurchaseTime = true;
-          }
-        } else if (RegExp(
-          r'\b\d{1,2}[/\-]\d{1,2}[/\-]\d{2,4}\b',
-        ).hasMatch(text)) {
-          draft.warnings.add(
-            'The printed date is ambiguous. Confirm the purchase date.',
-          );
-        }
-      } else if (!draft.hasPurchaseTime &&
-          RegExp(r'\btime\b', caseSensitive: false).hasMatch(text)) {
-        final time = _time(text);
-        if (time != null) {
-          final date = draft.purchasedAt!;
-          draft.purchasedAt = DateTime(
-            date.year,
-            date.month,
-            date.day,
-            time.$1,
-            time.$2,
-            time.$3,
-          );
-          draft.hasPurchaseTime = true;
-        }
       }
       final number = RegExp(
         r'\b(?:receipt|invoice|transaction|o\.?r\.?)\s*(?:no\.?|number|#)\s*[:#]?\s*([\w\-]+)|\b(?:receipt|invoice|transaction|o\.?r\.?)\s*[:#]\s*([\w\-]+)',
@@ -75,20 +77,79 @@ class ReceiptParser {
       if (number != null) {
         draft.receiptNumber = (number.group(1) ?? number.group(2))!;
       }
-      if (RegExp(
-        r'^(?:cash|change|tender|payment|balance)\b',
-        caseSensitive: false,
-      ).hasMatch(text)) {
+      if (draft.lines.isNotEmpty &&
+          RegExp(
+            r'^\d+\s+(?:x\s+)?item|^(?:cash|change|tender|payment|balance|items\s+purchased|total\s+items)\b',
+            caseSensitive: false,
+          ).hasMatch(text)) {
         reachedTotal = true;
       }
       final amountMatch = amountPattern.firstMatch(text);
-      if (amountMatch == null) continue;
+      if (amountMatch == null) {
+        if (!reachedTotal &&
+            !_metadata(text) &&
+            text != draft.supplierName &&
+            (_likelyIncompleteItem(text) ||
+                (inItemTable &&
+                    RegExp(r'[a-z]', caseSensitive: false).hasMatch(text)))) {
+          final count = RegExp(
+            r'(?<![\d.])\b(\d+)(?:\.0+)?\s*(pcs?|pieces?|packs?|pk)\b',
+            caseSensitive: false,
+          ).firstMatch(text);
+          final leading = RegExp(
+            r'^(\d{1,3})\s+(?:[x×]\s+)?(?=[a-z])',
+            caseSensitive: false,
+          ).firstMatch(text);
+          final quantity = count != null
+              ? parseQuantity(count[1]!)
+              : leading != null &&
+                    !RegExp(
+                      r'^(?:7\s+up|100\s+plus)\b',
+                      caseSensitive: false,
+                    ).hasMatch(text)
+              ? parseQuantity(leading[1]!)
+              : null;
+          final unit = count == null
+              ? null
+              : RegExp(
+                  r'^(?:pack|pk)',
+                  caseSensitive: false,
+                ).hasMatch(count[2]!)
+              ? PurchaseUnit.pack
+              : PurchaseUnit.piece;
+          draft.lines.add(
+            ParsedLineItem(
+              description: _descriptionText(
+                text,
+                [
+                  count,
+                  quantity != null && count == null ? leading : null,
+                ].whereType<RegExpMatch>(),
+              ),
+              quantity: quantity,
+              extractedQuantity: quantity,
+              unit: unit,
+              piecesPerPack: unit == PurchaseUnit.piece ? 1 : null,
+              warnings: [
+                'This item row is incomplete. Check the original receipt and enter the missing fields.',
+                'Confirm the exact brand, variant and size.',
+                'Confirm the quantity, pieces or packs, and line amount.',
+              ],
+            ),
+          );
+        }
+        continue;
+      }
       final cents = parsePesos(amountMatch.group(1)!.replaceFirst('-', ''));
       if (cents == null) continue;
       if (RegExp(
-        r'^(?:grand\s+total|amount\s+(?:due|paid)|total(?:\s+(?:due|amount|sales))?)[\s:₱]',
+        r'^(?:grand\s+total|amount\s+(?:due|paid)|total(?:\s+(?:due|amount|sales))?)[\s:₱]*(?:PHP[\s:₱]*)?(?:\d+\s*(?:(?:items?|item\(s\))\s*)?)?$',
         caseSensitive: false,
-      ).hasMatch(text)) {
+      ).hasMatch(text.substring(0, amountMatch.start).trim())) {
+        if (draft.detectedTotalCents != null &&
+            RegExp(r'^total\s+sales\b', caseSensitive: false).hasMatch(text)) {
+          continue;
+        }
         draft.detectedTotalCents = cents;
         reachedTotal = true;
         continue;
@@ -99,7 +160,7 @@ class ReceiptParser {
           ).hasMatch(text) ||
           amountMatch.group(1)!.startsWith('-')) {
         final warning =
-            'Possible discount ${amountMatch.group(1)}. Check whether the printed line amount already includes it before deducting.';
+            'Possible discount ${amountMatch.group(1)}. Enter the final amount paid for the item; check it against the receipt total.';
         if (draft.lines.isNotEmpty && !reachedTotal) {
           draft.lines.last.warnings.add(warning);
         } else {
@@ -117,6 +178,7 @@ class ReceiptParser {
       PurchaseUnit? unit;
       int? piecesPerPack;
       RegExpMatch? leadingQuantity;
+      var inferredLeadingQuantity = false;
       // Whole decimal counts are valid OCR output; a fractional suffix must
       // never become a separate quantity (for example, 2.50 becoming 50).
       final packCount = RegExp(
@@ -142,17 +204,46 @@ class ReceiptParser {
         unit = PurchaseUnit.piece;
         piecesPerPack = 1;
       } else {
-        final leading = RegExp(
-          r'^(\d{1,4})(?:\.0+)?\s+(?:[x×]\s+)?(?=[a-z])',
+        final explicitLeading = RegExp(
+          r'^(\d{1,4})(?:\.0+)?\s+[x×]\s+(?=[a-z0-9])',
           caseSensitive: false,
         ).firstMatch(description);
+        // Long prefixes are typically item codes. Recognizable numeric brands
+        // retain their identity; other short naked counts remain reviewable.
+        final numericBrand = RegExp(
+          r'^(?:7\s+up|100\s+plus)\b',
+          caseSensitive: false,
+        ).hasMatch(description);
+        final nakedLeading = numericBrand
+            ? null
+            : RegExp(
+                r'^(\d{1,3})(?:\.0+)?\s+(?=[a-z])',
+                caseSensitive: false,
+              ).firstMatch(description);
+        final leading = explicitLeading ?? nakedLeading;
         if (leading != null) {
+          inferredLeadingQuantity = explicitLeading == null;
           leadingQuantity = leading;
           quantity = parseQuantity(leading.group(1)!);
           description = description.substring(leading.end).trim();
         }
       }
       final warnings = <String>['Confirm the exact brand, variant and size.'];
+      final marker = amountMatch[2];
+      if (marker != null &&
+          !RegExp(
+            r'^(?:VE|V|E|Z|\*)$',
+            caseSensitive: false,
+          ).hasMatch(marker)) {
+        warnings.add(
+          'Unclear trailing price marker "$marker". Check the original receipt.',
+        );
+      }
+      if (inferredLeadingQuantity) {
+        warnings.add(
+          'Confirm that the leading number is a purchased quantity rather than a product name or code.',
+        );
+      }
       final quantityFields = [
         packCount,
         pieceCount,
@@ -161,13 +252,30 @@ class ReceiptParser {
       ].whereType<RegExpMatch>();
       // Printed whole-decimal counts are not monetary columns. Ignore only
       // their recognized field spans, retaining other prices for owner review.
-      final multipleAmounts = RegExp(r'\b\d[\d,]*\.\d{2}\b')
+      final otherAmounts = RegExp(r'\b\d[\d,]*\.\d{2}\b')
           .allMatches(printedDescription)
-          .any(
+          .where(
             (amount) => !quantityFields.any(
               (field) => amount.start >= field.start && amount.end <= field.end,
             ),
+          )
+          .toList();
+      // Some printers omit @, and OCR can lose it. Only a single trailing
+      // monetary column with an extracted count and exact arithmetic can be
+      // identified as a unit price; other pairs remain unresolved.
+      final trailingPrice = RegExp(
+        r'\s+@?(\d[\d,]*\.\d{2})\s*$',
+      ).firstMatch(printedDescription);
+      final agrees =
+          quantity != null &&
+          otherAmounts.length == 1 &&
+          trailingPrice != null &&
+          receiptAmountsAgree(
+            quantity.toString(),
+            trailingPrice[1]!,
+            amountMatch[1]!,
           );
+      final multipleAmounts = otherAmounts.isNotEmpty && !agrees;
       if (multipleAmounts) {
         warnings.add(
           'Multiple prices appear on this row. Confirm the total line amount, not the unit price.',
@@ -180,16 +288,50 @@ class ReceiptParser {
       if (unit == PurchaseUnit.pack && piecesPerPack == null) {
         warnings.add('Confirm the pieces in each pack.');
       }
+      // Keep OCR evidence in rawText/textLines; catalog matching and editable
+      // names use only the description, without purchased counts or prices.
+      description = _descriptionText(
+        printedDescription,
+        [packCount, pieceCount, leadingQuantity].whereType<RegExpMatch>(),
+      );
       draft.lines.add(
         ParsedLineItem(
           description: description,
           quantity: quantity,
+          extractedQuantity: quantity,
+          extractedAmountCents: multipleAmounts ? null : cents,
           unit: unit,
           piecesPerPack: piecesPerPack,
           grossAmountCents: multipleAmounts ? null : cents,
           warnings: warnings,
         ),
       );
+    }
+    if (draft.detectedTotalCents != null &&
+        draft.lines.isNotEmpty &&
+        draft.lines.every((line) => line.netAmountCents != null)) {
+      final sum = draft.lines.fold<int>(
+        0,
+        (sum, line) => sum + line.netAmountCents!,
+      );
+      if (sum != draft.detectedTotalCents) {
+        draft.warnings.add(
+          'Item amounts differ from the receipt total. Check missing items and discounts.',
+        );
+      }
+    }
+    if (printedUnitCount != null &&
+        draft.lines.isNotEmpty &&
+        draft.lines.every((line) => line.quantity != null)) {
+      final count = draft.lines.fold<int>(
+        0,
+        (sum, line) => sum + line.quantity!,
+      );
+      if (count != printedUnitCount) {
+        draft.warnings.add(
+          'Purchased quantities differ from the printed item count. Check missing items and purchase units.',
+        );
+      }
     }
     if (draft.purchasedAt == null) {
       draft.warnings.add('Choose and confirm the purchase date.');
@@ -205,18 +347,55 @@ class ReceiptParser {
     return draft;
   }
 
-  bool _metadata(String text) => RegExp(
-    r'\b(?:sub\s*total|vat|tax|cash|change|tender|payment|balance|total|amount\s+due|receipt|invoice|tel|phone)\b',
-    caseSensitive: false,
-  ).hasMatch(text);
+  bool _metadata(String text) =>
+      _purchaseDateTime.isMetadata(text) ||
+      RegExp(
+        r'^(?:date|time|tin|address|branch|page|qty|quantity|description|item|product|pos|serial|s/n|sn|s/n:|min|ptu|accred|cust|str|trx|ref)\b|\b(?:sub\s*total|vat|tax|cash|change|tender|payment|balance|total|amount\s+due|receipt|invoice|tel|phone)\b',
+        caseSensitive: false,
+      ).hasMatch(text);
+
+  // Damaged money tokens can be removed from a name without repairing the
+  // cost. Counts inside a product identity and its size remain visible.
+  String _descriptionText(String text, Iterable<RegExpMatch> counts) {
+    const priceSuffix =
+        r'(?:\s+(?:@\d[\d.,]*|\d[\d.,]*[.,]\d+))+(?:\s+(?:VE|V|E|Z|\*))?\s*$';
+    final removals =
+        counts
+            .where(
+              (field) =>
+                  field.start == 0 ||
+                  text.substring(field.end).trim().isEmpty ||
+                  RegExp(
+                    '^$priceSuffix',
+                    caseSensitive: false,
+                  ).hasMatch(text.substring(field.end)),
+            )
+            .toList()
+          ..sort((a, b) => b.start.compareTo(a.start));
+    for (final field in removals) {
+      text = text.replaceRange(field.start, field.end, ' ');
+    }
+    return text
+        .replaceFirst(RegExp(priceSuffix, caseSensitive: false), '')
+        .replaceAll(RegExp(r'\s+'), ' ')
+        .trim();
+  }
+
+  bool _likelyIncompleteItem(String text) =>
+      RegExp(r'[a-z]', caseSensitive: false).hasMatch(text) &&
+      RegExp(
+        r'\d+(?:\.\d+)?\s*(?:g|kg|ml|l|oz|pcs?|pieces?|packs?|pk)\b|@\s*\d',
+        caseSensitive: false,
+      ).hasMatch(text);
 
   bool _supplierCandidate(String text) =>
+      !_purchaseDateTime.isMetadata(text) &&
       RegExp(r'[a-z]', caseSensitive: false).hasMatch(text) &&
       !RegExp(
         r'^(?:official|sales|cash|tax|receipt|invoice|transaction|date|time|tin|vat|tel|phone|address|branch|page|qty|quantity|description|item|total)\b|\b(?:street|barangay|brgy|avenue|road|city)\b',
         caseSensitive: false,
       ).hasMatch(text) &&
-      !RegExp(r'\d{1,2}[/\-]\d{1,2}').hasMatch(text) &&
+      !RegExp(r'\d{1,2}[./\-]\d{1,2}').hasMatch(text) &&
       !RegExp(r'\d+\.\d{2}\s*$').hasMatch(text);
 
   /// Combine ordered photos as one draft. Matching suffix/prefix rows remain
@@ -243,6 +422,7 @@ class ReceiptParser {
       rawText: drafts.indexed
           .map((entry) => '--- Photo ${entry.$1 + 1} ---\n${entry.$2.rawText}')
           .join('\n\n'),
+      ocrPages: List.of(pages),
     );
     final names = drafts
         .map((draft) => draft.supplierName.trim())
@@ -255,24 +435,17 @@ class ReceiptParser {
         'Supplier headings differ between photos. Confirm that all pages belong to one receipt and enter the supplier.',
       );
     }
-    final dates = drafts
-        .map((draft) => draft.purchasedAt)
-        .whereType<DateTime>()
-        .toList();
-    if (dates.isNotEmpty) {
-      result.purchasedAt = dates.first;
-      result.hasPurchaseTime = drafts
-          .firstWhere((draft) => draft.purchasedAt != null)
-          .hasPurchaseTime;
-    }
-    if (dates.map((date) => (date.year, date.month, date.day)).toSet().length >
-        1) {
-      result.purchasedAt = null;
-      result.hasPurchaseTime = false;
-      result.warnings.add(
-        'Purchase dates differ between photos. Check the receipt pages before confirming a date.',
-      );
-    }
+    final purchase = _purchaseDateTime.suggest([
+      for (final page in pages) ...[
+        ...recognizedReceiptText(page.textLines).split('\n'),
+        '',
+      ],
+    ]);
+    result.purchasedAt = purchase.purchasedAt;
+    result.hasPurchaseTime = purchase.hasPurchaseTime;
+    result.dateCandidates = purchase.candidates;
+    result.dateFromReceipt = purchase.purchasedAt != null;
+    result.warnings.addAll(purchase.warnings);
     final numbers = drafts
         .map((draft) => draft.receiptNumber)
         .where((number) => number.isNotEmpty)
@@ -350,80 +523,5 @@ class ReceiptParser {
     }
     // Punctuation differences only suggest review; neither row is discarded.
     return description.replaceAll(RegExp(r'[^a-z0-9]+'), ' ').trim();
-  }
-
-  DateTime? _date(String text) {
-    final iso = RegExp(
-      r'\b(20\d{2})[/\-](\d{1,2})[/\-](\d{1,2})\b',
-    ).firstMatch(text);
-    if (iso != null) {
-      return _validDate(
-        int.parse(iso.group(1)!),
-        int.parse(iso.group(2)!),
-        int.parse(iso.group(3)!),
-      );
-    }
-    final named = RegExp(
-      r'\b(\d{1,2})\s*[- /]?\s*(JAN|FEB|MAR|APR|MAY|JUN|JUL|AUG|SEP|OCT|NOV|DEC)[a-z]*\s*[- /]?\s*(20\d{2})\b',
-      caseSensitive: false,
-    ).firstMatch(text);
-    if (named != null) {
-      final month =
-          [
-            'JAN',
-            'FEB',
-            'MAR',
-            'APR',
-            'MAY',
-            'JUN',
-            'JUL',
-            'AUG',
-            'SEP',
-            'OCT',
-            'NOV',
-            'DEC',
-          ].indexOf(named.group(2)!.toUpperCase()) +
-          1;
-      return _validDate(
-        int.parse(named.group(3)!),
-        month,
-        int.parse(named.group(1)!),
-      );
-    }
-    final separated = RegExp(
-      r'\b(\d{1,2})[/\-](\d{1,2})[/\-](20\d{2})\b',
-    ).firstMatch(text);
-    if (separated == null) return null;
-    final first = int.parse(separated.group(1)!);
-    final second = int.parse(separated.group(2)!);
-    final year = int.parse(separated.group(3)!);
-    if (first > 12) return _validDate(year, second, first);
-    if (second > 12) return _validDate(year, first, second);
-    return null;
-  }
-
-  DateTime? _validDate(int year, int month, int day) {
-    final result = DateTime(year, month, day);
-    return result.year == year && result.month == month && result.day == day
-        ? result
-        : null;
-  }
-
-  (int, int, int)? _time(String text) {
-    final match = RegExp(
-      r'\b(\d{1,2}):(\d{2})(?::(\d{2}))?\s*(AM|PM)?\b',
-      caseSensitive: false,
-    ).firstMatch(text);
-    if (match == null) return null;
-    var hour = int.parse(match.group(1)!);
-    final minute = int.parse(match.group(2)!);
-    final second = int.parse(match.group(3) ?? '0');
-    final meridiem = match.group(4)?.toUpperCase();
-    if (meridiem != null) {
-      if (hour < 1 || hour > 12) return null;
-      hour = hour % 12 + (meridiem == 'PM' ? 12 : 0);
-    }
-    if (hour > 23 || minute > 59 || second > 59) return null;
-    return (hour, minute, second);
   }
 }

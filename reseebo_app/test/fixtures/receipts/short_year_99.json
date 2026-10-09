@@ -1,0 +1,16 @@
+{
+  "synthetic": true,
+  "name": "short year 99 belongs to 2099",
+  "lines": [
+    {
+      "text": "SUPPLIER A"
+    },
+    {
+      "text": "DATE 12/31/99"
+    }
+  ],
+  "expected": {
+    "date": "2099-12-31",
+    "lines": []
+  }
+}

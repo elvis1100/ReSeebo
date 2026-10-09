@@ -1,6 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:reseebo/core/models/models.dart';
-import 'package:reseebo/core/utils/currency_formatter.dart';
+import 'package:reseebo_app/core/models/models.dart';
+import 'package:reseebo_app/core/utils/currency_formatter.dart';
 
 void main() {
   group('Restock Whole-Pack Ceil Calculations', () {

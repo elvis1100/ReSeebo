@@ -10,6 +10,7 @@ StoreProfile profileFromRow(Map<String, Object?> row) => StoreProfile(
 Product productFromRow(Map<String, Object?> row) => Product(
   id: row['id'] as String,
   name: row['name'] as String,
+  nameOnly: row['name_only'] == 1,
   brand: row['brand'] as String,
   variant: row['variant'] as String,
   size: row['size'] as String,
@@ -26,6 +27,11 @@ Supplier supplierFromRow(Map<String, Object?> row, {String prefix = ''}) =>
       name: row['${prefix}name'] as String,
       branch: row['${prefix}branch'] as String,
       notes: row['${prefix}notes'] as String,
+      dateOrder: row['${prefix}date_order'] == null
+          ? null
+          : NumericDateOrder.values.byName(
+              row['${prefix}date_order'] as String,
+            ),
     );
 
 Receipt receiptFromRow(
@@ -73,7 +79,7 @@ PurchaseRecord purchaseFromRow(Map<String, Object?> row) => PurchaseRecord(
 
 const receiptSelect = '''SELECT r.*,
   s.id AS supplier_id, s.name AS supplier_name,
-  s.branch AS supplier_branch, s.notes AS supplier_notes,
+  s.branch AS supplier_branch, s.notes AS supplier_notes, s.date_order AS supplier_date_order,
   (SELECT COUNT(*) FROM purchase_lines l WHERE l.receipt_id = r.id) AS line_count
   FROM receipts r JOIN suppliers s ON s.id = r.supplier_id''';
 
@@ -83,6 +89,6 @@ const purchaseSelect = '''SELECT l.*,
     WHERE i.receipt_id = r.id AND i.page_index = l.source_page), r.image_path) AS image_path,
   r.receipt_number,
   s.id AS supplier_id, s.name AS supplier_name,
-  s.branch AS supplier_branch, s.notes AS supplier_notes
+  s.branch AS supplier_branch, s.notes AS supplier_notes, s.date_order AS supplier_date_order
   FROM purchase_lines l JOIN receipts r ON r.id = l.receipt_id
   JOIN suppliers s ON s.id = r.supplier_id''';

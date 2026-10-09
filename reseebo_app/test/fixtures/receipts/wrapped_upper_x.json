@@ -1,0 +1,29 @@
+{
+  "synthetic": true,
+  "name": "wrapped uppercase multiplier keeps product and quantity",
+  "lines": [
+    {
+      "text": "SUPPLIER A"
+    },
+    {
+      "text": "2026-10-09"
+    },
+    {
+      "text": "COFFEE ORIGINAL 26G"
+    },
+    {
+      "text": "2 X 168.00 V"
+    }
+  ],
+  "expected": {
+    "date": "2026-10-09",
+    "lines": [
+      {
+        "description": "COFFEE ORIGINAL 26G",
+        "quantity": 2,
+        "unit": null,
+        "amount": 16800
+      }
+    ]
+  }
+}

@@ -6,16 +6,18 @@ import '../../../core/theme/app_typography.dart';
 import '../../../core/utils/currency_formatter.dart';
 import '../../../core/utils/date_formatter.dart';
 import '../../../core/widgets/app_button.dart';
+import '../../../core/widgets/shared_widgets.dart' show LocalPhoto;
+import '../../catalog/screens/product_editor_screen.dart';
 import '../../../core/widgets/app_card.dart';
 import '../widgets/price_history_timeline.dart';
 import '../widgets/supplier_comparison_table.dart';
+import '../../receipts/screens/receipt_detail_screen.dart';
 
 /// Screen allowing sari-sari store owners to compare prices for an identical
 /// product across suppliers and track cost trends over time.
 class ProductComparisonScreen extends StatefulWidget {
   final IReseeboDataAdapter dataAdapter;
   final String productId;
-  final ValueChanged<String>? onRestockPlanRequested;
   final ValueChanged<String>? onReceiptTap;
   final VoidCallback? onBack;
 
@@ -23,7 +25,6 @@ class ProductComparisonScreen extends StatefulWidget {
     super.key,
     required this.dataAdapter,
     required this.productId,
-    this.onRestockPlanRequested,
     this.onReceiptTap,
     this.onBack,
   });
@@ -37,6 +38,8 @@ class _ProductComparisonScreenState extends State<ProductComparisonScreen> {
   ProductComparisonData? _comparisonData;
   bool _isLoading = true;
   String? _errorMessage;
+  bool _reading = false;
+  int _request = 0;
 
   @override
   void initState() {
@@ -44,28 +47,70 @@ class _ProductComparisonScreenState extends State<ProductComparisonScreen> {
     _loadComparison();
   }
 
-  Future<void> _loadComparison() async {
+  void _openReceipt(String receiptId) {
+    final callback = widget.onReceiptTap;
+    if (callback != null) {
+      callback(receiptId);
+      return;
+    }
+    Navigator.push<void>(
+      context,
+      MaterialPageRoute(
+        builder: (_) => ReceiptDetailScreen(
+          adapter: widget.dataAdapter,
+          receiptId: receiptId,
+        ),
+      ),
+    );
+  }
+
+  Future<void> _loadComparison({bool refresh = false}) async {
+    if (_reading) return;
+    _reading = true;
+    final request = ++_request;
     setState(() {
-      _isLoading = true;
+      if (!refresh) _isLoading = true;
       _errorMessage = null;
     });
 
     try {
-      final data = await widget.dataAdapter.getProductComparison(widget.productId);
-      if (mounted) {
+      final data = await widget.dataAdapter.getProductComparison(
+        widget.productId,
+      );
+      if (mounted && request == _request) {
         setState(() {
           _comparisonData = data;
           _isLoading = false;
         });
       }
     } catch (e) {
-      if (mounted) {
+      if (mounted && request == _request) {
         setState(() {
-          _errorMessage = e.toString();
+          _errorMessage = userMessage(e);
           _isLoading = false;
         });
       }
+    } finally {
+      _reading = false;
     }
+  }
+
+  @override
+  void dispose() {
+    _request++;
+    super.dispose();
+  }
+
+  Future<void> _editProduct() async {
+    final product = _comparisonData?.product;
+    if (product == null) return;
+    final saved = await Navigator.of(context).push<bool>(
+      MaterialPageRoute(
+        builder: (_) =>
+            ProductEditorScreen(adapter: widget.dataAdapter, product: product),
+      ),
+    );
+    if (mounted && saved == true) await _loadComparison();
   }
 
   @override
@@ -74,7 +119,7 @@ class _ProductComparisonScreenState extends State<ProductComparisonScreen> {
       backgroundColor: AppColors.background,
       appBar: AppBar(
         title: Text(
-          _comparisonData?.product.displayTitle ?? 'Product Comparison',
+          _comparisonData?.product.displayName ?? 'Product details',
           style: AppTypography.headingMedium.copyWith(fontSize: 16),
         ),
         leading: IconButton(
@@ -82,44 +127,29 @@ class _ProductComparisonScreenState extends State<ProductComparisonScreen> {
           onPressed: widget.onBack ?? () => Navigator.of(context).maybePop(),
         ),
         actions: [
-          IconButton(
-            tooltip: 'Refresh',
-            icon: const Icon(Icons.refresh_rounded),
-            onPressed: _loadComparison,
-          ),
+          if (_comparisonData != null)
+            IconButton(
+              tooltip: 'Edit product',
+              icon: const Icon(Icons.edit_outlined),
+              onPressed: _editProduct,
+            ),
         ],
       ),
-      body: _buildBody(),
-      bottomNavigationBar: _comparisonData != null
-          ? Container(
-              padding: const EdgeInsets.all(AppSpacing.m),
-              decoration: BoxDecoration(
-                color: AppColors.surfaceCard,
-                border: const Border(top: BorderSide(color: AppColors.border)),
-              ),
-              child: SafeArea(
-                child: AppButton(
-                  label: 'Calculate Restock & Tubo',
-                  icon: Icons.calculate_rounded,
-                  isFullWidth: true,
-                  onPressed: () =>
-                      widget.onRestockPlanRequested?.call(widget.productId),
-                ),
-              ),
+      body: _isLoading
+          ? const Center(
+              child: CircularProgressIndicator(color: AppColors.primary),
             )
-          : null,
+          : RefreshIndicator(
+              onRefresh: () => _loadComparison(refresh: true),
+              child: _buildBody(),
+            ),
     );
   }
 
   Widget _buildBody() {
-    if (_isLoading) {
-      return const Center(
-        child: CircularProgressIndicator(color: AppColors.primary),
-      );
-    }
-
     if (_errorMessage != null || _comparisonData == null) {
-      return Center(
+      return SingleChildScrollView(
+        physics: const AlwaysScrollableScrollPhysics(),
         child: Padding(
           padding: const EdgeInsets.all(AppSpacing.xl),
           child: Column(
@@ -142,10 +172,7 @@ class _ProductComparisonScreenState extends State<ProductComparisonScreen> {
                 style: AppTypography.bodySmall,
               ),
               const SizedBox(height: AppSpacing.m),
-              AppButton(
-                label: 'Retry',
-                onPressed: _loadComparison,
-              ),
+              AppButton(label: 'Retry', onPressed: _loadComparison),
             ],
           ),
         ),
@@ -155,6 +182,7 @@ class _ProductComparisonScreenState extends State<ProductComparisonScreen> {
     final data = _comparisonData!;
 
     return SingleChildScrollView(
+      physics: const AlwaysScrollableScrollPhysics(),
       padding: const EdgeInsets.all(AppSpacing.m),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -168,18 +196,10 @@ class _ProductComparisonScreenState extends State<ProductComparisonScreen> {
                 Row(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Container(
-                      width: 50,
-                      height: 50,
-                      decoration: BoxDecoration(
-                        color: AppColors.primarySurface,
-                        borderRadius: BorderRadius.circular(AppSpacing.radiusS),
-                      ),
-                      child: const Icon(
-                        Icons.inventory_2_outlined,
-                        color: AppColors.primary,
-                        size: 26,
-                      ),
+                    LocalPhoto(
+                      path: data.product.photoPath,
+                      size: 68,
+                      fit: BoxFit.contain,
                     ),
                     const SizedBox(width: AppSpacing.m),
                     Expanded(
@@ -187,8 +207,10 @@ class _ProductComparisonScreenState extends State<ProductComparisonScreen> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            data.product.displayTitle,
-                            style: AppTypography.headingLarge.copyWith(fontSize: 18),
+                            data.product.displayName,
+                            style: AppTypography.headingLarge.copyWith(
+                              fontSize: 18,
+                            ),
                           ),
                           const SizedBox(height: 2),
                           Text(
@@ -268,15 +290,12 @@ class _ProductComparisonScreenState extends State<ProductComparisonScreen> {
           const SizedBox(height: AppSpacing.s),
           SupplierComparisonTable(
             rows: data.supplierRows,
-            onReceiptTap: widget.onReceiptTap,
+            onReceiptTap: _openReceipt,
           ),
           const SizedBox(height: AppSpacing.lg),
 
           // Price History Section
-          Text(
-            'Purchase Price History',
-            style: AppTypography.headingMedium,
-          ),
+          Text('Purchase Price History', style: AppTypography.headingMedium),
           const SizedBox(height: AppSpacing.xs),
           Text(
             'Track price hikes and drops recorded from your receipts',
@@ -285,7 +304,7 @@ class _ProductComparisonScreenState extends State<ProductComparisonScreen> {
           const SizedBox(height: AppSpacing.m),
           PriceHistoryTimeline(
             records: data.historyRows,
-            onReceiptTap: widget.onReceiptTap,
+            onReceiptTap: _openReceipt,
           ),
           const SizedBox(height: AppSpacing.xxl),
         ],

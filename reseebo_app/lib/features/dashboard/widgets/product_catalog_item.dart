@@ -3,7 +3,10 @@ import '../../../core/models/product.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_spacing.dart';
 import '../../../core/theme/app_typography.dart';
-import '../../../core/widgets/shared_widgets.dart';
+import '../../../core/widgets/app_card.dart';
+import '../../../core/widgets/currency_text.dart';
+import '../../../core/widgets/shared_widgets.dart' show LocalPhoto;
+import '../../../core/utils/date_formatter.dart';
 
 /// Interactive card rendering a product in the store owner's catalog.
 ///
@@ -13,6 +16,7 @@ class ProductCatalogItem extends StatelessWidget {
   final Product product;
   final double? latestUnitCost;
   final double? suggestedPrice;
+  final DateTime? latestPurchaseDate;
   final VoidCallback? onTap;
 
   const ProductCatalogItem({
@@ -20,6 +24,7 @@ class ProductCatalogItem extends StatelessWidget {
     required this.product,
     this.latestUnitCost,
     this.suggestedPrice,
+    this.latestPurchaseDate,
     this.onTap,
   });
 
@@ -27,24 +32,10 @@ class ProductCatalogItem extends StatelessWidget {
   Widget build(BuildContext context) {
     return AppCard(
       onTap: onTap,
-      padding: const EdgeInsets.symmetric(
-        horizontal: AppSpacing.m,
-        vertical: AppSpacing.s + 2,
-      ),
+      padding: AppSpacing.compactCardPadding,
       child: Row(
         children: [
-          ClipRRect(
-            borderRadius: BorderRadius.circular(AppSpacing.radiusS),
-            child: SizedBox(
-              width: 44,
-              height: 44,
-              child: LocalPhoto(
-                path: product.photoPath,
-                size: 44,
-                icon: Icons.inventory_2_rounded,
-              ),
-            ),
-          ),
+          LocalPhoto(path: product.photoPath, size: 48, fit: BoxFit.contain),
           const SizedBox(width: AppSpacing.m),
           Expanded(
             child: Column(
@@ -52,15 +43,14 @@ class ProductCatalogItem extends StatelessWidget {
               children: [
                 Text(
                   product.displayName,
-                  style: AppTypography.headingSmall.copyWith(
-                    fontSize: 15,
-                    fontWeight: FontWeight.w700,
-                  ),
-                  maxLines: 1,
+                  style: AppTypography.headingSmall.copyWith(fontSize: 15),
+                  maxLines: 2,
                   overflow: TextOverflow.ellipsis,
                 ),
-                const SizedBox(height: 3),
-                Row(
+                const SizedBox(height: 2),
+                Wrap(
+                  spacing: AppSpacing.s,
+                  runSpacing: 4,
                   children: [
                     if (product.category.isNotEmpty) ...[
                       Container(
@@ -81,15 +71,8 @@ class ProductCatalogItem extends StatelessWidget {
                           ),
                         ),
                       ),
-                      const SizedBox(width: AppSpacing.xs),
                     ],
-                    Text(
-                      product.sizeUnit,
-                      style: AppTypography.caption.copyWith(
-                        color: AppColors.textSecondary,
-                        fontSize: 12,
-                      ),
-                    ),
+                    Text(product.sizeUnit, style: AppTypography.caption),
                   ],
                 ),
               ],
@@ -104,52 +87,47 @@ class ProductCatalogItem extends StatelessWidget {
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     Text(
-                      'Cost: ',
-                      style: AppTypography.caption.copyWith(
-                        fontSize: 11,
-                        color: AppColors.textSecondary,
-                      ),
+                      'Cost / pc: ',
+                      style: AppTypography.caption.copyWith(fontSize: 11),
                     ),
                     CurrencyText(
                       latestUnitCost!,
                       style: AppTypography.tableCellNumber.copyWith(
                         fontSize: 14,
                         fontWeight: FontWeight.w700,
-                        color: AppColors.textPrimary,
                       ),
                     ),
                   ],
                 ),
               ],
+              if (latestPurchaseDate != null)
+                Text(
+                  DateFormatter.format(latestPurchaseDate!),
+                  style: AppTypography.caption,
+                ),
+              if (latestUnitCost == null)
+                const Text('No price yet', style: AppTypography.bodySmall),
               if (suggestedPrice != null) ...[
                 const SizedBox(height: 2),
-                Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 1.5),
-                  decoration: BoxDecoration(
-                    color: AppColors.primarySurface,
-                    borderRadius: BorderRadius.circular(4),
-                  ),
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Text(
-                        'SRP: ',
-                        style: AppTypography.caption.copyWith(
-                          fontSize: 10,
-                          fontWeight: FontWeight.w700,
-                          color: AppColors.primary,
-                        ),
+                Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(
+                      'Suggested: ',
+                      style: AppTypography.caption.copyWith(
+                        fontSize: 11,
+                        color: AppColors.textSecondary,
                       ),
-                      CurrencyText(
-                        suggestedPrice!,
-                        style: AppTypography.tableCellNumber.copyWith(
-                          fontSize: 13,
-                          fontWeight: FontWeight.w800,
-                          color: AppColors.primary,
-                        ),
+                    ),
+                    CurrencyText(
+                      suggestedPrice!,
+                      style: AppTypography.tableCellNumber.copyWith(
+                        fontSize: 13,
+                        fontWeight: FontWeight.w600,
+                        color: AppColors.primary,
                       ),
-                    ],
-                  ),
+                    ),
+                  ],
                 ),
               ],
             ],

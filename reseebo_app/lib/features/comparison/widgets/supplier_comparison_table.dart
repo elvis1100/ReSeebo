@@ -63,7 +63,7 @@ class SupplierComparisonTable extends StatelessWidget {
                   children: [
                     Expanded(
                       child: Text(
-                        row.supplierName,
+                        row.purchase.supplier.label,
                         style: AppTypography.headingSmall.copyWith(
                           fontSize: 14,
                           fontWeight: FontWeight.w700,
@@ -84,7 +84,9 @@ class SupplierComparisonTable extends StatelessWidget {
                         ),
                         decoration: BoxDecoration(
                           color: AppColors.priceCheaper,
-                          borderRadius: BorderRadius.circular(AppSpacing.radiusPill),
+                          borderRadius: BorderRadius.circular(
+                            AppSpacing.radiusPill,
+                          ),
                         ),
                         child: Text(
                           'LOWEST',
@@ -104,7 +106,9 @@ class SupplierComparisonTable extends StatelessWidget {
                         ),
                         decoration: BoxDecoration(
                           color: AppColors.surfaceSubtle,
-                          borderRadius: BorderRadius.circular(AppSpacing.radiusPill),
+                          borderRadius: BorderRadius.circular(
+                            AppSpacing.radiusPill,
+                          ),
                         ),
                         child: Text(
                           '+${CurrencyFormatter.format(row.differenceVsBest)} / pc',
@@ -123,11 +127,13 @@ class SupplierComparisonTable extends StatelessWidget {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Text(
-                      row.packageDescription,
-                      style: AppTypography.bodySmall.copyWith(
-                        fontSize: 12,
-                        color: AppColors.textSecondary,
+                    Expanded(
+                      child: Text(
+                        row.packageDescription,
+                        style: AppTypography.bodySmall.copyWith(
+                          fontSize: 12,
+                          color: AppColors.textSecondary,
+                        ),
                       ),
                     ),
                     Text(

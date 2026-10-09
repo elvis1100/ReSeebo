@@ -1,9 +1,133 @@
+import 'dart:convert';
+import 'dart:io';
+
 import 'package:flutter_test/flutter_test.dart';
-import 'package:reseebo/core/models/models.dart';
-import 'package:reseebo/core/services/receipt_parser.dart';
+import 'package:reseebo_app/core/models/models.dart';
+import 'package:reseebo_app/core/services/receipt_parser.dart';
+import 'package:reseebo_app/core/services/receipt_numeric_row.dart';
 
 void main() {
   final parser = ReceiptParser();
+
+  test('numeric rows preserve invalid money instead of throwing', () {
+    expect(receiptNumericRow('2 PC 1,2.00 24.00'), isNull);
+    expect(receiptNumericRow('2 PC 999999999999999.00 24.00'), isNull);
+    expect(receiptNumericRow('2 PC 15.00 3,0.00'), isNull);
+  });
+
+  final fixtures =
+      Directory('test/fixtures/receipts')
+          .listSync()
+          .whereType<File>()
+          .where((file) => file.path.endsWith('.json'))
+          .toList()
+        ..sort((a, b) => a.path.compareTo(b.path));
+  for (final file in fixtures) {
+    final fixture = jsonDecode(file.readAsStringSync()) as Map<String, dynamic>;
+    test('synthetic fixture: ${fixture['name']}', () {
+      final lines = (fixture['lines'] as List).map((entry) {
+        final row = entry as Map<String, dynamic>;
+        double bound(String key) => (row[key] as num? ?? 0).toDouble();
+        return OcrTextLine(
+          text: row['text'] as String,
+          left: bound('left'),
+          top: bound('top'),
+          width: bound('width'),
+          height: bound('height'),
+          tokens: (row['tokens'] as List? ?? []).map((entry) {
+            final token = entry as Map<String, dynamic>;
+            double value(String key) => (token[key] as num? ?? 0).toDouble();
+            return OcrTextToken(
+              text: token['text'] as String,
+              left: value('left'),
+              top: value('top'),
+              width: value('width'),
+              height: value('height'),
+            );
+          }).toList(),
+        );
+      }).toList();
+      final draft = parser.parse(imagePath: '/original.jpg', textLines: lines);
+      final expected = fixture['expected'] as Map<String, dynamic>;
+      expect(
+        draft.purchasedAt,
+        expected['date'] == null
+            ? null
+            : DateTime.parse(expected['date'] as String),
+      );
+      expect(draft.dateConfirmed, isFalse);
+      expect(draft.textLines, orderedEquals(lines));
+      for (final source in lines) {
+        expect(draft.rawText, contains(source.text));
+      }
+      if (expected['warning'] != null) {
+        expect(
+          draft.warnings.any(
+            (warning) => warning.contains(expected['warning'] as String),
+          ),
+          isTrue,
+        );
+      }
+      final items = expected['lines'] as List;
+      expect(draft.lines, hasLength(items.length));
+      for (var index = 0; index < items.length; index++) {
+        final item = items[index] as Map<String, dynamic>;
+        final actual = draft.lines[index];
+        expect(actual.description, item['description']);
+        expect(actual.quantity, item['quantity']);
+        expect(actual.unit?.name, item['unit']);
+        expect(actual.grossAmountCents, item['amount']);
+        expect(actual.confirmed, isFalse);
+        if (item['warning'] != null) {
+          expect(
+            actual.warnings.any(
+              (warning) => warning.contains(item['warning'] as String),
+            ),
+            isTrue,
+          );
+        }
+      }
+    });
+  }
+
+  test('retains original and recognition evidence for every ordered photo', () {
+    final pages = [
+      const ReceiptOcrPage(
+        imagePath: '/a.jpg',
+        recognitionImagePath: '/a-crop.jpg',
+        textLines: [
+          OcrTextLine(text: 'Supplier A'),
+          OcrTextLine(text: '1 pcs Coffee 84.00'),
+        ],
+      ),
+      const ReceiptOcrPage(
+        imagePath: '/b.jpg',
+        recognitionImagePath: '/b-rotate.jpg',
+        textLines: [
+          OcrTextLine(text: 'Supplier A'),
+          OcrTextLine(text: '1 pcs Milk 40.00'),
+        ],
+      ),
+    ];
+    final draft = parser.parsePages(pages: pages);
+    expect(draft.ocrPages.map((page) => page.imagePath), ['/a.jpg', '/b.jpg']);
+    expect(draft.ocrPages.map((page) => page.recognitionImagePath), [
+      '/a-crop.jpg',
+      '/b-rotate.jpg',
+    ]);
+    expect(
+      draft.ocrPages[1].textLines
+          .singleWhere((line) => line.text.contains('Milk'))
+          .text,
+      '1 pcs Milk 40.00',
+    );
+    final single = parser.parse(
+      imagePath: '/a.jpg',
+      recognitionImagePath: '/a-crop.jpg',
+      textLines: pages.first.textLines,
+    );
+    expect(single.ocrPages.single.recognitionImagePath, '/a-crop.jpg');
+  });
 
   test('aligns separately recognized item columns by text bounds', () {
     final lines = [
@@ -92,7 +216,7 @@ void main() {
       expect(draft.lines.single.netAmountCents, 16000);
       expect(
         draft.lines.single.warnings.any(
-          (warning) => warning.contains('already includes'),
+          (warning) => warning.contains('final amount paid'),
         ),
         isTrue,
       );
@@ -104,6 +228,227 @@ void main() {
     textLines: rows.map((text) => OcrTextLine(text: text)).toList(),
   );
 
+  for (final printed in [
+    'October 9, 2026 2:30 PM',
+    'OCT 09 26 14:30',
+    '09-OCT-26 02:30 p.m.',
+    '9 October 2026 14:30:00',
+  ]) {
+    test('suggests an English purchase date and time: $printed', () {
+      final draft = parseRows(['Supplier A', printed, '1 pcs Coffee 84.00']);
+      expect(draft.purchasedAt, DateTime(2026, 10, 9, 14, 30));
+      expect(draft.hasPurchaseTime, isTrue);
+      expect(draft.dateConfirmed, isFalse);
+      expect(draft.lines.single.quantity, 1);
+      expect(draft.lines.single.unit, PurchaseUnit.piece);
+      expect(draft.rawText, contains(printed));
+    });
+  }
+
+  for (final clockFirst in [false, true]) {
+    test(
+      'uses an adjacent standalone clock ${clockFirst ? 'before' : 'after'} the date',
+      () {
+        final dateAndTime = ['October 9, 2026', '02:30 PM'];
+        final draft = parseRows([
+          'Supplier A',
+          ...(clockFirst ? dateAndTime.reversed : dateAndTime),
+          '1 pcs Coffee 84.00',
+        ]);
+        expect(draft.purchasedAt, DateTime(2026, 10, 9, 14, 30));
+        expect(draft.hasPurchaseTime, isTrue);
+        expect(draft.dateConfirmed, isFalse);
+      },
+    );
+  }
+
+  test(
+    'a labeled clock before a separated date preserves midnight correctly',
+    () {
+      final draft = parseRows([
+        'Supplier A',
+        'Time: 12:05 AM',
+        'Receipt No 123',
+        'Date: 09-OCT-26',
+      ]);
+      expect(draft.purchasedAt, DateTime(2026, 10, 9, 0, 5));
+      expect(draft.hasPurchaseTime, isTrue);
+    },
+  );
+
+  test(
+    'equal numeric day and month is unambiguous; distinct ones need review',
+    () {
+      expect(
+        parseRows(['Supplier A', '09/09/26']).purchasedAt,
+        DateTime(2026, 9, 9),
+      );
+      expect(parseRows(['Supplier A', '09/10/26']).purchasedAt, isNull);
+    },
+  );
+
+  test(
+    'unrelated expiry manufacture and card dates cannot override purchase evidence',
+    () {
+      final draft = parseRows([
+        'Supplier A',
+        'Expiry date: 2027-02-20 14:30',
+        'Manufacture date: October 8, 2026',
+        'CARD VALID THRU 12/12/2028',
+        'Date: October 9, 2026',
+        'Time: 14:35',
+        'Opening time: 08:00',
+        '1 pcs Coffee 84.00',
+      ]);
+      expect(draft.purchasedAt, DateTime(2026, 10, 9, 14, 35));
+      expect(draft.hasPurchaseTime, isTrue);
+      expect(draft.lines, hasLength(1));
+      expect(
+        draft.warnings.any((warning) => warning.contains('differ')),
+        isFalse,
+      );
+      final expiryOnly = parseRows(['Supplier A', 'EXP 2027-02-20']);
+      expect(expiryOnly.purchasedAt, isNull);
+    },
+  );
+
+  for (final printed in ['February 30, 2026', '2026-13-09', '31/02/26']) {
+    test('rejects invalid calendar date $printed without rollover', () {
+      final draft = parseRows(['Supplier A', printed]);
+      expect(draft.purchasedAt, isNull);
+      expect(
+        draft.warnings.any((warning) => warning.contains('invalid')),
+        isTrue,
+      );
+    });
+  }
+
+  for (final clock in ['25:30', '14:60', '14:30:60', '00:30 AM', '14:30 PM']) {
+    test('rejects invalid purchase clock $clock without rollover', () {
+      final draft = parseRows([
+        'Supplier A',
+        'Date: October 9, 2026',
+        'Time: $clock',
+      ]);
+      expect(draft.purchasedAt, DateTime(2026, 10, 9));
+      expect(draft.hasPurchaseTime, isFalse);
+      expect(
+        draft.warnings.any((warning) => warning.contains('invalid')),
+        isTrue,
+      );
+    });
+  }
+
+  test('date and time conflicts stay unresolved for review', () {
+    final dates = parseRows([
+      'Supplier A',
+      '2026-10-09 14:30',
+      'Date: 2026-10-08',
+    ]);
+    expect(dates.purchasedAt, isNull);
+    expect(dates.hasPurchaseTime, isFalse);
+    expect(
+      dates.warnings.any((warning) => warning.contains('dates differ')),
+      isTrue,
+    );
+    final times = parseRows(['Supplier A', '2026-10-09 14:30', 'Time: 14:31']);
+    expect(times.purchasedAt, DateTime(2026, 10, 9));
+    expect(times.hasPurchaseTime, isFalse);
+    expect(
+      times.warnings.any((warning) => warning.contains('times differ')),
+      isTrue,
+    );
+  });
+
+  test('an unrelated distant unlabeled clock stays unknown', () {
+    final draft = parseRows([
+      'Supplier A',
+      '2026-10-09',
+      '1 pcs Coffee 84.00',
+      'TOTAL 84.00',
+      '15:30',
+    ]);
+    expect(draft.purchasedAt, DateTime(2026, 10, 9));
+    expect(draft.hasPurchaseTime, isFalse);
+  });
+
+  test('an English date in the first row cannot become the supplier name', () {
+    final draft = parseRows([
+      'October 9, 2026',
+      'Supplier A',
+      '1 pcs Coffee 84.00',
+    ]);
+    expect(draft.supplierName, 'Supplier A');
+  });
+
+  test(
+    'later page time enriches the same date and conflicting page clocks remain unknown',
+    () {
+      ReceiptOcrPage page(String path, String metadata) => ReceiptOcrPage(
+        imagePath: path,
+        textLines: [
+          const OcrTextLine(text: 'Supplier A'),
+          OcrTextLine(text: metadata),
+        ],
+      );
+      final enriched = parser.parsePages(
+        pages: [
+          page('/a.jpg', 'Date: October 9, 2026'),
+          page('/b.jpg', '2026-10-09 14:30'),
+        ],
+      );
+      expect(enriched.purchasedAt, DateTime(2026, 10, 9, 14, 30));
+      expect(enriched.hasPurchaseTime, isTrue);
+      expect(enriched.dateConfirmed, isFalse);
+      final conflict = parser.parsePages(
+        pages: [
+          page('/a.jpg', '2026-10-09 14:30'),
+          page('/b.jpg', '2026-10-09 14:31'),
+        ],
+      );
+      expect(conflict.purchasedAt, DateTime(2026, 10, 9));
+      expect(conflict.hasPurchaseTime, isFalse);
+      expect(
+        conflict.warnings.any((warning) => warning.contains('times differ')),
+        isTrue,
+      );
+    },
+  );
+
+  for (final count in ['2.00', '2.50']) {
+    test(
+      'a labeled amount table retains the product after $count pack count',
+      () {
+        final draft = parseRows([
+          'SUPPLIER A',
+          'QTY DESCRIPTION UNIT PRICE AMOUNT',
+          '$count packs Coffee Original 26G 84.00 168.00',
+        ]);
+        expect(draft.lines, hasLength(1));
+        expect(
+          draft.lines.single.description,
+          count == '2.00'
+              ? 'Coffee Original 26G'
+              : '$count packs Coffee Original 26G',
+        );
+        expect(draft.lines.single.quantity, count == '2.00' ? 2 : null);
+        expect(
+          draft.lines.single.unit,
+          count == '2.00' ? PurchaseUnit.pack : null,
+        );
+        expect(
+          draft.lines.single.grossAmountCents,
+          count == '2.00' ? 16800 : null,
+        );
+        expect(draft.lines.single.confirmed, isFalse);
+        expect(
+          draft.rawText,
+          contains('$count packs Coffee Original 26G 84.00 168.00'),
+        );
+      },
+    );
+  }
+
   test(
     'maps wrapped description and whole decimal quantities without losing raw OCR',
     () {
@@ -111,14 +456,14 @@ void main() {
         'SUPPLIER A',
         '2026-10-09',
         'COFFEE ORIGINAL 26G',
-        '2.00 168.00',
+        '2.00 X 168.00',
         'TOTAL 168.00',
       ]);
       expect(draft.lines.single.description, 'COFFEE ORIGINAL 26G');
       expect(draft.lines.single.quantity, 2);
       expect(draft.lines.single.unit, isNull);
       expect(draft.lines.single.grossAmountCents, 16800);
-      expect(draft.rawText, contains('COFFEE ORIGINAL 26G\n2.00 168.00'));
+      expect(draft.rawText, contains('COFFEE ORIGINAL 26G\n2.00 X 168.00'));
     },
   );
 
@@ -178,7 +523,7 @@ void main() {
         isTrue,
       );
       final wrapped = parseRows(['Supplier A', 'Coffee 26G', '2 84.00 168.00']);
-      expect(wrapped.lines.single.grossAmountCents, isNull);
+      expect(wrapped.lines.single.grossAmountCents, 16800);
     },
   );
 
@@ -294,14 +639,8 @@ void main() {
       );
       expect(draft.lines, hasLength(2));
       expect(draft.lines.last.possibleDuplicateOf, draft.lines.first.id);
-      expect(
-        draft.lines.first.description,
-        'Brand-X Coffee Original 26G 2 packs',
-      );
-      expect(
-        draft.lines.last.description,
-        '2.00 packs BRAND X COFFEE ORIGINAL 26G',
-      );
+      expect(draft.lines.first.description, 'Brand-X Coffee Original 26G');
+      expect(draft.lines.last.description, 'BRAND X COFFEE ORIGINAL 26G');
       expect(
         draft.lines.every((line) => line.grossAmountCents == 16800),
         isTrue,
@@ -369,7 +708,7 @@ void main() {
         '2.00 packs Coffee Original 26G 84.00 168.00',
       ]);
       expect(ambiguous.lines.single.quantity, 2);
-      expect(ambiguous.lines.single.grossAmountCents, isNull);
+      expect(ambiguous.lines.single.grossAmountCents, 16800);
     },
   );
 

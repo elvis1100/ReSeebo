@@ -1,4 +1,7 @@
+import '../services/receipt_product_match.dart';
 import 'dart:math';
+import 'package:uuid/uuid.dart';
+import '../services/receipt_validator.dart';
 import '../services/latest_product_cost_service.dart';
 import '../services/pricing_service.dart';
 import 'i_reseebo_data_adapter.dart';
@@ -6,6 +9,42 @@ import 'i_reseebo_data_adapter.dart';
 /// In-memory mock adapter pre-loaded with realistic sari-sari store fixtures.
 /// Enables immediate, offline frontend prototyping and lightweight Web testing.
 class MockReseeboDataAdapter implements IReseeboDataAdapter {
+  final Set<String> _categories = {};
+  @override
+  Future<List<String>> getProductCategories() async {
+    final values = <String, String>{};
+    for (final name in [..._categories, ..._products.map((p) => p.category)]) {
+      if (name.trim().isNotEmpty) {
+        values.putIfAbsent(name.trim().toLowerCase(), () => name.trim());
+      }
+    }
+    return values.values.toList()
+      ..sort((a, b) => a.toLowerCase().compareTo(b.toLowerCase()));
+  }
+
+  @override
+  Future<void> addProductCategory(String name) async {
+    if (name.trim().isEmpty) {
+      throw const ValidationException('Enter a category name.');
+    }
+    if (!(await getProductCategories()).any(
+      (value) => value.toLowerCase() == name.trim().toLowerCase(),
+    )) {
+      _categories.add(name.trim());
+    }
+  }
+
+  @override
+  Future<void> removeProductCategory(String name) async {
+    final key = name.trim().toLowerCase();
+    _categories.removeWhere((value) => value.toLowerCase() == key);
+    for (var index = 0; index < _products.length; index++) {
+      if (_products[index].category.trim().toLowerCase() == key) {
+        _products[index] = _products[index].copyWith(category: '');
+      }
+    }
+  }
+
   StoreProfile _profile = const StoreProfile(
     name: "Aling Nena's Sari-Sari Store",
     ownerName: 'Elena Santos',
@@ -169,32 +208,10 @@ class MockReseeboDataAdapter implements IReseeboDataAdapter {
 
   @override
   Future<List<ProductMatchSuggestion>> matchAliases(
-      String rawOcrDescription) async {
-    final desc = rawOcrDescription.toLowerCase();
-    final suggestions = <ProductMatchSuggestion>[];
-
-    for (final p in _products) {
-      if (desc.contains(p.brand.toLowerCase()) ||
-          desc.contains(p.variant.toLowerCase().split(' ').first)) {
-        suggestions.add(
-          ProductMatchSuggestion(
-            product: p,
-            reason: 'Matched brand/variant from catalog',
-            exactAlias: desc.contains(p.brand.toLowerCase()),
-          ),
-        );
-      }
-    }
-    if (suggestions.isEmpty && _products.isNotEmpty) {
-      suggestions.add(
-        ProductMatchSuggestion(
-          product: _products.first,
-          reason: 'Suggested fallback based on recent purchases',
-          exactAlias: false,
-        ),
-      );
-    }
-    return suggestions;
+    String rawOcrDescription, {
+    String? supplierId,
+  }) async {
+    return receiptProductSuggestions(rawOcrDescription, _products);
   }
 
   @override
@@ -224,11 +241,18 @@ class MockReseeboDataAdapter implements IReseeboDataAdapter {
   }
 
   @override
-  Future<List<Receipt>> getRecentReceipts({int limit = 200, String? query}) async {
+  Future<List<Receipt>> getRecentReceipts({
+    int limit = 200,
+    String? query,
+  }) async {
     var sorted = List<Receipt>.from(_receipts)
       ..sort((a, b) => b.purchasedAt.compareTo(a.purchasedAt));
     if (query != null && query.isNotEmpty) {
-      sorted = sorted.where((r) => r.supplierName.toLowerCase().contains(query.toLowerCase())).toList();
+      sorted = sorted
+          .where(
+            (r) => r.supplierName.toLowerCase().contains(query.toLowerCase()),
+          )
+          .toList();
     }
     return sorted.take(limit).toList();
   }
@@ -243,6 +267,7 @@ class MockReseeboDataAdapter implements IReseeboDataAdapter {
   Future<ReceiptDraft> processReceiptImage(
     String localImagePath, {
     String? recognitionImagePath,
+    String? comparisonImagePath,
   }) async {
     return ReceiptDraft(
       imagePath: localImagePath,
@@ -281,7 +306,33 @@ class MockReseeboDataAdapter implements IReseeboDataAdapter {
 
   @override
   Future<SaveReceiptResult> saveConfirmedReceipt(
-      ReceiptDraft confirmedDraft) async {
+    ReceiptDraft confirmedDraft,
+  ) async {
+    confirmedDraft = confirmedDraft.snapshot();
+    ReceiptValidator.validate(confirmedDraft);
+    final imported = <String, String>{};
+    for (final line in confirmedDraft.lines) {
+      if (line.productId != null) continue;
+      final key = line.description.trim().toLowerCase().replaceAll(
+        RegExp(r'\s+'),
+        ' ',
+      );
+      final id = imported.putIfAbsent(key, () {
+        final id = const Uuid().v4();
+        _products.add(
+          Product(
+            id: id,
+            name: line.description.trim(),
+            brand: '',
+            variant: '',
+            size: '',
+            nameOnly: true,
+          ),
+        );
+        return id;
+      });
+      line.productId = id;
+    }
     final newId = 'rec_${DateTime.now().millisecondsSinceEpoch}';
     final supplier = _suppliers.firstWhere(
       (s) => s.id == (confirmedDraft.supplierId ?? 'sup_a'),
@@ -296,8 +347,12 @@ class MockReseeboDataAdapter implements IReseeboDataAdapter {
       imagePath: confirmedDraft.imagePath,
       receiptNumber: confirmedDraft.receiptNumber,
       notes: confirmedDraft.notes,
-      totalCents: confirmedDraft.detectedTotalCents ??
-          confirmedDraft.lines.fold<int>(0, (sum, l) => sum + (l.netAmountCents ?? 0)),
+      totalCents:
+          confirmedDraft.detectedTotalCents ??
+          confirmedDraft.lines.fold<int>(
+            0,
+            (sum, l) => sum + (l.netAmountCents ?? 0),
+          ),
       lineCount: confirmedDraft.lines.length,
     );
     _receipts.insert(0, receipt);
@@ -305,7 +360,9 @@ class MockReseeboDataAdapter implements IReseeboDataAdapter {
     return SaveReceiptResult(
       receiptId: newId,
       lineIds: confirmedDraft.lines.map((l) => l.id).toList(),
-      unitCostsCents: confirmedDraft.lines.map((l) => l.costPerPieceCents ?? 0.0).toList(),
+      unitCostsCents: confirmedDraft.lines
+          .map((l) => l.costPerPieceCents ?? 0.0)
+          .toList(),
       alreadySaved: false,
     );
   }
@@ -382,18 +439,9 @@ class MockReseeboDataAdapter implements IReseeboDataAdapter {
       product: product,
       profile: _profile,
       latestPrices: [
-        SupplierPriceRow(
-          purchase: pWholesaler,
-          bestCostPerPieceCents: 820.0,
-        ),
-        SupplierPriceRow(
-          purchase: pPuregold,
-          bestCostPerPieceCents: 820.0,
-        ),
-        SupplierPriceRow(
-          purchase: pMegamart,
-          bestCostPerPieceCents: 820.0,
-        ),
+        SupplierPriceRow(purchase: pWholesaler, bestCostPerPieceCents: 820.0),
+        SupplierPriceRow(purchase: pPuregold, bestCostPerPieceCents: 820.0),
+        SupplierPriceRow(purchase: pMegamart, bestCostPerPieceCents: 820.0),
       ],
       history: [
         PriceHistoryRecord(
@@ -431,7 +479,8 @@ class MockReseeboDataAdapter implements IReseeboDataAdapter {
       return PricingService.estimatePurchase(
         row.purchase,
         targetPieces,
-        additionalCostCents: additionalCostsCents[row.purchase.supplier.id] ?? additionalCents,
+        additionalCostCents:
+            additionalCostsCents[row.purchase.supplier.id] ?? additionalCents,
       );
     }).toList();
 
@@ -461,10 +510,12 @@ class MockReseeboDataAdapter implements IReseeboDataAdapter {
   Future<ReceiptDraft> processReceiptImages(
     List<String> localImagePaths, {
     List<String>? recognitionImagePaths,
+    List<String>? comparisonImagePaths,
   }) async {
     return processReceiptImage(
       localImagePaths.first,
       recognitionImagePath: recognitionImagePaths?.firstOrNull,
+      comparisonImagePath: comparisonImagePaths?.firstOrNull,
     );
   }
 

@@ -1,0 +1,26 @@
+{
+  "synthetic": true,
+  "name": "fractional pack evidence stays unresolved",
+  "lines": [
+    {
+      "text": "SUPPLIER A"
+    },
+    {
+      "text": "2026-10-09"
+    },
+    {
+      "text": "2.50 packs Coffee 26G 168.00"
+    }
+  ],
+  "expected": {
+    "date": "2026-10-09",
+    "lines": [
+      {
+        "description": "2.50 packs Coffee 26G",
+        "quantity": null,
+        "unit": null,
+        "amount": null
+      }
+    ]
+  }
+}

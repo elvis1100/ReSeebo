@@ -1,5 +1,5 @@
-name: reseebo
-description: "Reseebo: offline tindahan price and tubo tracker."
+name: reseebo_app
+description: "Reseebo: offline store purchase and profit tracker."
 publish_to: 'none'
 
 version: 1.0.0+1
@@ -11,7 +11,6 @@ dependencies:
   flutter:
     sdk: flutter
 
-  cupertino_icons: ^1.0.8
   sqflite: '>=2.3.0 <2.4.0'
   path_provider: ^2.1.6
   path: ^1.9.1
@@ -21,6 +20,8 @@ dependencies:
   uuid: ^4.5.3
   crypto: ^3.0.7
   image: ^4.5.4
+  pdf: '>=3.11.0 <3.13.0'
+  printing: '>=5.13.0 <5.15.0'
 
 dev_dependencies:
   flutter_test:
@@ -40,4 +41,6 @@ flutter:
   assets:
     - assets/placeholders/
     - assets/fonts/
+    - assets/catalog/
+    - assets/catalog/images/
 

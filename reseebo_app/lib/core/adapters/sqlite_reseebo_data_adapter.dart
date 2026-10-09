@@ -1,3 +1,4 @@
+import '../services/receipt_product_match.dart';
 import 'dart:convert';
 import 'dart:io';
 
@@ -13,7 +14,9 @@ import '../services/local_file_store.dart';
 import '../services/ocr_service.dart';
 import '../services/pricing_service.dart';
 import '../services/receipt_parser.dart';
+import '../services/receipt_ocr_comparison.dart';
 import '../services/receipt_validator.dart';
+import '../services/starter_catalog_service.dart';
 import 'i_reseebo_data_adapter.dart';
 
 class SqliteReseeboDataAdapter implements IReseeboDataAdapter {
@@ -34,6 +37,7 @@ class SqliteReseeboDataAdapter implements IReseeboDataAdapter {
     Directory? mediaDirectory,
     OcrService? ocrService,
     DateTime Function()? clock,
+    List<Product>? starterProducts,
   }) async {
     final String dbPath;
     if (databasePath == null) {
@@ -53,6 +57,16 @@ class SqliteReseeboDataAdapter implements IReseeboDataAdapter {
       factory: databaseFactory ?? sqlite.databaseFactory,
       path: dbPath,
     );
+    try {
+      await StarterCatalogService.seed(
+        db,
+        starterProducts ?? await StarterCatalogService.load(),
+        now: (clock ?? DateTime.now)(),
+      );
+    } catch (_) {
+      await db.close();
+      rethrow;
+    }
     return SqliteReseeboDataAdapter._(
       db,
       LocalFileStore(mediaDirectory),
@@ -151,13 +165,46 @@ class SqliteReseeboDataAdapter implements IReseeboDataAdapter {
   }
 
   @override
+  Future<List<String>> getProductCategories() async => (await _db.rawQuery('''
+    SELECT name FROM product_categories
+    UNION SELECT trim(category) COLLATE NOCASE FROM products WHERE trim(category) != ''
+    ORDER BY name COLLATE NOCASE
+  ''')).map((row) => row['name'] as String).toList();
+
+  @override
+  Future<void> addProductCategory(String name) => _write(() async {
+    final value = name.trim();
+    if (value.isEmpty) {
+      throw const ValidationException('Enter a category name.');
+    }
+    await _db.insert('product_categories', {
+      'name': value,
+    }, conflictAlgorithm: sqlite.ConflictAlgorithm.ignore);
+  });
+
+  @override
+  Future<void> removeProductCategory(String name) => _write(() async {
+    await _db.transaction((txn) async {
+      await txn.update(
+        'products',
+        {'category': '', 'updated_at': _now},
+        where: 'trim(category) = ? COLLATE NOCASE',
+        whereArgs: [name.trim()],
+      );
+      await txn.delete(
+        'product_categories',
+        where: 'name = ? COLLATE NOCASE',
+        whereArgs: [name.trim()],
+      );
+    });
+  });
+
+  @override
   Future<void> saveProduct(Product product) => _write(() async {
     if ([
       product.id,
       product.name,
-      product.brand,
-      product.variant,
-      product.size,
+      if (!product.nameOnly) ...[product.brand, product.variant, product.size],
     ].any((value) => value.trim().isEmpty)) {
       throw const ValidationException(
         'Enter the product name, brand, variant and size. Use a clear variant such as Original when applicable.',
@@ -173,10 +220,21 @@ class SqliteReseeboDataAdapter implements IReseeboDataAdapter {
       whereArgs: [product.id],
     );
     final old = oldRows.isEmpty ? null : productFromRow(oldRows.first);
-    if (old != null &&
-        (_key(old.brand) != _key(product.brand) ||
-            _key(old.variant) != _key(product.variant) ||
-            _key(old.size) != _key(product.size))) {
+    if (old != null && !old.nameOnly && product.nameOnly) {
+      throw const ValidationException(
+        'Keep the confirmed product identity. Create a separate product for a different item.',
+      );
+    }
+    final identityChanged =
+        old != null &&
+        (old.nameOnly
+            ? old.size.trim().isNotEmpty &&
+                  (_key(old.name) != _key(product.name) ||
+                      _key(old.size) != _key(product.size))
+            : (_key(old.brand) != _key(product.brand) ||
+                  _key(old.variant) != _key(product.variant) ||
+                  _key(old.size) != _key(product.size)));
+    if (identityChanged) {
       final history = await _db.query(
         'purchase_lines',
         columns: ['id'],
@@ -186,13 +244,14 @@ class SqliteReseeboDataAdapter implements IReseeboDataAdapter {
       );
       if (history.isNotEmpty) {
         throw const ValidationException(
-          'This product has purchase history. Keep its brand, variant and size, or create a separate product for a different item.',
+          'This product has purchase history. Keep its identity and size, or create a separate product for a different item.',
         );
       }
     }
     StoredLocalFile? copied;
     try {
-      if (product.photoPath != null) {
+      if (product.photoPath != null &&
+          !product.photoPath!.startsWith('asset:')) {
         copied = await _files.persist(
           product.photoPath!,
           category: 'product_photos',
@@ -202,30 +261,42 @@ class SqliteReseeboDataAdapter implements IReseeboDataAdapter {
       final now = _now;
       final values = <String, Object?>{
         'name': product.name.trim(),
+        'name_only': product.nameOnly ? 1 : 0,
         'brand': product.brand.trim(),
         'variant': product.variant.trim(),
         'size': product.size.trim(),
         'category': product.category.trim(),
         'barcode': product.barcode.trim(),
-        'photo_path': copied?.path,
+        'photo_path': product.photoPath?.startsWith('asset:') == true
+            ? product.photoPath
+            : copied?.path,
         'markup_percent': product.markupPercent,
         'selling_price_cents': product.sellingPriceCents,
         'updated_at': now,
       };
-      if (old == null) {
-        await _db.insert('products', {
-          'id': product.id,
-          ...values,
-          'created_at': now,
-        });
-      } else {
-        await _db.update(
-          'products',
-          values,
-          where: 'id = ?',
-          whereArgs: [product.id],
-        );
-      }
+      await _db.transaction((txn) async {
+        if (product.category.trim().isNotEmpty) {
+          await txn.insert(
+            'product_categories',
+            {'name': product.category.trim()},
+            conflictAlgorithm: sqlite.ConflictAlgorithm.ignore,
+          );
+        }
+        if (old == null) {
+          await txn.insert('products', {
+            'id': product.id,
+            ...values,
+            'created_at': now,
+          });
+        } else {
+          await txn.update(
+            'products',
+            values,
+            where: 'id = ?',
+            whereArgs: [product.id],
+          );
+        }
+      });
     } catch (_) {
       if (copied?.created ?? false) await _files.remove(copied!.path);
       rethrow;
@@ -270,6 +341,7 @@ class SqliteReseeboDataAdapter implements IReseeboDataAdapter {
       'name': supplier.name.trim(),
       'branch': supplier.branch.trim(),
       'notes': supplier.notes.trim(),
+      'date_order': supplier.dateOrder?.name,
       'name_key': _key(supplier.name),
       'branch_key': _key(supplier.branch),
       'updated_at': now,
@@ -309,10 +381,32 @@ class SqliteReseeboDataAdapter implements IReseeboDataAdapter {
 
   @override
   Future<List<ProductMatchSuggestion>> matchAliases(
-    String rawOcrDescription,
-  ) async {
+    String rawOcrDescription, {
+    String? supplierId,
+  }) async {
     final key = _key(rawOcrDescription);
     if (key.isEmpty) return [];
+    final scoped = supplierId == null
+        ? <Map<String, Object?>>[]
+        : await _db.rawQuery(
+            'SELECT DISTINCT p.* FROM products p JOIN supplier_product_aliases a ON a.product_id = p.id WHERE a.supplier_id = ? AND a.description_key = ?',
+            [supplierId, key],
+          );
+    if (scoped.isNotEmpty) {
+      return scoped
+          .map(
+            (row) => ProductMatchSuggestion(
+              product: productFromRow(row),
+              reason: scoped.length > 1
+                  ? 'This supplier description has more than one confirmed mapping. Choose the exact variant and size.'
+                  : 'Previously confirmed description for this supplier branch.',
+              exactAlias: true,
+            ),
+          )
+          .toList();
+    }
+    // Global aliases have no reliable supplier provenance. They can suggest a
+    // product but must never silently decide which branch-specific variant wins.
     final exact = await _db.rawQuery(
       'SELECT DISTINCT p.* FROM products p JOIN product_aliases a ON a.product_id = p.id WHERE a.description_key = ?',
       [key],
@@ -321,49 +415,20 @@ class SqliteReseeboDataAdapter implements IReseeboDataAdapter {
         .map(
           (row) => ProductMatchSuggestion(
             product: productFromRow(row),
-            reason: exact.length > 1
-                ? 'This description has more than one confirmed mapping. Choose the exact variant and size.'
-                : 'Previously confirmed receipt description. Check this purchase before confirming.',
-            exactAlias: true,
+            reason:
+                'Saved catalog description. Confirm this supplier product and size.',
           ),
         )
         .toList();
     if (suggestions.isNotEmpty) return suggestions;
-    final tokens = key
-        .split(RegExp(r'[^a-z0-9]+'))
-        .where((token) => token.length >= 2)
-        .toSet();
-    if (tokens.isEmpty) return [];
-    final candidates = <(Product, int)>[];
-    for (final product in await getProducts()) {
-      final identity = _key(
-        '${product.name} ${product.brand} ${product.variant} ${product.size}',
-      );
-      final score = tokens.where((token) => identity.contains(token)).length;
-      if (score >= (tokens.length > 1 ? 2 : 1)) {
-        candidates.add((product, score));
-      }
-    }
-    candidates.sort((a, b) => b.$2.compareTo(a.$2));
-    return candidates
-        .take(8)
-        .map(
-          (entry) => ProductMatchSuggestion(
-            product: entry.$1,
-            reason:
-                'Similar catalog text. Confirm the exact brand, variant and size.',
-          ),
-        )
-        .toList();
+    return receiptProductSuggestions(rawOcrDescription, await getProducts());
   }
 
   @override
   Future<List<ProductAlias>> getAliases(String productId) async =>
-      (await _db.query(
-            'product_aliases',
-            where: 'product_id = ?',
-            whereArgs: [productId],
-            orderBy: 'description COLLATE NOCASE',
+      (await _db.rawQuery(
+            'SELECT id, product_id, description FROM product_aliases WHERE product_id = ? UNION ALL SELECT id, product_id, description FROM supplier_product_aliases WHERE product_id = ? ORDER BY description COLLATE NOCASE',
+            [productId, productId],
           ))
           .map(
             (row) => ProductAlias(
@@ -377,6 +442,11 @@ class SqliteReseeboDataAdapter implements IReseeboDataAdapter {
   @override
   Future<void> deleteAlias(String aliasId) => _write(() async {
     await _db.delete('product_aliases', where: 'id = ?', whereArgs: [aliasId]);
+    await _db.delete(
+      'supplier_product_aliases',
+      where: 'id = ?',
+      whereArgs: [aliasId],
+    );
   });
 
   @override
@@ -436,21 +506,26 @@ class SqliteReseeboDataAdapter implements IReseeboDataAdapter {
   Future<ReceiptDraft> processReceiptImage(
     String localImagePath, {
     String? recognitionImagePath,
+    String? comparisonImagePath,
   }) => processReceiptImages(
     [localImagePath],
     recognitionImagePaths: [recognitionImagePath ?? localImagePath],
+    comparisonImagePaths: [comparisonImagePath ?? localImagePath],
   );
 
   @override
   Future<ReceiptDraft> processReceiptImages(
     List<String> localImagePaths, {
     List<String>? recognitionImagePaths,
+    List<String>? comparisonImagePaths,
   }) async {
     final originals = List<String>.of(localImagePaths);
     final adjusted = List<String>.of(recognitionImagePaths ?? originals);
+    final comparison = List<String>.of(comparisonImagePaths ?? originals);
     if (originals.isEmpty ||
         originals.length > maxReceiptPages ||
-        adjusted.length != originals.length) {
+        adjusted.length != originals.length ||
+        comparison.length != originals.length) {
       throw const ValidationException(
         'Choose 1 to 20 photos in receipt order.',
       );
@@ -464,9 +539,20 @@ class SqliteReseeboDataAdapter implements IReseeboDataAdapter {
       }
     }
     final pages = <ReceiptOcrPage>[];
+    final comparisonWarnings = <String>[];
     for (var index = 0; index < originals.length; index++) {
       try {
         final text = await _ocr.recognize(adjusted[index]);
+        var originalText = <OcrTextLine>[];
+        if (adjusted[index] != comparison[index]) {
+          try {
+            originalText = await _ocr.recognize(comparison[index]);
+          } catch (_) {
+            comparisonWarnings.add(
+              'Photo ${index + 1}: the original photo could not be compared. Review the enhanced reading.',
+            );
+          }
+        }
         pages.add(
           ReceiptOcrPage(
             imagePath: originals[index],
@@ -474,13 +560,27 @@ class SqliteReseeboDataAdapter implements IReseeboDataAdapter {
                 ? null
                 : adjusted[index],
             textLines: text,
+            originalTextLines: originalText,
+            comparisonImagePath: comparison[index],
           ),
         );
       } on AppException catch (failure) {
         throw AppException('Photo ${index + 1}: ${failure.message}');
       }
     }
-    return _parser.parsePages(pages: pages);
+    final draft = _parser.parsePages(pages: pages);
+    draft.ocrPages
+      ..clear()
+      ..addAll(pages);
+    const ReceiptOcrComparison().supplement(draft, pages);
+    for (var index = 0; index < pages.length; index++) {
+      if (pages[index].originalTextLines.isNotEmpty) {
+        draft.rawText +=
+            '\n\n--- Original photo ${index + 1} comparison ---\n${pages[index].originalTextLines.map((line) => line.text).join('\n')}';
+      }
+    }
+    draft.warnings.addAll(comparisonWarnings);
+    return draft;
   }
 
   @override
@@ -587,7 +687,11 @@ class SqliteReseeboDataAdapter implements IReseeboDataAdapter {
             alreadySaved: true,
           );
         }
-        for (final id in draft.lines.map((line) => line.productId!).toSet()) {
+        for (final id
+            in draft.lines
+                .map((line) => line.productId)
+                .whereType<String>()
+                .toSet()) {
           final products = await txn.query(
             'products',
             where: 'id = ?',
@@ -685,14 +789,36 @@ class SqliteReseeboDataAdapter implements IReseeboDataAdapter {
             'image_hash': copies[page].hash,
           });
         }
+        // Resolve only within this transaction. The caller snapshot and digest
+        // retain null IDs so retrying the same operation remains idempotent.
+        final importedIds = <String, String>{};
         final lineIds = <String>[];
         final costs = <double>[];
         for (final line in draft.lines) {
+          var productId = line.productId;
+          if (productId == null) {
+            final key = _key(line.description);
+            productId = importedIds[key];
+            if (productId == null) {
+              productId = const Uuid().v4();
+              importedIds[key] = productId;
+              await txn.insert('products', {
+                'id': productId,
+                'name': line.description.trim(),
+                'brand': '',
+                'variant': '',
+                'size': '',
+                'name_only': 1,
+                'created_at': now,
+                'updated_at': now,
+              });
+            }
+          }
           final lineId = const Uuid().v4();
           await txn.insert('purchase_lines', {
             'id': lineId,
             'receipt_id': receiptId,
-            'product_id': line.productId,
+            'product_id': productId,
             'source_page': line.sourcePage,
             'original_description': line.description.trim(),
             'quantity': line.quantity,
@@ -705,14 +831,19 @@ class SqliteReseeboDataAdapter implements IReseeboDataAdapter {
             'created_at': now,
             'updated_at': now,
           });
-          await txn.insert('product_aliases', {
-            'id': const Uuid().v4(),
-            'product_id': line.productId,
-            'description': line.description.trim(),
-            'description_key': _key(line.description),
-            'created_at': now,
-            'updated_at': now,
-          }, conflictAlgorithm: sqlite.ConflictAlgorithm.ignore);
+          await txn.insert(
+            'supplier_product_aliases',
+            {
+              'id': const Uuid().v4(),
+              'supplier_id': supplierId,
+              'product_id': productId,
+              'description': line.description.trim(),
+              'description_key': _key(line.description),
+              'created_at': now,
+              'updated_at': now,
+            },
+            conflictAlgorithm: sqlite.ConflictAlgorithm.ignore,
+          );
           lineIds.add(lineId);
           costs.add(line.netAmountCents! / line.totalPieces!);
         }

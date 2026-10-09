@@ -50,11 +50,13 @@ class ReceiptValidator {
           '$prefix review the possible overlap with the previous photo.',
         );
       }
-      if (!line.confirmed || (line.productId ?? '').trim().isEmpty) {
-        throw ValidationException('$prefix confirm an exact product match.');
+      if (!line.confirmed) {
+        throw ValidationException(
+          '$prefix confirm the product name, quantity and cost.',
+        );
       }
       if (line.description.trim().isEmpty) {
-        throw ValidationException('$prefix enter the receipt description.');
+        throw ValidationException('$prefix enter the product name.');
       }
       if (line.quantity == null) {
         throw ValidationException('$prefix enter the purchased quantity.');
@@ -94,7 +96,7 @@ class ReceiptValidator {
       if (total != draft.detectedTotalCents &&
           !draft.totalDifferenceConfirmed) {
         throw const ValidationException(
-          'The item amounts do not match the printed total. Review discounts or confirm the difference before saving.',
+          'The item amounts do not match the printed total. Review the amounts paid or confirm the difference before saving.',
         );
       }
     }

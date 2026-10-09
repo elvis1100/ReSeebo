@@ -16,13 +16,23 @@ abstract class IReseeboDataAdapter {
   Future<List<Product>> getProducts({String? query});
   Future<Product?> getProductById(String id);
   Future<void> saveProduct(Product product);
+  Future<List<String>> getProductCategories();
+  Future<void> addProductCategory(String name);
+
+  /// Removes the category and clears its product assignments atomically.
+  /// Products and purchase history remain intact.
+  Future<void> removeProductCategory(String name);
   Future<List<Supplier>> getSuppliers();
   Future<Supplier?> getSupplierById(String id) async {
     final list = await getSuppliers();
     return list.where((s) => s.id == id).firstOrNull;
   }
+
   Future<void> saveSupplier(Supplier supplier);
-  Future<List<ProductMatchSuggestion>> matchAliases(String rawOcrDescription);
+  Future<List<ProductMatchSuggestion>> matchAliases(
+    String rawOcrDescription, {
+    String? supplierId,
+  });
   Future<List<ProductAlias>> getAliases(String productId);
   Future<void> deleteAlias(String aliasId);
   Future<List<Receipt>> getRecentReceipts({int limit = 200, String? query});
@@ -30,6 +40,7 @@ abstract class IReseeboDataAdapter {
   Future<ReceiptDraft> processReceiptImage(
     String localImagePath, {
     String? recognitionImagePath,
+    String? comparisonImagePath,
   });
 
   /// Recognize ordered pages of one receipt, retaining every original. Adjusted
@@ -38,6 +49,7 @@ abstract class IReseeboDataAdapter {
   Future<ReceiptDraft> processReceiptImages(
     List<String> localImagePaths, {
     List<String>? recognitionImagePaths,
+    List<String>? comparisonImagePaths,
   }) {
     if (localImagePaths.length != 1) {
       throw const ValidationException(
@@ -47,6 +59,7 @@ abstract class IReseeboDataAdapter {
     return processReceiptImage(
       localImagePaths.single,
       recognitionImagePath: recognitionImagePaths?.single,
+      comparisonImagePath: comparisonImagePaths?.single,
     );
   }
 
@@ -55,6 +68,8 @@ abstract class IReseeboDataAdapter {
   /// DuplicateReceiptException unless the owner explicitly confirms them.
   /// A selected supplier ID must match the confirmed name/branch. Draft supplier
   /// notes initialize new suppliers only; existing notes use saveSupplier.
+  /// Confirmed lines without a product ID create name-only catalog products
+  /// without photos, atomically with receipt lines. Matching remains optional.
   Future<SaveReceiptResult> saveConfirmedReceipt(ReceiptDraft confirmedDraft);
   Future<ProductComparisonData> getProductComparison(String productId);
 

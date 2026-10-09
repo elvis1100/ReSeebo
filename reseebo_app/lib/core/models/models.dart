@@ -5,10 +5,10 @@ const maxQuantity = 1000000;
 
 class StoreProfile {
   const StoreProfile({
-    this.name = '',
+    this.name = 'Sari-sari Store',
     this.ownerName = '',
     this.photoPath,
-    this.defaultMarkupPercent,
+    this.defaultMarkupPercent = 20.0,
   });
   final String name;
   final String ownerName;
@@ -16,7 +16,7 @@ class StoreProfile {
   final double? defaultMarkupPercent;
 
   String get storeName => name;
-  double get defaultMarkupPercentage => defaultMarkupPercent ?? 15.0;
+  double get defaultMarkupPercentage => defaultMarkupPercent ?? 20.0;
 
   StoreProfile copyWith({
     String? name,
@@ -25,13 +25,15 @@ class StoreProfile {
     String? photoPath,
     double? defaultMarkupPercent,
     double? defaultMarkupPercentage,
-  }) =>
-      StoreProfile(
-        name: storeName ?? name ?? this.name,
-        ownerName: ownerName ?? this.ownerName,
-        photoPath: photoPath ?? this.photoPath,
-        defaultMarkupPercent: defaultMarkupPercentage ?? defaultMarkupPercent ?? this.defaultMarkupPercent,
-      );
+  }) => StoreProfile(
+    name: storeName ?? name ?? this.name,
+    ownerName: ownerName ?? this.ownerName,
+    photoPath: photoPath ?? this.photoPath,
+    defaultMarkupPercent:
+        defaultMarkupPercentage ??
+        defaultMarkupPercent ??
+        this.defaultMarkupPercent,
+  );
 }
 
 class Product {
@@ -41,6 +43,7 @@ class Product {
     required this.brand,
     required this.variant,
     required this.size,
+    this.nameOnly = false,
     this.category = '',
     this.barcode = '',
     this.photoPath,
@@ -52,14 +55,22 @@ class Product {
   final String brand;
   final String variant;
   final String size;
+
+  /// Uses the owner-entered name rather than separate brand/variant fields.
+  /// Receipt imports can lack a size; exact automatic matching requires one.
+  final bool nameOnly;
   final String category;
   final String barcode;
   final String? photoPath;
   final double? markupPercent;
   final int? sellingPriceCents;
-  String get identity => '$brand · $variant · $size';
+  String get identity => [
+    brand,
+    variant,
+    size,
+  ].where((value) => value.trim().isNotEmpty).join(' · ');
 
-  String get displayTitle => '$brand $variant $size'.trim();
+  String get displayTitle => nameOnly ? name : '$brand $variant $size'.trim();
   String get displayName => name.isNotEmpty ? name : displayTitle;
   String get sizeUnit => size;
   double? get markupPercentageOverride => markupPercent;
@@ -72,24 +83,34 @@ class Product {
     String? brand,
     String? variant,
     String? size,
+    bool? nameOnly,
     String? category,
     String? barcode,
     String? photoPath,
     double? markupPercent,
     int? sellingPriceCents,
-  }) =>
-      Product(
-        id: id ?? this.id,
-        name: name ?? this.name,
-        brand: brand ?? this.brand,
-        variant: variant ?? this.variant,
-        size: size ?? this.size,
-        category: category ?? this.category,
-        barcode: barcode ?? this.barcode,
-        photoPath: photoPath ?? this.photoPath,
-        markupPercent: markupPercent ?? this.markupPercent,
-        sellingPriceCents: sellingPriceCents ?? this.sellingPriceCents,
-      );
+  }) => Product(
+    id: id ?? this.id,
+    name: name ?? this.name,
+    brand: brand ?? this.brand,
+    variant: variant ?? this.variant,
+    size: size ?? this.size,
+    nameOnly: nameOnly ?? this.nameOnly,
+    category: category ?? this.category,
+    barcode: barcode ?? this.barcode,
+    photoPath: photoPath ?? this.photoPath,
+    markupPercent: markupPercent ?? this.markupPercent,
+    sellingPriceCents: sellingPriceCents ?? this.sellingPriceCents,
+  );
+}
+
+enum NumericDateOrder { monthFirst, dayFirst }
+
+class PurchaseDateCandidate {
+  const PurchaseDateCandidate(this.date, this.order, this.hasTime);
+  final DateTime date;
+  final NumericDateOrder order;
+  final bool hasTime;
 }
 
 class Supplier {
@@ -98,7 +119,9 @@ class Supplier {
     required this.name,
     this.branch = '',
     this.notes = '',
+    this.dateOrder,
   });
+  final NumericDateOrder? dateOrder;
   final String id;
   final String name;
   final String branch;
@@ -133,8 +156,10 @@ class ProductMatchSuggestion {
 
 enum PurchaseUnit { piece, pack }
 
-class OcrTextLine {
-  const OcrTextLine({
+/// A recognized word in pixel coordinates of its page's recognition image.
+/// These bounds must never be overlaid on a differently cropped original.
+class OcrTextToken {
+  const OcrTextToken({
     required this.text,
     this.left = 0,
     this.top = 0,
@@ -148,6 +173,32 @@ class OcrTextLine {
   final double height;
 }
 
+class OcrTextLine {
+  const OcrTextLine({
+    required this.text,
+    this.left = 0,
+    this.top = 0,
+    this.width = 0,
+    this.height = 0,
+    this.tokens = const [],
+  });
+  final String text;
+  final double left;
+  final double top;
+  final double width;
+  final double height;
+  final List<OcrTextToken> tokens;
+
+  OcrTextLine snapshot() => OcrTextLine(
+    text: text,
+    left: left,
+    top: top,
+    width: width,
+    height: height,
+    tokens: List.unmodifiable(tokens),
+  );
+}
+
 const maxReceiptPages = 20;
 
 class ReceiptOcrPage {
@@ -155,10 +206,26 @@ class ReceiptOcrPage {
     required this.imagePath,
     required this.textLines,
     this.recognitionImagePath,
+    this.originalTextLines = const [],
+    this.comparisonImagePath,
   });
   final String imagePath;
   final String? recognitionImagePath;
   final List<OcrTextLine> textLines;
+
+  /// Secondary evidence keeps the original image's coordinate space separate.
+  final List<OcrTextLine> originalTextLines;
+  final String? comparisonImagePath;
+
+  ReceiptOcrPage snapshot() => ReceiptOcrPage(
+    imagePath: imagePath,
+    recognitionImagePath: recognitionImagePath,
+    textLines: List.unmodifiable(textLines.map((line) => line.snapshot())),
+    originalTextLines: List.unmodifiable(
+      originalTextLines.map((line) => line.snapshot()),
+    ),
+    comparisonImagePath: comparisonImagePath,
+  );
 }
 
 /// A draft is intentionally editable. Services snapshot it before any awaited
@@ -170,6 +237,12 @@ class ParsedLineItem {
     String description = '',
     String? rawDescription,
     this.productId,
+    this.matchOrigin,
+    this.printedItemCode,
+    this.extractedQuantity,
+    this.extractedAmountCents,
+    this.quantityEdited = false,
+    this.amountEdited = false,
     this.quantity,
     this.unit,
     this.piecesPerPack,
@@ -182,11 +255,22 @@ class ParsedLineItem {
     List<String>? warnings,
   }) : id = tempId ?? id ?? const Uuid().v4(),
        description = rawDescription ?? description,
-       grossAmountCents = netAmount != null ? (netAmount * 100).round() : grossAmountCents,
+       grossAmountCents = netAmount != null
+           ? (netAmount * 100).round()
+           : grossAmountCents,
        warnings = warnings ?? [];
   final String id;
   String description;
   String? productId;
+  String? matchOrigin;
+
+  /// Uncorrected printed code, separate from product identity; raw OCR retains it.
+  final String? printedItemCode;
+  // OCR comparison completes this baseline before owner editing starts.
+  int? extractedQuantity;
+  int? extractedAmountCents;
+  bool quantityEdited;
+  bool amountEdited;
   int? quantity;
   PurchaseUnit? unit;
   int? piecesPerPack;
@@ -242,6 +326,12 @@ class ParsedLineItem {
     id: id,
     description: description,
     productId: productId,
+    matchOrigin: matchOrigin,
+    printedItemCode: printedItemCode,
+    extractedQuantity: extractedQuantity,
+    extractedAmountCents: extractedAmountCents,
+    quantityEdited: quantityEdited,
+    amountEdited: amountEdited,
     quantity: quantity,
     unit: unit,
     piecesPerPack: piecesPerPack,
@@ -270,6 +360,9 @@ class ReceiptDraft {
     DateTime? purchaseDate,
     this.hasPurchaseTime = false,
     this.dateConfirmed = false,
+    this.dateManuallyEdited = false,
+    this.dateFromReceipt = false,
+    this.dateCandidates = const [],
     this.receiptNumber = '',
     this.notes = '',
     this.rawText = '',
@@ -277,15 +370,19 @@ class ReceiptDraft {
     this.totalDifferenceConfirmed = false,
     this.allowDuplicate = false,
     List<OcrTextLine>? textLines,
+    List<ReceiptOcrPage>? ocrPages,
     List<ParsedLineItem>? lines,
     List<String>? warnings,
   }) : imagePath = localImagePath ?? imagePath ?? '',
        supplierBranch = branchLocation ?? supplierBranch ?? '',
        purchasedAt = purchaseDate ?? purchasedAt,
-       imagePaths = List.unmodifiable(imagePaths ?? [localImagePath ?? imagePath ?? '']),
+       imagePaths = List.unmodifiable(
+         imagePaths ?? [localImagePath ?? imagePath ?? ''],
+       ),
        operationId = operationId ?? const Uuid().v4(),
        lines = lines ?? [],
        textLines = textLines ?? [],
+       ocrPages = ocrPages ?? [],
        warnings = warnings ?? [];
   final String operationId;
   final String imagePath;
@@ -298,6 +395,9 @@ class ReceiptDraft {
   DateTime? purchasedAt;
   bool hasPurchaseTime;
   bool dateConfirmed;
+  bool dateManuallyEdited;
+  bool dateFromReceipt;
+  List<PurchaseDateCandidate> dateCandidates;
   String receiptNumber;
   String notes;
   String rawText;
@@ -305,6 +405,7 @@ class ReceiptDraft {
   bool totalDifferenceConfirmed;
   bool allowDuplicate;
   final List<OcrTextLine> textLines;
+  final List<ReceiptOcrPage> ocrPages;
   final List<ParsedLineItem> lines;
   final List<String> warnings;
 
@@ -324,13 +425,17 @@ class ReceiptDraft {
     purchasedAt: purchasedAt,
     hasPurchaseTime: hasPurchaseTime,
     dateConfirmed: dateConfirmed,
+    dateManuallyEdited: dateManuallyEdited,
+    dateFromReceipt: dateFromReceipt,
+    dateCandidates: List.of(dateCandidates),
     receiptNumber: receiptNumber,
     notes: notes,
     rawText: rawText,
     detectedTotalCents: detectedTotalCents,
     totalDifferenceConfirmed: totalDifferenceConfirmed,
     allowDuplicate: allowDuplicate,
-    textLines: List.of(textLines),
+    textLines: textLines.map((line) => line.snapshot()).toList(),
+    ocrPages: ocrPages.map((page) => page.snapshot()).toList(),
     lines: lines.map((line) => line.snapshot()).toList(),
     warnings: List.of(warnings),
   );
@@ -485,8 +590,7 @@ class PriceHistoryRecord {
       ? null
       : changeCents! / previousCostPerPieceCents! * 100;
 
-  double? get changeAmount =>
-      changeCents != null ? changeCents! / 100.0 : null;
+  double? get changeAmount => changeCents != null ? changeCents! / 100.0 : null;
   double? get changeFromPreviousPesos => changeAmount;
   double? get changeFromPreviousPercent => changePercent;
   double get unitCost => purchase.costPerPieceCents / 100.0;
@@ -589,13 +693,17 @@ class RestockSupplierEstimate {
   int get totalPurchasedPieces => purchasedPieces;
   int get totalPiecesPurchased => purchasedPieces;
   double get calculatedSubtotal => subtotalCents / 100.0;
-  double get totalEstimatedCost => (subtotalCents + additionalCostCents) / 100.0;
+  double get totalEstimatedCost =>
+      (subtotalCents + additionalCostCents) / 100.0;
   double get totalPurchaseCost => subtotalCents / 100.0;
   double get travelCost => additionalCostCents / 100.0;
-  double get totalCostWithTravel => (subtotalCents + additionalCostCents) / 100.0;
+  double get totalCostWithTravel =>
+      (subtotalCents + additionalCostCents) / 100.0;
   double? get netSavingsAfterTravel => null;
   double get packCost =>
-      (purchase.netAmountCents / (purchase.quantity > 0 ? purchase.quantity : 1)) / 100.0;
+      (purchase.netAmountCents /
+          (purchase.quantity > 0 ? purchase.quantity : 1)) /
+      100.0;
 
   double get subtotal => subtotalCents / 100.0;
   double get totalWithFare => (subtotalCents + additionalCostCents) / 100.0;

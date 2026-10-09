@@ -1,250 +1,289 @@
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
+
 import '../../../core/adapters/reseebo_data_adapter.dart';
-import '../../../core/theme/app_colors.dart';
-import '../../../core/theme/app_spacing.dart';
-import '../../../core/theme/app_typography.dart';
-import '../widgets/camera_viewfinder_guide.dart';
+import '../../../core/theme/app_theme.dart';
+import '../../../core/widgets/shared_widgets.dart';
+import '../state/capture_state.dart';
+import '../widgets/capture_page_strip.dart';
+import '../widgets/receipt_image_viewer.dart';
+import '../widgets/receipt_scan_steps.dart';
+import '../models/receipt_photo_edits.dart';
+import 'receipt_photo_editor_screen.dart';
 
-/// Screen enabling store owners to snap photos of receipts with on-device
-/// framing assistance, gallery upload fallback, and offline OCR status.
 class CaptureScreen extends StatefulWidget {
-  final IReseeboDataAdapter dataAdapter;
-  final ValueChanged<ReceiptDraft>? onDraftReady;
-  final VoidCallback? onBack;
-
   const CaptureScreen({
     super.key,
     required this.dataAdapter,
     this.onDraftReady,
     this.onBack,
+    this.captureState,
   });
-
+  final IReseeboDataAdapter dataAdapter;
+  final ValueChanged<ReceiptDraft>? onDraftReady;
+  final VoidCallback? onBack;
+  final CaptureState? captureState;
   @override
   State<CaptureScreen> createState() => _CaptureScreenState();
 }
 
 class _CaptureScreenState extends State<CaptureScreen> {
-  final ImagePicker _picker = ImagePicker();
-  bool _isProcessing = false;
-  String? _statusMessage;
+  late final CaptureState _state;
 
-  Future<void> _captureFromCamera() async {
-    try {
-      final photo = await _picker.pickImage(
-        source: ImageSource.camera,
-        maxWidth: 1920,
-        maxHeight: 1920,
-        imageQuality: 90,
-      );
-
-      if (photo != null) {
-        await _processImagePath(photo.path);
-      }
-    } catch (_) {
-      // In desktop/simulator environments without camera, fallback gracefully
-      _useDemoReceipt();
-    }
-  }
-
-  Future<void> _pickFromGallery() async {
-    try {
-      final image = await _picker.pickImage(
-        source: ImageSource.gallery,
-        maxWidth: 1920,
-        maxHeight: 1920,
-        imageQuality: 90,
-      );
-
-      if (image != null) {
-        await _processImagePath(image.path);
-      }
-    } catch (_) {
-      _useDemoReceipt();
-    }
-  }
-
-  Future<void> _useDemoReceipt() async {
-    await _processImagePath('assets/samples/demo_puregold_receipt.jpg');
-  }
-
-  Future<void> _processImagePath(String localPath) async {
-    setState(() {
-      _isProcessing = true;
-      _statusMessage = 'Reading receipt lines...';
-    });
-
-    try {
-      final draft = await widget.dataAdapter.processReceiptImage(localPath);
-      if (mounted) {
-        setState(() {
-          _isProcessing = false;
-        });
-        widget.onDraftReady?.call(draft);
-      }
-    } catch (e) {
-      if (mounted) {
-        setState(() {
-          _isProcessing = false;
-        });
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            backgroundColor: AppColors.priceIncrease,
-            content: Text('Failed to process receipt: $e'),
-          ),
-        );
-      }
-    }
+  @override
+  void initState() {
+    super.initState();
+    _state = widget.captureState ?? CaptureState(adapter: widget.dataAdapter);
   }
 
   @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: Colors.black,
-      appBar: AppBar(
-        backgroundColor: Colors.black,
-        foregroundColor: Colors.white,
-        title: const Text(
-          'Capture Receipt',
-          style: TextStyle(color: Colors.white, fontSize: 18),
+  void dispose() {
+    if (widget.captureState == null) _state.dispose();
+    super.dispose();
+  }
+
+  Future<void> _editPhoto() async {
+    final page = _state.selectedPage;
+    if (page == null || !_state.beginPhotoEdit()) return;
+    ReceiptPhotoEdits? edits;
+    try {
+      edits = await Navigator.of(context).push<ReceiptPhotoEdits>(
+        MaterialPageRoute(
+          fullscreenDialog: true,
+          builder: (_) => ReceiptPhotoEditorScreen(page: page),
         ),
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back_rounded, color: Colors.white),
-          onPressed: widget.onBack ?? () => Navigator.of(context).maybePop(),
-        ),
-        actions: [
-          IconButton(
-            tooltip: 'Try Demo Receipt',
-            icon: const Icon(Icons.receipt_long_rounded, color: AppColors.accentLight),
-            onPressed: _isProcessing ? null : _useDemoReceipt,
-          ),
-        ],
-      ),
-      body: Stack(
-        children: [
-          // Viewfinder background preview area
-          Container(
-            color: const Color(0xFF1E293B),
-            child: const Center(
-              child: Icon(
-                Icons.camera_alt_outlined,
-                size: 80,
-                color: Color(0xFF475569),
-              ),
+      );
+    } finally {
+      _state.finishPhotoEdit(page, edits);
+    }
+  }
+
+  Future<void> _read({bool allowLowQuality = false}) async {
+    final draft = await _state.recognize(allowLowQuality: allowLowQuality);
+    if (draft != null && mounted) widget.onDraftReady?.call(draft);
+  }
+
+  @override
+  Widget build(BuildContext context) => AnimatedBuilder(
+    animation: _state,
+    builder: (context, _) {
+      final hasPhotos = _state.pages.isNotEmpty;
+      final enabled = !_state.busy;
+      return PopScope(
+        canPop: enabled,
+        child: Scaffold(
+          appBar: AppBar(
+            title: const Text('Scan receipt'),
+            leading: IconButton(
+              icon: const Icon(Icons.arrow_back_rounded),
+              onPressed: enabled
+                  ? (widget.onBack ?? () => Navigator.of(context).maybePop())
+                  : null,
             ),
           ),
-
-          // Framing cut-out guidelines
-          const CameraViewfinderGuide(),
-
-          // Bottom control toolbar
-          Positioned(
-            bottom: 0,
-            left: 0,
-            right: 0,
-            child: Container(
-              color: Colors.black.withValues(alpha: 0.8),
-              padding: const EdgeInsets.symmetric(
-                horizontal: AppSpacing.xl,
-                vertical: AppSpacing.lg,
-              ),
-              child: SafeArea(
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceAround,
-                  children: [
-                    // Pick from phone gallery
-                    IconButton(
-                      iconSize: 32,
-                      tooltip: 'Choose from Gallery',
-                      icon: const Icon(
-                        Icons.photo_library_outlined,
-                        color: Colors.white,
-                      ),
-                      onPressed: _isProcessing ? null : _pickFromGallery,
+          body: AbsorbPointer(
+            absorbing: _state.busy,
+            child: SafeArea(
+              child: ListView(
+                padding: const EdgeInsets.all(AppSpacing.lg),
+                children: [
+                  const ReceiptScanSteps(activeStep: 0),
+                  const SizedBox(height: AppSpacing.xl),
+                  Text(
+                    hasPhotos
+                        ? 'Check your receipt photos'
+                        : 'Start with a receipt photo',
+                    style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                      fontWeight: FontWeight.w700,
                     ),
-
-                    // Main circular shutter capture button
-                    GestureDetector(
-                      onTap: _isProcessing ? null : _captureFromCamera,
-                      child: Container(
-                        width: 76,
-                        height: 76,
-                        decoration: BoxDecoration(
-                          shape: BoxShape.circle,
-                          border: Border.all(color: Colors.white, width: 4),
-                          color: Colors.transparent,
-                        ),
-                        child: Center(
-                          child: Container(
-                            width: 60,
-                            height: 60,
-                            decoration: const BoxDecoration(
-                              shape: BoxShape.circle,
+                  ),
+                  const SizedBox(height: AppSpacing.sm),
+                  Text(
+                    hasPhotos
+                        ? 'Make sure the words and amounts are clear. You can correct everything in the next step.'
+                        : 'Take a clear photo or choose one from your phone. Reseebo will read it for you.',
+                    style: const TextStyle(color: AppColors.textSecondary),
+                  ),
+                  const SizedBox(height: AppSpacing.xl),
+                  AppButton(
+                    label: 'Take photo',
+                    icon: Icons.camera_alt_outlined,
+                    isFullWidth: true,
+                    onPressed: enabled
+                        ? () => _state.pick(ImageSource.camera)
+                        : null,
+                  ),
+                  const SizedBox(height: AppSpacing.sm),
+                  AppButton(
+                    label: hasPhotos ? 'Add photos' : 'Choose photos',
+                    icon: Icons.photo_library_outlined,
+                    variant: ButtonVariant.outlined,
+                    isFullWidth: true,
+                    onPressed: enabled
+                        ? () => _state.pick(ImageSource.gallery)
+                        : null,
+                  ),
+                  const SizedBox(height: AppSpacing.xl),
+                  if (!hasPhotos)
+                    const Card(
+                      child: Padding(
+                        padding: EdgeInsets.all(AppSpacing.xl),
+                        child: Column(
+                          children: [
+                            Icon(
+                              Icons.receipt_long_outlined,
+                              size: 52,
                               color: AppColors.primary,
                             ),
-                            child: const Icon(
-                              Icons.camera_rounded,
-                              color: Colors.white,
-                              size: 32,
+                            SizedBox(height: AppSpacing.lg),
+                            Text(
+                              'A clear photo helps',
+                              style: TextStyle(fontWeight: FontWeight.w700),
                             ),
-                          ),
+                            SizedBox(height: AppSpacing.sm),
+                            Text(
+                              'Lay the receipt flat in good light. Include the shop name, date, items, and total.',
+                              textAlign: TextAlign.center,
+                              style: TextStyle(color: AppColors.textSecondary),
+                            ),
+                            SizedBox(height: AppSpacing.lg),
+                            Text(
+                              'Long receipt? Add photos from top to bottom with a little overlap.',
+                              textAlign: TextAlign.center,
+                              style: TextStyle(color: AppColors.textSecondary),
+                            ),
+                          ],
                         ),
                       ),
                     ),
-
-                    // Use sample receipt shortcut
-                    IconButton(
-                      iconSize: 32,
-                      tooltip: 'Load Sample',
-                      icon: const Icon(
-                        Icons.description_outlined,
-                        color: Colors.white,
+                  if (hasPhotos) ...[
+                    if (_state.pages.length > 1) ...[
+                      Text(
+                        '${_state.pages.length} photos · top to bottom',
+                        style: Theme.of(context).textTheme.titleSmall,
                       ),
-                      onPressed: _isProcessing ? null : _useDemoReceipt,
+                      const SizedBox(height: AppSpacing.sm),
+                      CapturePageStrip(
+                        pages: _state.pages,
+                        selectedIndex: _state.selectedIndex,
+                        onSelected: _state.selectPage,
+                        enabled: enabled,
+                      ),
+                      const SizedBox(height: AppSpacing.md),
+                    ],
+                    ReceiptImageViewer(
+                      key: ValueKey(_state.previewPath),
+                      imagePath: _state.previewPath!,
+                      scrollPageWithOneFinger: true,
+                      isEnhanced:
+                          !_state.selectedPage!.useOriginal &&
+                          _state.selectedPage!.preparedPath != null,
+                      showContrastControl: false,
+                      displayCacheWidth: 1000,
+                      imageLabel: _state.selectedPage!.useOriginal
+                          ? 'Original photo'
+                          : 'Enhanced photo',
+                      height: 280,
+                    ),
+                    Wrap(
+                      spacing: AppSpacing.xs,
+                      children: [
+                        if (_state.pages.length > 1) ...[
+                          TextButton.icon(
+                            icon: const Icon(Icons.arrow_upward_rounded),
+                            label: const Text('Move earlier'),
+                            onPressed: enabled && _state.selectedIndex > 0
+                                ? () => _state.moveSelectedPage(-1)
+                                : null,
+                          ),
+                          TextButton.icon(
+                            icon: const Icon(Icons.arrow_downward_rounded),
+                            label: const Text('Move later'),
+                            onPressed:
+                                enabled &&
+                                    _state.selectedIndex <
+                                        _state.pages.length - 1
+                                ? () => _state.moveSelectedPage(1)
+                                : null,
+                          ),
+                        ],
+                        TextButton.icon(
+                          icon: const Icon(Icons.delete_outline),
+                          label: const Text('Remove photo'),
+                          style: TextButton.styleFrom(
+                            foregroundColor: AppColors.danger,
+                          ),
+                          onPressed: enabled ? _state.removeSelectedPage : null,
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: AppSpacing.sm),
+                    AppButton(
+                      label: 'Edit / enhance photo',
+                      icon: Icons.tune_rounded,
+                      variant: ButtonVariant.outlined,
+                      isFullWidth: true,
+                      onPressed: enabled ? _editPhoto : null,
                     ),
                   ],
-                ),
+                  if (_state.notice != null) ...[
+                    const SizedBox(height: AppSpacing.md),
+                    Notice(message: _state.notice!),
+                  ],
+                  if (_state.error != null) ...[
+                    const SizedBox(height: AppSpacing.md),
+                    Notice(message: _state.error!, warning: true),
+                  ],
+                  if (_state.qualityRejected)
+                    TextButton(
+                      onPressed: enabled
+                          ? () => _read(allowLowQuality: true)
+                          : null,
+                      child: const Text('Use photo anyway'),
+                    ),
+                  const SizedBox(height: AppSpacing.lg),
+                ],
               ),
             ),
           ),
-
-          // Processing loading overlay
-          if (_isProcessing)
-            Container(
-              color: Colors.black.withValues(alpha: 0.75),
-              child: Center(
-                child: Container(
-                  padding: const EdgeInsets.all(AppSpacing.xl),
-                  margin: const EdgeInsets.symmetric(horizontal: AppSpacing.xl),
-                  decoration: BoxDecoration(
-                    color: AppColors.surfaceCard,
-                    borderRadius: BorderRadius.circular(AppSpacing.radiusM),
+          bottomNavigationBar: Material(
+            color: AppColors.surfaceCard,
+            child: SafeArea(
+              top: false,
+              minimum: const EdgeInsets.all(AppSpacing.lg),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  if (_state.busy) ...[
+                    const LinearProgressIndicator(),
+                    const SizedBox(height: AppSpacing.sm),
+                    const Text(
+                      'Preparing photos and reading on your phone…',
+                      textAlign: TextAlign.center,
+                    ),
+                    const SizedBox(height: AppSpacing.md),
+                  ],
+                  AppButton(
+                    label: 'Read receipt',
+                    icon: Icons.arrow_forward_rounded,
+                    isFullWidth: true,
+                    onPressed: enabled && hasPhotos ? () => _read() : null,
                   ),
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      const CircularProgressIndicator(
-                        color: AppColors.primary,
-                        strokeWidth: 3.5,
-                      ),
-                      const SizedBox(height: AppSpacing.m),
-                      Text(
-                        'Processing Receipt...',
-                        style: AppTypography.headingSmall,
-                      ),
-                      const SizedBox(height: AppSpacing.xs),
-                      Text(
-                        _statusMessage ?? 'Extracting products & prices...',
-                        textAlign: TextAlign.center,
-                        style: AppTypography.bodySmall,
-                      ),
-                    ],
-                  ),
-                ),
+                  if (hasPhotos)
+                    TextButton.icon(
+                      icon: const Icon(Icons.edit_note),
+                      label: const Text('Enter manually instead'),
+                      onPressed: enabled
+                          ? () =>
+                                widget.onDraftReady?.call(_state.manualDraft())
+                          : null,
+                    ),
+                ],
               ),
             ),
-        ],
-      ),
-    );
-  }
+          ),
+        ),
+      );
+    },
+  );
 }
