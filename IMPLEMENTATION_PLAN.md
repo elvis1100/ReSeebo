@@ -223,26 +223,29 @@ This guarantees:
 
 ## 6. Phased Execution Roadmap
 
-### Phase 1: Foundation & Design System (Hours 1–3)
-- [ ] Initialize Flutter app skeleton in `reseebo_app/` with offline asset configuration in `pubspec.yaml`.
-- [ ] Build `lib/core/theme/` and configure centralized tokens (colors, typography, radii, ₱ formatting).
-- [ ] Build core shared widgets: `AppButton`, `AppCard`, `AppTextField`, `TrendBadge`, `CurrencyText`.
-- [ ] Create `MockReseeboDataAdapter` with realistic multi-supplier fixtures based on `SARI-SARI-RECEIPT-IDEA.md` (Brand X Original Coffee 26g across Puregold and Wholesaler).
+### Phase 1: Foundation & Design System (Completed)
+- [x] Initialize Flutter app skeleton in `reseebo_app/` with offline asset configuration in `pubspec.yaml`.
+- [x] Build `lib/core/theme/` and configure centralized tokens (colors, typography, radii, ₱ formatting).
+- [x] Build core shared widgets: `AppButton`, `AppCard`, `AppTextField`, `TrendBadge`, `CurrencyText`.
+- [x] Create `MockReseeboDataAdapter` with realistic multi-supplier fixtures based on `SARI-SARI-RECEIPT-IDEA.md` (Brand X Original Coffee 26g across Puregold and Wholesaler).
 
-### Phase 2: Screen Development with Mock Adapter (Hours 4–9)
-- [ ] **Dashboard:** Recent receipts list, products catalog tab, quick search.
-- [ ] **Receipt Capture & Review:**
+### Phase 2: Screen Development with Mock Adapter (Completed)
+- [x] **Dashboard:** Recent receipts list, products catalog tab, quick search.
+- [x] **Receipt Capture & Review:**
   - Local image viewer with pinch-to-zoom.
   - Line item editor with pieces/pack selector and alias matching chips.
   - Validation guards and duplicate-save prevention.
-- [ ] **Product Comparison & Price History:**
+- [x] **Product Comparison & Price History:**
   - Supplier comparison tables with highlighted lowest price.
   - Price change history rows with `+₱` and `%` badges.
-- [ ] **Pricing & Restock Planner:**
+- [x] **Pricing & Restock Planner:**
   - Interactive restock piece counter with whole pack rounding.
   - Tricycle/delivery fare input with instant net savings output.
   - Selling price & estimated tubo gross profit calculator.
-- [ ] **Store Profile Editor:** Store name, default markup setup, product photo update.
+- [x] **Store Profile Editor:** Store name, default markup setup, product photo update.
+- [x] **Root Navigation & Tests:**
+  - Root bottom navigation connecting Tindahan, Scan, and Settings.
+  - Full unit test coverage for ceil rounding, profit margins, and formatting.
 
 ### Phase 3: Integration with Local SQLite & OCR Services (Hours 10–14)
 - [ ] Inspect implemented SQLite DAO and OCR service contracts from Backend/Integration owner.
