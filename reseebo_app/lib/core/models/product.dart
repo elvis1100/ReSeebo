@@ -26,6 +26,7 @@ class Product {
 
   /// Full formatted display name e.g. "Brand X Original Coffee 26g"
   String get displayTitle => '$brand $variant $sizeUnit'.trim();
+  String get displayName => displayTitle;
 
   Product copyWith({
     String? id,

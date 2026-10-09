@@ -300,7 +300,7 @@ class MockReseeboDataAdapter implements IReseeboDataAdapter {
         supplierId: 'sup_b',
         supplierName: 'Supermarket B (Megamart)',
         branchLocation: 'Highway Branch',
-        latestPurchaseDate: const _ConstDate(2026, 10, 5),
+        latestPurchaseDate: _ConstDate(2026, 10, 5),
         packageDescription: '1 pack × 10 sachets',
         netAmountPaid: 78.0,
         costPerPiece: 7.80,
@@ -312,7 +312,7 @@ class MockReseeboDataAdapter implements IReseeboDataAdapter {
         supplierId: 'sup_c',
         supplierName: 'Wholesaler C',
         branchLocation: 'Town Proper',
-        latestPurchaseDate: const _ConstDate(2026, 10, 7),
+        latestPurchaseDate: _ConstDate(2026, 10, 7),
         packageDescription: '1 pack × 10 sachets',
         netAmountPaid: 81.0,
         costPerPiece: 8.10,
@@ -324,7 +324,7 @@ class MockReseeboDataAdapter implements IReseeboDataAdapter {
         supplierId: 'sup_a',
         supplierName: 'Puregold Price Club',
         branchLocation: 'Branch A - San Juan',
-        latestPurchaseDate: const _ConstDate(2026, 10, 8),
+        latestPurchaseDate: _ConstDate(2026, 10, 8),
         packageDescription: '2 packs × 10 sachets',
         netAmountPaid: 168.0,
         costPerPiece: 8.40,
@@ -337,7 +337,7 @@ class MockReseeboDataAdapter implements IReseeboDataAdapter {
     // Price history at Supplier A showing price hike from ₱8.00 to ₱8.40 (+5%)
     final historyRows = [
       const PriceHistoryRecord(
-        purchaseDate: const _ConstDate(2026, 10, 8),
+        purchaseDate: _ConstDate(2026, 10, 8),
         costPerPiece: 8.40,
         changeFromPreviousPesos: 0.40,
         changeFromPreviousPercent: 5.0,
@@ -345,7 +345,7 @@ class MockReseeboDataAdapter implements IReseeboDataAdapter {
         sourceReceiptId: 'rec_001',
       ),
       const PriceHistoryRecord(
-        purchaseDate: const _ConstDate(2026, 10, 1),
+        purchaseDate: _ConstDate(2026, 10, 1),
         costPerPiece: 8.00,
         changeFromPreviousPesos: null,
         changeFromPreviousPercent: null,
