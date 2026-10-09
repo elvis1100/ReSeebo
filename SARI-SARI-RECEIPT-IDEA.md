@@ -4,7 +4,9 @@
 
 **Status:** Brainstorming concept, not a final specification.  
 **Hackathon build window:** 20 hours.  
-**Product name and AI model:** Still to be decided.
+**Product name:** Reseebo.
+
+**Stack:** Flutter/Dart, local SQLite, and bundled on-device OCR; supporting packages and model compatibility still need a demo-phone check.
 
 ## 1. The problem
 
@@ -174,9 +176,9 @@ Where applicable, DTI Suggested Retail Price references should be dated and chec
 
 The intended core workflow runs on the owner's phone: receipt recognition, review, saving, and comparison.
 
-- Owners can scan and compare while offline, once the required app and model assets are installed.
+- Owners can scan and compare from first launch with internet disabled; required model assets ship with the app.
 - Receipt images and purchasing records can stay on the device.
-- Frequent scans can work without depending on a cloud AI call for each receipt.
+- Recognition runs on the phone; scans require no cloud AI calls, account, or cloud backup.
 
 This must be demonstrated with internet disabled. A cloud-only scanner followed by offline calculations would not prove the intended local AI feature.
 
