@@ -1,0 +1,16 @@
+ReSeebo
+Copyright 2026 ReSeebo contributors.
+
+Original ReSeebo source code is licensed under Apache License 2.0.
+Third-party code, models, fonts, and catalog assets retain their respective
+licenses and notices; the root license does not replace them.
+
+Bundled third-party notices and provenance:
+- PaddleOCR SDK: reseebo_app/android/paddle_ocr/LICENSE and source_manifest.json
+- OCR models and runtimes: reseebo_app/assets/ocr/LICENSE-*.txt,
+  NOTICE-ONNXRuntime.txt, and model_manifest.json
+- Inter font: reseebo_app/assets/fonts/OFL.txt
+- Open Food Facts catalog and photos: reseebo_app/assets/catalog/ATTRIBUTION.txt
+  and provenance.json (ODbL/DbCL data; CC BY-SA 3.0 photos)
+
+Third-party trademarks remain the property of their respective owners.

@@ -37,3 +37,7 @@ adb install -r releases/reseebo-1.0.0.apk
 - **Existing code/assets:** adapted Apache-2.0 PaddleOCR Android SDK; Inter font (SIL OFL 1.1); supplied ReSeebo branding; bundled Open Food Facts catalog data (ODbL/DbCL) and contributor photos (CC BY-SA 3.0). The Open Food Facts API was used during development; catalog content is bundled offline.
 
 Exact revisions and local changes: [models](assets/ocr/model_manifest.json), [SDK](android/paddle_ocr/source_manifest.json). Licenses: `assets/ocr/LICENSE-*.txt`, [Inter](assets/fonts/OFL.txt), [catalog attribution](assets/catalog/ATTRIBUTION.txt). See [device verification](docs/verification/2026-10-10-paddle-device-acceptance.md) for tested behavior and accuracy limits.
+
+## License
+
+ReSeebo's original source code is licensed under [Apache-2.0](../LICENSE). Third-party code, models, fonts, and catalog assets retain their respective licenses; see [notices](../NOTICE) and bundled attribution files.
