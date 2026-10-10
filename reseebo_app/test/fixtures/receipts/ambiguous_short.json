@@ -1,0 +1,17 @@
+{
+  "synthetic": true,
+  "name": "ambiguous short dates require owner choice",
+  "lines": [
+    {
+      "text": "SUPPLIER A"
+    },
+    {
+      "text": "DATE 09/10/26"
+    }
+  ],
+  "expected": {
+    "date": null,
+    "warning": "ambiguous",
+    "lines": []
+  }
+}

@@ -1,0 +1,51 @@
+{
+  "kind": "photo-ground-truth",
+  "verification": "Manually read from /tmp/reseebo-receipt-download-check/savemore.jpg on 2026-10-10; item/total region only. Match patterns align OCR rows for evaluation, never product matching.",
+  "source": "https://note.com/norris_iloilo/n/n2f7474d537f5",
+  "captures": [
+    "savemore",
+    "savemore_enhanced"
+  ],
+  "expected": {
+    "total": 19760,
+    "lines": [
+      {
+        "matchPattern": "SHIPA|SHIP|PATATA",
+        "description": "OISHIPATATA24G",
+        "quantity": 2,
+        "amount": 1590
+      },
+      {
+        "matchPattern": "Monde|Nissin",
+        "description": "MondeNissinBtr12s",
+        "quantity": 1,
+        "amount": 3795
+      },
+      {
+        "matchPattern": "Choco|Mucho",
+        "description": "ChocoMuchoCrm130G",
+        "quantity": 1,
+        "amount": 1025
+      },
+      {
+        "matchPattern": "Orange",
+        "description": "TangOrangeMango19g",
+        "quantity": 3,
+        "amount": 6300
+      },
+      {
+        "matchPattern": "Pwdr|Pudr|Padr",
+        "description": "TangPwdrMango19g",
+        "quantity": 2,
+        "amount": 4100
+      },
+      {
+        "matchPattern": "BEAR",
+        "description": "BEARBRAND 200ml",
+        "quantity": 1,
+        "amount": 2950
+      }
+    ]
+  },
+  "imageSha256": "79aa855eec4091a1658689eb3324253e5846100e15f7bb8874a386b367591234"
+}

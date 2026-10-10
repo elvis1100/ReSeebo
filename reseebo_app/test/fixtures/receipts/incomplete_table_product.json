@@ -1,0 +1,30 @@
+{
+  "synthetic": true,
+  "name": "a table product missing price and size stays editable",
+  "lines": [
+    {
+      "text": "SUPPLIER A"
+    },
+    {
+      "text": "2026-10-09"
+    },
+    {
+      "text": "DESCRIPTION QTY UNIT PRICE AMOUNT"
+    },
+    {
+      "text": "SHAMPOO ORIGINAL"
+    }
+  ],
+  "expected": {
+    "date": "2026-10-09",
+    "lines": [
+      {
+        "description": "SHAMPOO ORIGINAL",
+        "quantity": null,
+        "unit": null,
+        "amount": null,
+        "warning": "incomplete"
+      }
+    ]
+  }
+}

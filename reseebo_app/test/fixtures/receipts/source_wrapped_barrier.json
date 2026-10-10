@@ -1,0 +1,43 @@
+{
+  "synthetic": true,
+  "source": "https://note.com/norris_iloilo/n/n2f7474d537f5",
+  "basis": "Inspired by the author's description of name/price line breaks. Invented names, prices, and OCR order; no photo/token geometry was verified.",
+  "name": "wrapped prices cannot cross subtotal metadata",
+  "lines": [
+    {
+      "text": "SUPPLIER A"
+    },
+    {
+      "text": "2026-10-09"
+    },
+    {
+      "text": "COFFEE ORIGINAL 26G"
+    },
+    {
+      "text": "SUBTOTAL 84.00"
+    },
+    {
+      "text": "MILK ORIGINAL 500G"
+    },
+    {
+      "text": "40.00"
+    }
+  ],
+  "expected": {
+    "date": "2026-10-09",
+    "lines": [
+      {
+        "description": "COFFEE ORIGINAL 26G",
+        "quantity": null,
+        "unit": null,
+        "amount": null
+      },
+      {
+        "description": "MILK ORIGINAL 500G",
+        "quantity": null,
+        "unit": null,
+        "amount": 4000
+      }
+    ]
+  }
+}

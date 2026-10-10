@@ -1,0 +1,2602 @@
+{
+  "version": 1,
+  "source": "Open Food Facts",
+  "retrieved_on": "2026-10-10",
+  "database_license": "ODbL-1.0",
+  "contents_license": "DbCL-1.0",
+  "image_license": "CC-BY-SA-3.0",
+  "products": [
+    {
+      "barcode": "4800575480254",
+      "name": "Alaska Crema All Purpose",
+      "brand": "Alaska",
+      "variant": "Crema All Purpose",
+      "size": "250 mL",
+      "category": "Milk & dairy",
+      "image_asset": "assets/catalog/images/4800575480254.webp"
+    },
+    {
+      "barcode": "4800611546760",
+      "name": "Asia Brewery Cobra Energy Drink",
+      "brand": "Asia Brewery",
+      "variant": "Cobra Energy Drink",
+      "size": "350 mL",
+      "category": "Drinks",
+      "image_asset": "assets/catalog/images/4800611546760.webp"
+    },
+    {
+      "barcode": "4800361403474",
+      "name": "Bear Brand fortified",
+      "brand": "Bear Brand",
+      "variant": "Fortified",
+      "size": "2000 g",
+      "category": "Milk & dairy",
+      "image_asset": "assets/catalog/images/4800361403474.webp"
+    },
+    {
+      "barcode": "4802222046295",
+      "name": "Bonus Virgin Coconut Oil",
+      "brand": "Bonus",
+      "variant": "Virgin Coconut Oil",
+      "size": "250 mL",
+      "category": "Pantry staples",
+      "image_asset": "assets/catalog/images/4802222046295.webp"
+    },
+    {
+      "barcode": "4800016052774",
+      "name": "C2 Apple Green",
+      "brand": "C2",
+      "variant": "Apple Green",
+      "size": "1 l",
+      "category": "Coffee & tea",
+      "image_asset": "assets/catalog/images/4800016052774.webp"
+    },
+    {
+      "barcode": "4800016068010",
+      "name": "C2 Solo Apple Flavored Green Tea",
+      "brand": "C2",
+      "variant": "Solo Apple Flavored Green Tea",
+      "size": "230 mL",
+      "category": "Coffee & tea",
+      "image_asset": "assets/catalog/images/4800016068010.webp"
+    },
+    {
+      "barcode": "4800016680267",
+      "name": "Calbee Honey Butter",
+      "brand": "Calbee",
+      "variant": "Honey Butter",
+      "size": "60 g",
+      "category": "Snacks & biscuits",
+      "image_asset": "assets/catalog/images/4800016680267.webp"
+    },
+    {
+      "barcode": "4800249909319",
+      "name": "cdo Beef Loaf",
+      "brand": "cdo",
+      "variant": "Beef Loaf",
+      "size": "150 g",
+      "category": "Canned goods",
+      "image_asset": "assets/catalog/images/4800249909319.webp"
+    },
+    {
+      "barcode": "4806537026805",
+      "name": "Choc Nut Peanut Milk Chocolate",
+      "brand": "Choc Nut",
+      "variant": "Peanut Milk Chocolate",
+      "size": "200 g",
+      "category": "Snacks & biscuits",
+      "image_asset": "assets/catalog/images/4806537026805.webp"
+    },
+    {
+      "barcode": "4801981116072",
+      "name": "Coca Cola original taste",
+      "brand": "coca cola",
+      "variant": "Original Taste",
+      "size": "1.5 l",
+      "category": "Drinks",
+      "image_asset": "assets/catalog/images/4801981116072.webp"
+    },
+    {
+      "barcode": "4801981118502",
+      "name": "Coca Cola Coke Mismo",
+      "brand": "Coca Cola",
+      "variant": "Coke Mismo",
+      "size": "290 mL",
+      "category": "Drinks",
+      "image_asset": "assets/catalog/images/4801981118502.webp"
+    },
+    {
+      "barcode": "4801981190119",
+      "name": "Coca Cola Nutri Boost Chocolate Milk",
+      "brand": "Coca Cola",
+      "variant": "Nutri Boost Chocolate Milk",
+      "size": "110 mL",
+      "category": "Snacks & biscuits",
+      "image_asset": "assets/catalog/images/4801981190119.webp"
+    },
+    {
+      "barcode": "4801981110001",
+      "name": "Coca-Cola Coke light",
+      "brand": "Coca-Cola",
+      "variant": "Coke light",
+      "size": "320 mL",
+      "category": "Drinks",
+      "image_asset": "assets/catalog/images/4801981110001.webp"
+    },
+    {
+      "barcode": "4801981112005",
+      "name": "Cocacola",
+      "brand": "Coca-Cola",
+      "variant": "Cocacola",
+      "size": "2000 mL",
+      "category": "Drinks",
+      "image_asset": "assets/catalog/images/4801981112005.webp"
+    },
+    {
+      "barcode": "4801981116645",
+      "name": "Coca-Cola Zero Sugar",
+      "brand": "Coca-Cola",
+      "variant": "Zero Sugar",
+      "size": "1.5 l",
+      "category": "Drinks",
+      "image_asset": "assets/catalog/images/4801981116645.webp"
+    },
+    {
+      "barcode": "4801981119981",
+      "name": "Coca-Cola Wilkins Pure Purified Drinking Water",
+      "brand": "Coca-Cola",
+      "variant": "Wilkins Pure Purified Drinking Water",
+      "size": "1 L",
+      "category": "Drinks",
+      "image_asset": "assets/catalog/images/4801981119981.webp"
+    },
+    {
+      "barcode": "4801981127177",
+      "name": "Coca-Cola Original Taste",
+      "brand": "Coca-Cola",
+      "variant": "Original Taste",
+      "size": "190 mL",
+      "category": "Drinks",
+      "image_asset": "assets/catalog/images/4801981127177.webp"
+    },
+    {
+      "barcode": "4801981189540",
+      "name": "Coca-Cola Nutriboost Strawberry Flavor",
+      "brand": "Coca-Cola",
+      "variant": "Nutriboost Strawberry Flavor",
+      "size": "330 mL",
+      "category": "Milk & dairy",
+      "image_asset": "assets/catalog/images/4801981189540.webp"
+    },
+    {
+      "barcode": "4801981120000",
+      "name": "Coca-Cola",
+      "brand": "Coca-Cola",
+      "variant": "Coca-Cola",
+      "size": "500 mL",
+      "category": "Drinks",
+      "image_asset": "assets/catalog/images/4801981120000.webp"
+    },
+    {
+      "barcode": "4800818601385",
+      "name": "Columbia's Lüv-Lov",
+      "brand": "Columbia's",
+      "variant": "Lüv-Lov",
+      "size": "20 g",
+      "category": "Snacks & biscuits",
+      "image_asset": "assets/catalog/images/4800818601385.webp"
+    },
+    {
+      "barcode": "4800249013719",
+      "name": "Danes Queso de Bola",
+      "brand": "Danes",
+      "variant": "Queso de Bola",
+      "size": "350 g",
+      "category": "Milk & dairy",
+      "image_asset": "assets/catalog/images/4800249013719.webp"
+    },
+    {
+      "barcode": "4800024037480",
+      "name": "Del Monte Fiesta Fruit Cocktail in Extra Light Syrup",
+      "brand": "Del Monte",
+      "variant": "Fiesta Fruit Cocktail in Extra Light Syrup",
+      "size": "836 g",
+      "category": "Pantry staples",
+      "image_asset": "assets/catalog/images/4800024037480.webp"
+    },
+    {
+      "barcode": "4800024555533",
+      "name": "Del Monte Italian style spaghetti sauce",
+      "brand": "Del Monte",
+      "variant": "Italian style spaghetti sauce",
+      "size": "250 g",
+      "category": "Sauces & seasonings",
+      "image_asset": "assets/catalog/images/4800024555533.webp"
+    },
+    {
+      "barcode": "4800024556165",
+      "name": "Del Monte Original style tomato sauce",
+      "brand": "Del Monte",
+      "variant": "Original style tomato sauce",
+      "size": "1 kg",
+      "category": "Sauces & seasonings",
+      "image_asset": "assets/catalog/images/4800024556165.webp"
+    },
+    {
+      "barcode": "4800024556899",
+      "name": "Del Monte Tomato Paste",
+      "brand": "Del Monte",
+      "variant": "Tomato Paste",
+      "size": "150 g",
+      "category": "Pantry staples",
+      "image_asset": "assets/catalog/images/4800024556899.webp"
+    },
+    {
+      "barcode": "4800024562616",
+      "name": "Del Monte 100% Pineapple Juice Drink",
+      "brand": "Del Monte",
+      "variant": "100% Pineapple Juice Drink",
+      "size": "220 mL",
+      "category": "Drinks",
+      "image_asset": "assets/catalog/images/4800024562616.webp"
+    },
+    {
+      "barcode": "4800024573520",
+      "name": "Del Monte Italian Style Spaghetti Sauce",
+      "brand": "Del Monte",
+      "variant": "Italian Style Spaghetti Sauce",
+      "size": "900 g",
+      "category": "Sauces & seasonings",
+      "image_asset": "assets/catalog/images/4800024573520.webp"
+    },
+    {
+      "barcode": "4800024573926",
+      "name": "Del Monte DM Spaghetti Pasta Merienda Pack",
+      "brand": "Del Monte",
+      "variant": "DM Spaghetti Pasta Merienda Pack",
+      "size": "175 g",
+      "category": "Pantry staples",
+      "image_asset": "assets/catalog/images/4800024573926.webp"
+    },
+    {
+      "barcode": "4800024577122",
+      "name": "Del Monte Tomato Ketchup Original",
+      "brand": "Del Monte",
+      "variant": "Tomato Ketchup Original",
+      "size": "320 g",
+      "category": "Sauces & seasonings",
+      "image_asset": "assets/catalog/images/4800024577122.webp"
+    },
+    {
+      "barcode": "4800024577139",
+      "name": "Del Monte Sweet Blend Ketchup",
+      "brand": "Del Monte",
+      "variant": "Sweet Blend Ketchup",
+      "size": "320 g",
+      "category": "Sauces & seasonings",
+      "image_asset": "assets/catalog/images/4800024577139.webp"
+    },
+    {
+      "barcode": "4800024579317",
+      "name": "Del Monte Pineapple Heart Smart",
+      "brand": "Del Monte",
+      "variant": "Pineapple Heart Smart",
+      "size": "1 L",
+      "category": "Drinks",
+      "image_asset": "assets/catalog/images/4800024579317.webp"
+    },
+    {
+      "barcode": "4800024582461",
+      "name": "Del Monte Sweet Chili Sauce",
+      "brand": "Del Monte",
+      "variant": "Sweet Chili Sauce",
+      "size": "320 g",
+      "category": "Sauces & seasonings",
+      "image_asset": "assets/catalog/images/4800024582461.webp"
+    },
+    {
+      "barcode": "4800024583161",
+      "name": "Del Monte Potato Crisp",
+      "brand": "Del Monte",
+      "variant": "Potato Crisp",
+      "size": "80 g",
+      "category": "Snacks & biscuits",
+      "image_asset": "assets/catalog/images/4800024583161.webp"
+    },
+    {
+      "barcode": "4800024583802",
+      "name": "Del Monte Fruity Munchsters",
+      "brand": "Del Monte",
+      "variant": "Fruity Munchsters",
+      "size": "26 g",
+      "category": "Snacks & biscuits",
+      "image_asset": "assets/catalog/images/4800024583802.webp"
+    },
+    {
+      "barcode": "4800024584403",
+      "name": "Del Monte Fiesta Fruit Cocktail",
+      "brand": "Del Monte",
+      "variant": "Fiesta Fruit Cocktail",
+      "size": "385 g",
+      "category": "Pantry staples",
+      "image_asset": "assets/catalog/images/4800024584403.webp"
+    },
+    {
+      "barcode": "4803925251146",
+      "name": "Mountain Dew",
+      "brand": "Dew",
+      "variant": "Mountain",
+      "size": "500 mL",
+      "category": "Drinks",
+      "image_asset": "assets/catalog/images/4803925251146.webp"
+    },
+    {
+      "barcode": "4808647020100",
+      "name": "Eden Original",
+      "brand": "Eden",
+      "variant": "Original",
+      "size": "430 g",
+      "category": "Milk & dairy",
+      "image_asset": "assets/catalog/images/4808647020100.webp"
+    },
+    {
+      "barcode": "4800040314138",
+      "name": "Fibisco The Ultimate Chocolate Chip Cookies",
+      "brand": "Fibisco",
+      "variant": "The Ultimate Chocolate Chip Cookies",
+      "size": "400 g",
+      "category": "Snacks & biscuits",
+      "image_asset": "assets/catalog/images/4800040314138.webp"
+    },
+    {
+      "barcode": "4800092113352",
+      "name": "Frootees Strawberry Cookie Sandwich",
+      "brand": "Frootees",
+      "variant": "Strawberry Cookie Sandwich",
+      "size": "32 g",
+      "category": "Snacks & biscuits",
+      "image_asset": "assets/catalog/images/4800092113352.webp"
+    },
+    {
+      "barcode": "4806502720219",
+      "name": "Gardenia Toasties",
+      "brand": "Gardenia",
+      "variant": "Toasties",
+      "size": "25 g",
+      "category": "Snacks & biscuits",
+      "image_asset": "assets/catalog/images/4806502720219.webp"
+    },
+    {
+      "barcode": "4806502720301",
+      "name": "Gardenia High Fiber Whole Wheat Bread",
+      "brand": "Gardenia",
+      "variant": "High Fiber Whole Wheat Bread",
+      "size": "600 g",
+      "category": "Bread & bakery",
+      "image_asset": "assets/catalog/images/4806502720301.webp"
+    },
+    {
+      "barcode": "4806502720615",
+      "name": "Gardenia White Bread Classic",
+      "brand": "Gardenia",
+      "variant": "White Bread Classic",
+      "size": "600 g",
+      "category": "Bread & bakery",
+      "image_asset": "assets/catalog/images/4806502720615.webp"
+    },
+    {
+      "barcode": "4806502721452",
+      "name": "Gardenia High Fiber Whole Wheat Bread",
+      "brand": "Gardenia",
+      "variant": "High Fiber Whole Wheat Bread",
+      "size": "400 g",
+      "category": "Bread & bakery",
+      "image_asset": "assets/catalog/images/4806502721452.webp"
+    },
+    {
+      "barcode": "4806502726822",
+      "name": "Gardenia Neu Bake White Bread",
+      "brand": "Gardenia",
+      "variant": "Neu Bake White Bread",
+      "size": "450 g",
+      "category": "Bread & bakery",
+      "image_asset": "assets/catalog/images/4806502726822.webp"
+    },
+    {
+      "barcode": "4806502727423",
+      "name": "Gardenia Neu Bake Wheaten bread",
+      "brand": "Gardenia",
+      "variant": "Neu Bake Wheaten bread",
+      "size": "480 g",
+      "category": "Bread & bakery",
+      "image_asset": "assets/catalog/images/4806502727423.webp"
+    },
+    {
+      "barcode": "4806502720417",
+      "name": "Gardenia Classic Enriched White Bread",
+      "brand": "Gardenia Classic",
+      "variant": "Enriched White Bread",
+      "size": "400 g",
+      "category": "Bread & bakery",
+      "image_asset": "assets/catalog/images/4806502720417.webp"
+    },
+    {
+      "barcode": "4806517042061",
+      "name": "Goya Cream White Chocolate Bar",
+      "brand": "Goya",
+      "variant": "Cream White Chocolate Bar",
+      "size": "35 g",
+      "category": "Snacks & biscuits",
+      "image_asset": "assets/catalog/images/4806517042061.webp"
+    },
+    {
+      "barcode": "4806517042085",
+      "name": "Goya Dark Chocolate",
+      "brand": "Goya",
+      "variant": "Dark Chocolate",
+      "size": "35 g",
+      "category": "Snacks & biscuits",
+      "image_asset": "assets/catalog/images/4806517042085.webp"
+    },
+    {
+      "barcode": "4800016022920",
+      "name": "Great Taste Supreme Toffee Hazel",
+      "brand": "Great Taste",
+      "variant": "Supreme Toffee Hazel",
+      "size": "26 g",
+      "category": "Coffee & tea",
+      "image_asset": "assets/catalog/images/4800016022920.webp"
+    },
+    {
+      "barcode": "4800016074882",
+      "name": "Great Taste Vanilla Latte",
+      "brand": "Great Taste",
+      "variant": "Vanilla Latte",
+      "size": "200 mL",
+      "category": "Coffee & tea",
+      "image_asset": "assets/catalog/images/4800016074882.webp"
+    },
+    {
+      "barcode": "4800047820014",
+      "name": "GreenCross Isopropyl alcohol",
+      "brand": "GreenCross",
+      "variant": "Isopropyl alcohol",
+      "size": "500 mL",
+      "category": "Personal care",
+      "image_asset": "assets/catalog/images/4800047820014.webp"
+    },
+    {
+      "barcode": "4800047820236",
+      "name": "GreenCross Isopropyl alcohol",
+      "brand": "GreenCross",
+      "variant": "Isopropyl alcohol",
+      "size": "150 mL",
+      "category": "Personal care",
+      "image_asset": "assets/catalog/images/4800047820236.webp"
+    },
+    {
+      "barcode": "4800092110528",
+      "name": "Hansel Choco",
+      "brand": "Hansel",
+      "variant": "Choco",
+      "size": "310 g",
+      "category": "Snacks & biscuits",
+      "image_asset": "assets/catalog/images/4800092110528.webp"
+    },
+    {
+      "barcode": "4800066122168",
+      "name": "Holiday Corned beef",
+      "brand": "Holiday",
+      "variant": "Corned beef",
+      "size": "150 g",
+      "category": "Canned goods",
+      "image_asset": "assets/catalog/images/4800066122168.webp"
+    },
+    {
+      "barcode": "4800098122952",
+      "name": "Island Biscuit Yum Yum Strawberry Snack",
+      "brand": "Island Biscuit",
+      "variant": "Yum Yum Strawberry Snack",
+      "size": "30 g",
+      "category": "Snacks & biscuits",
+      "image_asset": "assets/catalog/images/4800098122952.webp"
+    },
+    {
+      "barcode": "4800010075076",
+      "name": "Jack 'n Jill Cream-O",
+      "brand": "Jack 'n Jill",
+      "variant": "Cream-O",
+      "size": "90 g",
+      "category": "Snacks & biscuits",
+      "image_asset": "assets/catalog/images/4800010075076.webp"
+    },
+    {
+      "barcode": "4800016084058",
+      "name": "Jack 'n Jill Wafrets Choco Brix (Creamy Crunch Wafer)",
+      "brand": "Jack 'n Jill",
+      "variant": "Wafrets Choco Brix (Creamy Crunch Wafer)",
+      "size": "24 g",
+      "category": "Snacks & biscuits",
+      "image_asset": "assets/catalog/images/4800016084058.webp"
+    },
+    {
+      "barcode": "4800016112430",
+      "name": "Jack 'n Jill Quake Overload Black Forest",
+      "brand": "Jack 'n Jill",
+      "variant": "Quake Overload Black Forest",
+      "size": "30 g",
+      "category": "Snacks & biscuits",
+      "image_asset": "assets/catalog/images/4800016112430.webp"
+    },
+    {
+      "barcode": "4800016114274",
+      "name": "Jack 'n Jill Dewberry Blueberry Cheesecake",
+      "brand": "Jack 'n Jill",
+      "variant": "Dewberry Blueberry Cheesecake",
+      "size": "33 g",
+      "category": "Snacks & biscuits",
+      "image_asset": "assets/catalog/images/4800016114274.webp"
+    },
+    {
+      "barcode": "4800016115257",
+      "name": "Jack 'n Jill Chicharon Ni Mang Juan Cracking Chips",
+      "brand": "Jack 'n Jill",
+      "variant": "Chicharon Ni Mang Juan Cracking Chips",
+      "size": "70 g",
+      "category": "Snacks & biscuits",
+      "image_asset": "assets/catalog/images/4800016115257.webp"
+    },
+    {
+      "barcode": "4800016629686",
+      "name": "Jack 'n Jill Potato Chips Classic - Plain salted flavor",
+      "brand": "Jack 'n Jill",
+      "variant": "Potato Chips Classic - Plain salted flavor",
+      "size": "130 g",
+      "category": "Snacks & biscuits",
+      "image_asset": "assets/catalog/images/4800016629686.webp"
+    },
+    {
+      "barcode": "4800016635809",
+      "name": "Jack 'n Jill Piattos Sour Cream and Onion",
+      "brand": "Jack 'n Jill",
+      "variant": "Piattos Sour Cream and Onion",
+      "size": "170 g",
+      "category": "Snacks & biscuits",
+      "image_asset": "assets/catalog/images/4800016635809.webp"
+    },
+    {
+      "barcode": "4800016963827",
+      "name": "Jack 'n Jill Cloud 9 Overload",
+      "brand": "Jack 'n Jill",
+      "variant": "Cloud 9 Overload",
+      "size": "50 g",
+      "category": "Snacks & biscuits",
+      "image_asset": "assets/catalog/images/4800016963827.webp"
+    },
+    {
+      "barcode": "4800016964060",
+      "name": "Jack 'n Jill Cloud 9 White",
+      "brand": "Jack 'n Jill",
+      "variant": "Cloud 9 White",
+      "size": "28 g",
+      "category": "Snacks & biscuits",
+      "image_asset": "assets/catalog/images/4800016964060.webp"
+    },
+    {
+      "barcode": "4800016604232",
+      "name": "jack n jill Nova Homestyle BBQ",
+      "brand": "jack n jill",
+      "variant": "Nova Homestyle BBQ",
+      "size": "78 g",
+      "category": "Snacks & biscuits",
+      "image_asset": "assets/catalog/images/4800016604232.webp"
+    },
+    {
+      "barcode": "4800016652134",
+      "name": "Jack n Jill Tostillas nacho cheese flavored tortilla chips",
+      "brand": "Jack n Jill",
+      "variant": "Tostillas nacho cheese flavored tortilla chips",
+      "size": "72 g",
+      "category": "Snacks & biscuits",
+      "image_asset": "assets/catalog/images/4800016652134.webp"
+    },
+    {
+      "barcode": "4800016112379",
+      "name": "Jack n' Jill Quake Overload Choco Strawberry",
+      "brand": "Jack n' Jill",
+      "variant": "Quake Overload Choco Strawberry",
+      "size": "30 g",
+      "category": "Snacks & biscuits",
+      "image_asset": "assets/catalog/images/4800016112379.webp"
+    },
+    {
+      "barcode": "4800016113871",
+      "name": "Jack n' Jill Quake Overload Mallow Vanilla",
+      "brand": "Jack n' Jill",
+      "variant": "Quake Overload Mallow Vanilla",
+      "size": "29 g",
+      "category": "Snacks & biscuits",
+      "image_asset": "assets/catalog/images/4800016113871.webp"
+    },
+    {
+      "barcode": "4800016082641",
+      "name": "JACK'nJILL Magic Flakes Cheese",
+      "brand": "JACK'nJILL",
+      "variant": "Magic Flakes Cheese",
+      "size": "28 g",
+      "category": "Milk & dairy",
+      "image_asset": "assets/catalog/images/4800016082641.webp"
+    },
+    {
+      "barcode": "4800016666261",
+      "name": "Jack’n Jill Nova Multigrain Snacks Classic Crunch Lightly Salted Flavor",
+      "brand": "Jack’n Jill",
+      "variant": "Nova Multigrain Snacks Classic Crunch Lightly Salted Flavor",
+      "size": "30 g",
+      "category": "Snacks & biscuits",
+      "image_asset": "assets/catalog/images/4800016666261.webp"
+    },
+    {
+      "barcode": "4806509690898",
+      "name": "Jimms Black Coffee with Ginseng",
+      "brand": "Jimms",
+      "variant": "Black Coffee with Ginseng",
+      "size": "2 g",
+      "category": "Coffee & tea",
+      "image_asset": "assets/catalog/images/4806509690898.webp"
+    },
+    {
+      "barcode": "4806014092811",
+      "name": "Jolly Green Peas",
+      "brand": "Jolly",
+      "variant": "Green Peas",
+      "size": "155 g",
+      "category": "Pantry staples",
+      "image_asset": "assets/catalog/images/4806014092811.webp"
+    },
+    {
+      "barcode": "4800888600219",
+      "name": "Knorr Sinigang Miso",
+      "brand": "Knorr",
+      "variant": "Sinigang Miso",
+      "size": "23 g",
+      "category": "Sauces & seasonings",
+      "image_asset": "assets/catalog/images/4800888600219.webp"
+    },
+    {
+      "barcode": "4800888602725",
+      "name": "Knorr Cube Pork",
+      "brand": "Knorr",
+      "variant": "Cube Pork",
+      "size": "10 g",
+      "category": "Sauces & seasonings",
+      "image_asset": "assets/catalog/images/4800888602725.webp"
+    },
+    {
+      "barcode": "4800888603364",
+      "name": "Knorr Ginataan Gulay",
+      "brand": "Knorr",
+      "variant": "Ginataan Gulay",
+      "size": "40 g",
+      "category": "Sauces & seasonings",
+      "image_asset": "assets/catalog/images/4800888603364.webp"
+    },
+    {
+      "barcode": "4800888603692",
+      "name": "Knorr Sinigang sa Sampalok Mix Original",
+      "brand": "Knorr",
+      "variant": "Sinigang sa Sampalok Mix Original",
+      "size": "11 g",
+      "category": "Sauces & seasonings",
+      "image_asset": "assets/catalog/images/4800888603692.webp"
+    },
+    {
+      "barcode": "4808680210902",
+      "name": "Knorr Nido Oriental Style",
+      "brand": "Knorr",
+      "variant": "Nido Oriental Style",
+      "size": "55 g",
+      "category": "Sauces & seasonings",
+      "image_asset": "assets/catalog/images/4808680210902.webp"
+    },
+    {
+      "barcode": "4808680210957",
+      "name": "Knorr Real Chinese-Style Soup Crab & Corn",
+      "brand": "Knorr",
+      "variant": "Real Chinese-Style Soup Crab & Corn",
+      "size": "60 g",
+      "category": "Sauces & seasonings",
+      "image_asset": "assets/catalog/images/4808680210957.webp"
+    },
+    {
+      "barcode": "4808680211251",
+      "name": "Knorr Crab and Corn Soup",
+      "brand": "Knorr",
+      "variant": "Crab and Corn Soup",
+      "size": "40 g",
+      "category": "Sauces & seasonings",
+      "image_asset": "assets/catalog/images/4808680211251.webp"
+    },
+    {
+      "barcode": "4808680221250",
+      "name": "Knorr Cream of Mushroom",
+      "brand": "Knorr",
+      "variant": "Cream of Mushroom",
+      "size": "68 g",
+      "category": "Sauces & seasonings",
+      "image_asset": "assets/catalog/images/4808680221250.webp"
+    },
+    {
+      "barcode": "4800888602268",
+      "name": "Lady's Choice Real Mayonnaise",
+      "brand": "Lady's Choice",
+      "variant": "Real Mayonnaise",
+      "size": "220 mL",
+      "category": "Sauces & seasonings",
+      "image_asset": "assets/catalog/images/4800888602268.webp"
+    },
+    {
+      "barcode": "4800888602299",
+      "name": "Lady's Choice Sandwich Spread",
+      "brand": "Lady's Choice",
+      "variant": "Sandwich Spread",
+      "size": "220 mL",
+      "category": "Sauces & seasonings",
+      "image_asset": "assets/catalog/images/4800888602299.webp"
+    },
+    {
+      "barcode": "4808680021430",
+      "name": "Lady's Choice Mayonaise",
+      "brand": "Lady's Choice",
+      "variant": "Mayonaise",
+      "size": "220 mL",
+      "category": "Sauces & seasonings",
+      "image_asset": "assets/catalog/images/4808680021430.webp"
+    },
+    {
+      "barcode": "4808680061191",
+      "name": "Lady's Choice Creamy Peanut Butter",
+      "brand": "Lady's Choice",
+      "variant": "Creamy Peanut Butter",
+      "size": "1 kg",
+      "category": "Pantry staples",
+      "image_asset": "assets/catalog/images/4808680061191.webp"
+    },
+    {
+      "barcode": "4806018403712",
+      "name": "Lemon Square Whatta Tops Chocolahat Flavor (Cupcakes with Toppings)",
+      "brand": "Lemon Square",
+      "variant": "Whatta Tops Chocolahat Flavor (Cupcakes with Toppings)",
+      "size": "35 g",
+      "category": "Snacks & biscuits",
+      "image_asset": "assets/catalog/images/4806018403712.webp"
+    },
+    {
+      "barcode": "4806018405655",
+      "name": "Lemon Square Lava Cake Chocolate",
+      "brand": "Lemon Square",
+      "variant": "Lava Cake Chocolate",
+      "size": "40 g",
+      "category": "Snacks & biscuits",
+      "image_asset": "assets/catalog/images/4806018405655.webp"
+    },
+    {
+      "barcode": "4809010626011",
+      "name": "Lemon Square Cheese Cake",
+      "brand": "Lemon Square",
+      "variant": "Cheese Cake",
+      "size": "30 g",
+      "category": "Snacks & biscuits",
+      "image_asset": "assets/catalog/images/4809010626011.webp"
+    },
+    {
+      "barcode": "4806018403859",
+      "name": "Lemon Square® Choochoo Cake Bites",
+      "brand": "Lemon Square®",
+      "variant": "Choochoo Cake Bites",
+      "size": "38 g",
+      "category": "Snacks & biscuits",
+      "image_asset": "assets/catalog/images/4806018403859.webp"
+    },
+    {
+      "barcode": "4800216121911",
+      "name": "Leslie's Cheezy corn crunch spicy",
+      "brand": "Leslie's",
+      "variant": "Cheezy corn crunch spicy",
+      "size": "22 g",
+      "category": "Milk & dairy",
+      "image_asset": "assets/catalog/images/4800216121911.webp"
+    },
+    {
+      "barcode": "4800216121720",
+      "name": "leslie-s Nacho corn chips cheese",
+      "brand": "leslie-s",
+      "variant": "Nacho corn chips cheese",
+      "size": "100 g",
+      "category": "Snacks & biscuits",
+      "image_asset": "assets/catalog/images/4800216121720.webp"
+    },
+    {
+      "barcode": "4803925270116",
+      "name": "Lipton Ice tea Red Tea orange Flavored Ice Tea",
+      "brand": "Lipton Ice tea",
+      "variant": "Red Tea orange Flavored Ice Tea",
+      "size": "450 mL",
+      "category": "Coffee & tea",
+      "image_asset": "assets/catalog/images/4803925270116.webp"
+    },
+    {
+      "barcode": "4807770270017",
+      "name": "Lucky Me! Beef Na Beef Flavor Instant Mami Noodle Soup",
+      "brand": "Lucky Me!",
+      "variant": "Beef Na Beef Flavor Instant Mami Noodle Soup",
+      "size": "55 g",
+      "category": "Instant noodles",
+      "image_asset": "assets/catalog/images/4807770270017.webp"
+    },
+    {
+      "barcode": "4807770271175",
+      "name": "Lucky Me! Go Cup Bulalo Instant Noodle Soup",
+      "brand": "Lucky Me!",
+      "variant": "Go Cup Bulalo Instant Noodle Soup",
+      "size": "40 g",
+      "category": "Instant noodles",
+      "image_asset": "assets/catalog/images/4807770271175.webp"
+    },
+    {
+      "barcode": "4807770272097",
+      "name": "Lucky Me Beef Spicy",
+      "brand": "Lucky Me!",
+      "variant": "Beef Spicy",
+      "size": "50 g",
+      "category": "Instant noodles",
+      "image_asset": "assets/catalog/images/4807770272097.webp"
+    },
+    {
+      "barcode": "4807770272813",
+      "name": "Lucky Me Batchoy (Instant Noodle Soup)",
+      "brand": "Lucky Me!",
+      "variant": "Batchoy (Instant Noodle Soup)",
+      "size": "55 g",
+      "category": "Instant noodles",
+      "image_asset": "assets/catalog/images/4807770272813.webp"
+    },
+    {
+      "barcode": "4807770273612",
+      "name": "Lucky Me! Go Cup Mini Instant Noodle Soup Spicy Bulalo Flavor",
+      "brand": "Lucky Me!",
+      "variant": "Go Cup Mini Instant Noodle Soup Spicy Bulalo Flavor",
+      "size": "40 g",
+      "category": "Instant noodles",
+      "image_asset": "assets/catalog/images/4807770273612.webp"
+    },
+    {
+      "barcode": "4807770273650",
+      "name": "Lucky Me Chicken Spicy",
+      "brand": "Lucky Me!",
+      "variant": "Chicken Spicy",
+      "size": "50 g",
+      "category": "Instant noodles",
+      "image_asset": "assets/catalog/images/4807770273650.webp"
+    },
+    {
+      "barcode": "4807770273698",
+      "name": "Lucky Me! Pancit Canton ChiliMansi",
+      "brand": "Lucky Me!",
+      "variant": "Pancit Canton ChiliMansi",
+      "size": "80 g",
+      "category": "Instant noodles",
+      "image_asset": "assets/catalog/images/4807770273698.webp"
+    },
+    {
+      "barcode": "4807770274305",
+      "name": "Lucky Me Pancit Canton Extra Hot Chili",
+      "brand": "Lucky Me!",
+      "variant": "Pancit Canton Extra Hot Chili",
+      "size": "75 g",
+      "category": "Instant noodles",
+      "image_asset": "assets/catalog/images/4807770274305.webp"
+    },
+    {
+      "barcode": "4807770274459",
+      "name": "Lucky Me! Seafood Shrimp Tonkotsu",
+      "brand": "Lucky Me!",
+      "variant": "Seafood Shrimp Tonkotsu",
+      "size": "60 g",
+      "category": "Instant noodles",
+      "image_asset": "assets/catalog/images/4807770274459.webp"
+    },
+    {
+      "barcode": "4807770274480",
+      "name": "Lucky Me! Pancit Canton Kasalo Pack (Chilimansi)",
+      "brand": "Lucky Me!",
+      "variant": "Pancit Canton Kasalo Pack (Chilimansi)",
+      "size": "120 g",
+      "category": "Instant noodles",
+      "image_asset": "assets/catalog/images/4807770274480.webp"
+    },
+    {
+      "barcode": "4807770273674",
+      "name": "LuckyMe! Lucky Me Pancit Canton Kalamansi",
+      "brand": "LuckyMe!",
+      "variant": "Lucky Me Pancit Canton Kalamansi",
+      "size": "80 g",
+      "category": "Instant noodles",
+      "image_asset": "assets/catalog/images/4807770273674.webp"
+    },
+    {
+      "barcode": "4800361050104",
+      "name": "Maggi Liquid seasoning",
+      "brand": "Maggi",
+      "variant": "Liquid seasoning",
+      "size": "130 mL",
+      "category": "Sauces & seasonings",
+      "image_asset": "assets/catalog/images/4800361050104.webp"
+    },
+    {
+      "barcode": "4800361316934",
+      "name": "Maggi Savor Liquid Seasoning Chilimansi",
+      "brand": "Maggi",
+      "variant": "Savor Liquid Seasoning Chilimansi",
+      "size": "130 mL",
+      "category": "Sauces & seasonings",
+      "image_asset": "assets/catalog/images/4800361316934.webp"
+    },
+    {
+      "barcode": "4800361420129",
+      "name": "Maggi Magic Sarap",
+      "brand": "Maggi",
+      "variant": "Magic Sarap",
+      "size": "55 g",
+      "category": "Sauces & seasonings",
+      "image_asset": "assets/catalog/images/4800361420129.webp"
+    },
+    {
+      "barcode": "48025522",
+      "name": "Maggi Magic Sarap",
+      "brand": "Maggi",
+      "variant": "Magic Sarap",
+      "size": "8 g",
+      "category": "Sauces & seasonings",
+      "image_asset": "assets/catalog/images/48025522.webp"
+    },
+    {
+      "barcode": "4800016082917",
+      "name": "Magic Flakes Onion Chives Flavored Crackers",
+      "brand": "Magic Flakes",
+      "variant": "Onion Chives Flavored Crackers",
+      "size": "28 g",
+      "category": "Snacks & biscuits",
+      "image_asset": "assets/catalog/images/4800016082917.webp"
+    },
+    {
+      "barcode": "4805358324664",
+      "name": "Magnolia Cheese Squeeze Cheddar",
+      "brand": "Magnolia",
+      "variant": "Cheese Squeeze Cheddar",
+      "size": "220 g",
+      "category": "Milk & dairy",
+      "image_asset": "assets/catalog/images/4805358324664.webp"
+    },
+    {
+      "barcode": "4805358373037",
+      "name": "Magnolia Daily Quezo",
+      "brand": "Magnolia",
+      "variant": "Daily Quezo",
+      "size": "165 g",
+      "category": "Milk & dairy",
+      "image_asset": "assets/catalog/images/4805358373037.webp"
+    },
+    {
+      "barcode": "4805358810877",
+      "name": "Magnolia Creamy Chicken Spread",
+      "brand": "Magnolia",
+      "variant": "Creamy Chicken Spread",
+      "size": "80 mL",
+      "category": "Milk & dairy",
+      "image_asset": "assets/catalog/images/4805358810877.webp"
+    },
+    {
+      "barcode": "4804888804240",
+      "name": "mama sita Oyster sauce",
+      "brand": "mama sita",
+      "variant": "Oyster sauce",
+      "size": "405 g",
+      "category": "Sauces & seasonings",
+      "image_asset": "assets/catalog/images/4804888804240.webp"
+    },
+    {
+      "barcode": "4801668100271",
+      "name": "Mang Tomas All-around sarsa",
+      "brand": "Mang Tomas",
+      "variant": "All-around sarsa",
+      "size": "550 g",
+      "category": "Sauces & seasonings",
+      "image_asset": "assets/catalog/images/4801668100271.webp"
+    },
+    {
+      "barcode": "4800148531598",
+      "name": "Marby Whole Wheat Bread",
+      "brand": "Marby",
+      "variant": "Whole Wheat Bread",
+      "size": "600 g",
+      "category": "Bread & bakery",
+      "image_asset": "assets/catalog/images/4800148531598.webp"
+    },
+    {
+      "barcode": "4806504710119",
+      "name": "Mega Sardines in Tomato Sauce",
+      "brand": "Mega",
+      "variant": "Sardines in Tomato Sauce",
+      "size": "155 g (5.5 oz.)",
+      "category": "Canned goods",
+      "image_asset": "assets/catalog/images/4806504710119.webp"
+    },
+    {
+      "barcode": "4806504713059",
+      "name": "Mega Prime Quality Whole Mushrooms Champignons",
+      "brand": "Mega Prime Quality",
+      "variant": "Whole Mushrooms Champignons",
+      "size": "198 g",
+      "category": "Pantry staples",
+      "image_asset": "assets/catalog/images/4806504713059.webp"
+    },
+    {
+      "barcode": "4806504710812",
+      "name": "Mega Sardines Fried Sardine With Tausi",
+      "brand": "Mega Sardines",
+      "variant": "Fried Sardine With Tausi",
+      "size": "155 g",
+      "category": "Canned goods",
+      "image_asset": "assets/catalog/images/4806504710812.webp"
+    },
+    {
+      "barcode": "4806504712052",
+      "name": "Mega Tuna Flakes Hot and Spicy",
+      "brand": "Mega Tuna",
+      "variant": "Flakes Hot and Spicy",
+      "size": "155 g",
+      "category": "Canned goods",
+      "image_asset": "assets/catalog/images/4806504712052.webp"
+    },
+    {
+      "barcode": "4800361418225",
+      "name": "Milo Nourishing Energy Zero Added Table Sugar",
+      "brand": "Milo",
+      "variant": "Nourishing Energy Zero Added Table Sugar",
+      "size": "26 g",
+      "category": "Milk & dairy",
+      "image_asset": "assets/catalog/images/4800361418225.webp"
+    },
+    {
+      "barcode": "4801981120147",
+      "name": "Minute Maid Orange Juice Drink",
+      "brand": "Minute Maid",
+      "variant": "Orange Juice Drink",
+      "size": "250 mL",
+      "category": "Drinks",
+      "image_asset": "assets/catalog/images/4801981120147.webp"
+    },
+    {
+      "barcode": "4801981164851",
+      "name": "Minute Maid Apple Juice",
+      "brand": "Minute Maid",
+      "variant": "Apple Juice",
+      "size": "180 mL",
+      "category": "Drinks",
+      "image_asset": "assets/catalog/images/4801981164851.webp"
+    },
+    {
+      "barcode": "4807770100406",
+      "name": "Monde Nissin Eggnog Cookies",
+      "brand": "Monde Nissin",
+      "variant": "Eggnog Cookies",
+      "size": "130 g",
+      "category": "Snacks & biscuits",
+      "image_asset": "assets/catalog/images/4807770100406.webp"
+    },
+    {
+      "barcode": "4807770120206",
+      "name": "Monde Nissin Wafer Choco",
+      "brand": "Monde Nissin",
+      "variant": "Wafer Choco",
+      "size": "12 g",
+      "category": "Snacks & biscuits",
+      "image_asset": "assets/catalog/images/4807770120206.webp"
+    },
+    {
+      "barcode": "4800092660788",
+      "name": "Multirich Foods Choco Mucho White Chocolate",
+      "brand": "Multirich Foods",
+      "variant": "Choco Mucho White Chocolate",
+      "size": "30 g",
+      "category": "Snacks & biscuits",
+      "image_asset": "assets/catalog/images/4800092660788.webp"
+    },
+    {
+      "barcode": "4800092660801",
+      "name": "Multirich Foods Choco Mucho Peanut Butter",
+      "brand": "Multirich Foods",
+      "variant": "Choco Mucho Peanut Butter",
+      "size": "33 g",
+      "category": "Pantry staples",
+      "image_asset": "assets/catalog/images/4800092660801.webp"
+    },
+    {
+      "barcode": "4800092660962",
+      "name": "Multirich Foods Choco Mucho Dark Chocolate",
+      "brand": "Multirich Foods",
+      "variant": "Choco Mucho Dark Chocolate",
+      "size": "33 g",
+      "category": "Snacks & biscuits",
+      "image_asset": "assets/catalog/images/4800092660962.webp"
+    },
+    {
+      "barcode": "4800092661174",
+      "name": "Multirich foods corporation Superstix",
+      "brand": "Multirich foods corporation",
+      "variant": "Superstix",
+      "size": "250.0 g",
+      "category": "Snacks & biscuits",
+      "image_asset": "assets/catalog/images/4800092661174.webp"
+    },
+    {
+      "barcode": "4800361417204",
+      "name": "Nescafe Café Creations Caramel Latte",
+      "brand": "Nescafe",
+      "variant": "Café Creations Caramel Latte",
+      "size": "33 g",
+      "category": "Coffee & tea",
+      "image_asset": "assets/catalog/images/4800361417204.webp"
+    },
+    {
+      "barcode": "4800361418874",
+      "name": "Nescafe Cafe Creation Mocha Latte",
+      "brand": "Nescafe",
+      "variant": "Cafe Creation Mocha Latte",
+      "size": "33 g",
+      "category": "Coffee & tea",
+      "image_asset": "assets/catalog/images/4800361418874.webp"
+    },
+    {
+      "barcode": "4800361387989",
+      "name": "Nestea Honey Blend Black Tea",
+      "brand": "Nestea",
+      "variant": "Honey Blend Black Tea",
+      "size": "25 g",
+      "category": "Coffee & tea",
+      "image_asset": "assets/catalog/images/4800361387989.webp"
+    },
+    {
+      "barcode": "4800361417198",
+      "name": "Nestea Lemon Cucumber Green Tea",
+      "brand": "Nestea",
+      "variant": "Lemon Cucumber Green Tea",
+      "size": "250 mL",
+      "category": "Coffee & tea",
+      "image_asset": "assets/catalog/images/4800361417198.webp"
+    },
+    {
+      "barcode": "4800361392549",
+      "name": "Nestle Phils. Nestea Cranberry",
+      "brand": "Nestle Phils.",
+      "variant": "Nestea Cranberry",
+      "size": "25 g",
+      "category": "Coffee & tea",
+      "image_asset": "assets/catalog/images/4800361392549.webp"
+    },
+    {
+      "barcode": "4800361015165",
+      "name": "Nestlé Low-Fat Milk",
+      "brand": "Nestlé",
+      "variant": "Low-Fat Milk",
+      "size": "1000 mL",
+      "category": "Milk & dairy",
+      "image_asset": "assets/catalog/images/4800361015165.webp"
+    },
+    {
+      "barcode": "4800361015172",
+      "name": "Nestlé Low-Fat Milk",
+      "brand": "Nestlé",
+      "variant": "Low-Fat Milk",
+      "size": "250 mL",
+      "category": "Milk & dairy",
+      "image_asset": "assets/catalog/images/4800361015172.webp"
+    },
+    {
+      "barcode": "4800361028639",
+      "name": "Nestlé Koko Krunch Pack",
+      "brand": "Nestlé",
+      "variant": "Koko Krunch Pack",
+      "size": "20 g",
+      "category": "Pantry staples",
+      "image_asset": "assets/catalog/images/4800361028639.webp"
+    },
+    {
+      "barcode": "4800361028646",
+      "name": "Nestlé Milo Cereal",
+      "brand": "Nestlé",
+      "variant": "Milo Cereal",
+      "size": "20 g",
+      "category": "Pantry staples",
+      "image_asset": "assets/catalog/images/4800361028646.webp"
+    },
+    {
+      "barcode": "4800361331265",
+      "name": "Nestlé Nestle Chuckie",
+      "brand": "Nestlé",
+      "variant": "Nestle Chuckie",
+      "size": "1000 mL",
+      "category": "Milk & dairy",
+      "image_asset": "assets/catalog/images/4800361331265.webp"
+    },
+    {
+      "barcode": "4800361331289",
+      "name": "Nestlé Bear Brand Sterilized Full Cream Milk (UHT Processed)",
+      "brand": "Nestlé",
+      "variant": "Bear Brand Sterilized Full Cream Milk (UHT Processed)",
+      "size": "1 L",
+      "category": "Milk & dairy",
+      "image_asset": "assets/catalog/images/4800361331289.webp"
+    },
+    {
+      "barcode": "4800361380737",
+      "name": "Nestlé Coffee mate",
+      "brand": "Nestlé",
+      "variant": "Coffee mate",
+      "size": "450 g",
+      "category": "Coffee & tea",
+      "image_asset": "assets/catalog/images/4800361380737.webp"
+    },
+    {
+      "barcode": "4800361390804",
+      "name": "Nestlé Nescafe Coffee Mate",
+      "brand": "Nestlé",
+      "variant": "Nescafe Coffee Mate",
+      "size": "170 g",
+      "category": "Coffee & tea",
+      "image_asset": "assets/catalog/images/4800361390804.webp"
+    },
+    {
+      "barcode": "4800361395687",
+      "name": "Nestlé Chuckie",
+      "brand": "Nestlé",
+      "variant": "Chuckie",
+      "size": "110 mL",
+      "category": "Milk & dairy",
+      "image_asset": "assets/catalog/images/4800361395687.webp"
+    },
+    {
+      "barcode": "4800361396677",
+      "name": "Nestlé Bear brand Adult plus",
+      "brand": "Nestlé",
+      "variant": "Bear brand Adult plus",
+      "size": "33 g",
+      "category": "Milk & dairy",
+      "image_asset": "assets/catalog/images/4800361396677.webp"
+    },
+    {
+      "barcode": "4800361403764",
+      "name": "Nestlé Nescafe Original",
+      "brand": "Nestlé",
+      "variant": "Nescafe Original",
+      "size": "20 g",
+      "category": "Coffee & tea",
+      "image_asset": "assets/catalog/images/4800361403764.webp"
+    },
+    {
+      "barcode": "48025515",
+      "name": "Nestlé Coffee Mate",
+      "brand": "Nestlé",
+      "variant": "Coffee Mate",
+      "size": "5 g",
+      "category": "Coffee & tea",
+      "image_asset": "assets/catalog/images/48025515.webp"
+    },
+    {
+      "barcode": "4800361410892",
+      "name": "Nestlé Bear Brand Fortified Powdered Milk Drink",
+      "brand": "Nestlé",
+      "variant": "Bear Brand Fortified Powdered Milk Drink",
+      "size": "300 g",
+      "category": "Milk & dairy",
+      "image_asset": "assets/catalog/images/4800361410892.webp"
+    },
+    {
+      "barcode": "4800016551604",
+      "name": "Nissin Yakisoba spicy chicken flavor with real vegetables",
+      "brand": "Nissin",
+      "variant": "Yakisoba spicy chicken flavor with real vegetables",
+      "size": "59 g",
+      "category": "Instant noodles",
+      "image_asset": "assets/catalog/images/4800016551604.webp"
+    },
+    {
+      "barcode": "4800016551611",
+      "name": "Nissin Yakisoba instant pancit savory beef flavor with real vegetables",
+      "brand": "Nissin",
+      "variant": "Yakisoba instant pancit savory beef flavor with real vegetables",
+      "size": "59 g",
+      "category": "Instant noodles",
+      "image_asset": "assets/catalog/images/4800016551611.webp"
+    },
+    {
+      "barcode": "4800016552137",
+      "name": "Nissin Cup Batchoy",
+      "brand": "Nissin",
+      "variant": "Cup Batchoy",
+      "size": "40 g",
+      "category": "Instant noodles",
+      "image_asset": "assets/catalog/images/4800016552137.webp"
+    },
+    {
+      "barcode": "4807770100703",
+      "name": "Nissin Bread Stix",
+      "brand": "Nissin",
+      "variant": "Bread Stix",
+      "size": "20 g",
+      "category": "Snacks & biscuits",
+      "image_asset": "assets/catalog/images/4807770100703.webp"
+    },
+    {
+      "barcode": "4807770101694",
+      "name": "Nissin Butter Coconut",
+      "brand": "Nissin",
+      "variant": "Butter Coconut",
+      "size": "90 g",
+      "category": "Snacks & biscuits",
+      "image_asset": "assets/catalog/images/4807770101694.webp"
+    },
+    {
+      "barcode": "4807770120251",
+      "name": "Nissin Wafer Vanilla",
+      "brand": "Nissin",
+      "variant": "Wafer Vanilla",
+      "size": "240 g",
+      "category": "Snacks & biscuits",
+      "image_asset": "assets/catalog/images/4807770120251.webp"
+    },
+    {
+      "barcode": "4807770121708",
+      "name": "Nissin Waffle Deluxe Chocolate",
+      "brand": "Nissin",
+      "variant": "Waffle Deluxe Chocolate",
+      "size": "23 g",
+      "category": "Snacks & biscuits",
+      "image_asset": "assets/catalog/images/4807770121708.webp"
+    },
+    {
+      "barcode": "4807770122163",
+      "name": "Nissin Butter Coconut",
+      "brand": "Nissin",
+      "variant": "Butter Coconut",
+      "size": "28 g",
+      "category": "Snacks & biscuits",
+      "image_asset": "assets/catalog/images/4807770122163.webp"
+    },
+    {
+      "barcode": "4807770122170",
+      "name": "Nissin Butter Coconut",
+      "brand": "Nissin",
+      "variant": "Butter Coconut",
+      "size": "280 g",
+      "category": "Snacks & biscuits",
+      "image_asset": "assets/catalog/images/4807770122170.webp"
+    },
+    {
+      "barcode": "4807770122705",
+      "name": "Nissin Malkist Sandwich",
+      "brand": "Nissin",
+      "variant": "Malkist Sandwich",
+      "size": "24 g",
+      "category": "Snacks & biscuits",
+      "image_asset": "assets/catalog/images/4807770122705.webp"
+    },
+    {
+      "barcode": "4807770123153",
+      "name": "Nissin Stick Wafer",
+      "brand": "Nissin",
+      "variant": "Stick Wafer",
+      "size": "264 g",
+      "category": "Snacks & biscuits",
+      "image_asset": "assets/catalog/images/4807770123153.webp"
+    },
+    {
+      "barcode": "4800016560927",
+      "name": "Nissin Cup Noodles Nissin Cup Spicy Hot Beef",
+      "brand": "Nissin Cup Noodles",
+      "variant": "Nissin Cup Spicy Hot Beef",
+      "size": "45 g",
+      "category": "Instant noodles",
+      "image_asset": "assets/catalog/images/4800016560927.webp"
+    },
+    {
+      "barcode": "4800194104128",
+      "name": "Oishi Cheez On Chips",
+      "brand": "Oishi",
+      "variant": "Cheez On Chips",
+      "size": "22 g",
+      "category": "Snacks & biscuits",
+      "image_asset": "assets/catalog/images/4800194104128.webp"
+    },
+    {
+      "barcode": "4800194104968",
+      "name": "Oishi Prawn Crackers Spicy",
+      "brand": "Oishi",
+      "variant": "Prawn Crackers Spicy",
+      "size": "24 g",
+      "category": "Snacks & biscuits",
+      "image_asset": "assets/catalog/images/4800194104968.webp"
+    },
+    {
+      "barcode": "4800194105958",
+      "name": "Oishi Prawn Crackers (Sweet Extra Flavor)",
+      "brand": "Oishi",
+      "variant": "Prawn Crackers (Sweet Extra Flavor)",
+      "size": "60 g",
+      "category": "Snacks & biscuits",
+      "image_asset": "assets/catalog/images/4800194105958.webp"
+    },
+    {
+      "barcode": "4800194106696",
+      "name": "Oishi Potato Fries Barbeque (BBQ)",
+      "brand": "Oishi",
+      "variant": "Potato Fries Barbeque (BBQ)",
+      "size": "50 g",
+      "category": "Snacks & biscuits",
+      "image_asset": "assets/catalog/images/4800194106696.webp"
+    },
+    {
+      "barcode": "4800194106900",
+      "name": "Oishi 4x Corn Snack - Cheddar Flavor",
+      "brand": "Oishi",
+      "variant": "4x Corn Snack - Cheddar Flavor",
+      "size": "24 g",
+      "category": "Milk & dairy",
+      "image_asset": "assets/catalog/images/4800194106900.webp"
+    },
+    {
+      "barcode": "4800194131230",
+      "name": "Oishi Potato Fries Plain",
+      "brand": "Oishi",
+      "variant": "Potato Fries Plain",
+      "size": "30 g",
+      "category": "Snacks & biscuits",
+      "image_asset": "assets/catalog/images/4800194131230.webp"
+    },
+    {
+      "barcode": "4800194136648",
+      "name": "Oishi Fishda Fish Kropeck",
+      "brand": "Oishi",
+      "variant": "Fishda Fish Kropeck",
+      "size": "22 g",
+      "category": "Snacks & biscuits",
+      "image_asset": "assets/catalog/images/4800194136648.webp"
+    },
+    {
+      "barcode": "4800194150965",
+      "name": "Oishi Smart C + Dalandan Burst Juice Drink",
+      "brand": "Oishi",
+      "variant": "Smart C + Dalandan Burst Juice Drink",
+      "size": "350 mL",
+      "category": "Drinks",
+      "image_asset": "assets/catalog/images/4800194150965.webp"
+    },
+    {
+      "barcode": "4800194152594",
+      "name": "Oishi Grab Nuts Roasted Almonds",
+      "brand": "Oishi",
+      "variant": "Grab Nuts Roasted Almonds",
+      "size": "30 g",
+      "category": "Snacks & biscuits",
+      "image_asset": "assets/catalog/images/4800194152594.webp"
+    },
+    {
+      "barcode": "4800194153232",
+      "name": "Oishi Bread Pan Onion & Garlic",
+      "brand": "Oishi",
+      "variant": "Bread Pan Onion & Garlic",
+      "size": "24 g",
+      "category": "Snacks & biscuits",
+      "image_asset": "assets/catalog/images/4800194153232.webp"
+    },
+    {
+      "barcode": "4800194184083",
+      "name": "Oishi Smart C Lemon Squeeze",
+      "brand": "Oishi",
+      "variant": "Smart C Lemon Squeeze",
+      "size": "350 mL",
+      "category": "Drinks",
+      "image_asset": "assets/catalog/images/4800194184083.webp"
+    },
+    {
+      "barcode": "4800194185103",
+      "name": "Oishi Smart C+ Pomelo Grapefruit Vitamin C Juice Drink",
+      "brand": "Oishi",
+      "variant": "Smart C+ Pomelo Grapefruit Vitamin C Juice Drink",
+      "size": "500 mL",
+      "category": "Drinks",
+      "image_asset": "assets/catalog/images/4800194185103.webp"
+    },
+    {
+      "barcode": "4800194187084",
+      "name": "Oishi Smart C Lemon Squeese",
+      "brand": "Oishi",
+      "variant": "Smart C Lemon Squeese",
+      "size": "1 L",
+      "category": "Drinks",
+      "image_asset": "assets/catalog/images/4800194187084.webp"
+    },
+    {
+      "barcode": "4808591800049",
+      "name": "Ovaltine",
+      "brand": "Ovaltine",
+      "variant": "Ovaltine",
+      "size": "20 g",
+      "category": "Milk & dairy",
+      "image_asset": "assets/catalog/images/4808591800049.webp"
+    },
+    {
+      "barcode": "4803925260124",
+      "name": "Pepsi Tropicana Twister",
+      "brand": "Pepsi",
+      "variant": "Tropicana Twister",
+      "size": "1000 mL",
+      "category": "Drinks",
+      "image_asset": "assets/catalog/images/4803925260124.webp"
+    },
+    {
+      "barcode": "4800274700011",
+      "name": "Pepsi-Cola Quaker Oats Caldo Chicken & Mushroom flavor",
+      "brand": "Pepsi-Cola",
+      "variant": "Quaker Oats Caldo Chicken & Mushroom flavor",
+      "size": "28 g",
+      "category": "Pantry staples",
+      "image_asset": "assets/catalog/images/4800274700011.webp"
+    },
+    {
+      "barcode": "4800350108878",
+      "name": "Pocari Sweat Ion Supply Drink",
+      "brand": "pocari sweat",
+      "variant": "Ion Supply Drink",
+      "size": "900 mL",
+      "category": "Drinks",
+      "image_asset": "assets/catalog/images/4800350108878.webp"
+    },
+    {
+      "barcode": "4808887010022",
+      "name": "Purefoods Corned Beef",
+      "brand": "Purefoods",
+      "variant": "Corned Beef",
+      "size": "150 g",
+      "category": "Canned goods",
+      "image_asset": "assets/catalog/images/4808887010022.webp"
+    },
+    {
+      "barcode": "4808887010077",
+      "name": "Purefoods Corned Beef (Classic)",
+      "brand": "Purefoods",
+      "variant": "Corned Beef (Classic)",
+      "size": "150 g",
+      "category": "Canned goods",
+      "image_asset": "assets/catalog/images/4808887010077.webp"
+    },
+    {
+      "barcode": "4800274020027",
+      "name": "Quaker Quick Cook Oatmeal",
+      "brand": "Quaker",
+      "variant": "Quick Cook Oatmeal",
+      "size": "200 g",
+      "category": "Pantry staples",
+      "image_asset": "assets/catalog/images/4800274020027.webp"
+    },
+    {
+      "barcode": "4800274330355",
+      "name": "Quaker Instant Oatmeal Chocolate Flavor",
+      "brand": "Quaker",
+      "variant": "Instant Oatmeal Chocolate Flavor",
+      "size": "33 g",
+      "category": "Pantry staples",
+      "image_asset": "assets/catalog/images/4800274330355.webp"
+    },
+    {
+      "barcode": "4800274834280",
+      "name": "Quaker Oaties mini oats cookies Apple Cinnamon",
+      "brand": "Quaker",
+      "variant": "Oaties mini oats cookies Apple Cinnamon",
+      "size": "28 g",
+      "category": "Snacks & biscuits",
+      "image_asset": "assets/catalog/images/4800274834280.webp"
+    },
+    {
+      "barcode": "4800056161023",
+      "name": "Ques-O Pasteurized Processed Cheese Food",
+      "brand": "Ques-O",
+      "variant": "Pasteurized Processed Cheese Food",
+      "size": "500 g",
+      "category": "Milk & dairy",
+      "image_asset": "assets/catalog/images/4800056161023.webp"
+    },
+    {
+      "barcode": "4804888889018",
+      "name": "Quickchow Quiickchow Instant Mami Chicken",
+      "brand": "Quickchow",
+      "variant": "Quiickchow Instant Mami Chicken",
+      "size": "55 g",
+      "category": "Instant noodles",
+      "image_asset": "assets/catalog/images/4804888889018.webp"
+    },
+    {
+      "barcode": "4806505854973",
+      "name": "Quinns Sweet Corn Balls",
+      "brand": "Quinns",
+      "variant": "Sweet Corn Balls",
+      "size": "420 g",
+      "category": "Snacks & biscuits",
+      "image_asset": "assets/catalog/images/4806505854973.webp"
+    },
+    {
+      "barcode": "4800017905505",
+      "name": "RAM Green Peas",
+      "brand": "RAM",
+      "variant": "Green Peas",
+      "size": "225 g",
+      "category": "Pantry staples",
+      "image_asset": "assets/catalog/images/4800017905505.webp"
+    },
+    {
+      "barcode": "4800017952301",
+      "name": "RAM Food Products RAM Hotcake Mix",
+      "brand": "RAM Food Products",
+      "variant": "RAM Hotcake Mix",
+      "size": "200 g",
+      "category": "Pantry staples",
+      "image_asset": "assets/catalog/images/4800017952301.webp"
+    },
+    {
+      "barcode": "4800092113314",
+      "name": "Rebisco Hansel Milk Sandwhich",
+      "brand": "Rebisco",
+      "variant": "Hansel Milk Sandwhich",
+      "size": "31 g",
+      "category": "Snacks & biscuits",
+      "image_asset": "assets/catalog/images/4800092113314.webp"
+    },
+    {
+      "barcode": "4800092113413",
+      "name": "Rebisco Bravo",
+      "brand": "Rebisco",
+      "variant": "Bravo",
+      "size": "30 g",
+      "category": "Snacks & biscuits",
+      "image_asset": "assets/catalog/images/4800092113413.webp"
+    },
+    {
+      "barcode": "4800092115707",
+      "name": "Rebisco Wafer time",
+      "brand": "Rebisco",
+      "variant": "Wafer time",
+      "size": "27 g",
+      "category": "Snacks & biscuits",
+      "image_asset": "assets/catalog/images/4800092115707.webp"
+    },
+    {
+      "barcode": "4800092550669",
+      "name": "Rebisco Crossini Hazel Choco",
+      "brand": "Rebisco",
+      "variant": "Crossini Hazel Choco",
+      "size": "41 g",
+      "category": "Snacks & biscuits",
+      "image_asset": "assets/catalog/images/4800092550669.webp"
+    },
+    {
+      "barcode": "4800016073335",
+      "name": "RFM Universal Robina B'lue Flavored Drink",
+      "brand": "RFM Universal Robina",
+      "variant": "B'lue Flavored Drink",
+      "size": "500 mL",
+      "category": "Drinks",
+      "image_asset": "assets/catalog/images/4800016073335.webp"
+    },
+    {
+      "barcode": "4800016073960",
+      "name": "RFM Vitasoy Chocolate",
+      "brand": "RFM",
+      "variant": "Vitasoy Chocolate",
+      "size": "330 mL",
+      "category": "Snacks & biscuits",
+      "image_asset": "assets/catalog/images/4800016073960.webp"
+    },
+    {
+      "barcode": "4806527717218",
+      "name": "Rite 'n Lite Sugar free Orange soda",
+      "brand": "Rite 'n Lite",
+      "variant": "Sugar free Orange soda",
+      "size": "250 mL",
+      "category": "Drinks",
+      "image_asset": "assets/catalog/images/4806527717218.webp"
+    },
+    {
+      "barcode": "4801981118519",
+      "name": "Royal Tru-Orange",
+      "brand": "Royal",
+      "variant": "Tru-Orange",
+      "size": "250 mL",
+      "category": "Drinks",
+      "image_asset": "assets/catalog/images/4801981118519.webp"
+    },
+    {
+      "barcode": "4801981118571",
+      "name": "Royal Tru-Orange Carbonated Orange Drink (Fortified with B-Vitamins)",
+      "brand": "Royal",
+      "variant": "Tru-Orange Carbonated Orange Drink (Fortified with B-Vitamins)",
+      "size": "290 mL",
+      "category": "Drinks",
+      "image_asset": "assets/catalog/images/4801981118571.webp"
+    },
+    {
+      "barcode": "4801981127207",
+      "name": "Royal Tru-Orange",
+      "brand": "Royal",
+      "variant": "Tru-Orange",
+      "size": "195 mL",
+      "category": "Drinks",
+      "image_asset": "assets/catalog/images/4801981127207.webp"
+    },
+    {
+      "barcode": "4806513742569",
+      "name": "San Miguel Foods San Mig Super Coffee",
+      "brand": "San Miguel Foods",
+      "variant": "San Mig Super Coffee",
+      "size": "7 g",
+      "category": "Coffee & tea",
+      "image_asset": "assets/catalog/images/4806513742569.webp"
+    },
+    {
+      "barcode": "4800110080482",
+      "name": "Selecta Moo Fortified",
+      "brand": "Selecta",
+      "variant": "Moo Fortified",
+      "size": "245 mL",
+      "category": "Milk & dairy",
+      "image_asset": "assets/catalog/images/4800110080482.webp"
+    },
+    {
+      "barcode": "4800110093888",
+      "name": "Selecta Fortified Milk",
+      "brand": "Selecta",
+      "variant": "Fortified Milk",
+      "size": "1000 mL",
+      "category": "Milk & dairy",
+      "image_asset": "assets/catalog/images/4800110093888.webp"
+    },
+    {
+      "barcode": "4802222039969",
+      "name": "SM Bonus Creamy Peanut Butter",
+      "brand": "SM Bonus",
+      "variant": "Creamy Peanut Butter",
+      "size": "470 g",
+      "category": "Pantry staples",
+      "image_asset": "assets/catalog/images/4802222039969.webp"
+    },
+    {
+      "barcode": "4802222046141",
+      "name": "Sm Bonus Banana chips",
+      "brand": "Sm Bonus",
+      "variant": "Banana chips",
+      "size": "80 g",
+      "category": "Snacks & biscuits",
+      "image_asset": "assets/catalog/images/4802222046141.webp"
+    },
+    {
+      "barcode": "4800361411110",
+      "name": "Societé des Produits Nestlé S.A Coffee Mate",
+      "brand": "Societé des Produits Nestlé S.A",
+      "variant": "Coffee Mate",
+      "size": "60 g",
+      "category": "Coffee & tea",
+      "image_asset": "assets/catalog/images/4800361411110.webp"
+    },
+    {
+      "barcode": "4800361028158",
+      "name": "Société des Produits Nestlé S.A. Honey Stars",
+      "brand": "Société des Produits Nestlé S.A.",
+      "variant": "Honey Stars",
+      "size": "20 g",
+      "category": "Pantry staples",
+      "image_asset": "assets/catalog/images/4800361028158.webp"
+    },
+    {
+      "barcode": "4800361379557",
+      "name": "Société des Produits Nestlé S.A. Nestea Lemon",
+      "brand": "Société des Produits Nestlé S.A.",
+      "variant": "Nestea Lemon",
+      "size": "20 g",
+      "category": "Coffee & tea",
+      "image_asset": "assets/catalog/images/4800361379557.webp"
+    },
+    {
+      "barcode": "4801981127191",
+      "name": "Sprite",
+      "brand": "Sprite",
+      "variant": "Sprite",
+      "size": "195 mL",
+      "category": "Drinks",
+      "image_asset": "assets/catalog/images/4801981127191.webp"
+    },
+    {
+      "barcode": "4801981116270",
+      "name": "Lemon-Lime Drink Sprite",
+      "brand": "Sprite",
+      "variant": "Lemon-Lime Drink",
+      "size": "1.5 l",
+      "category": "Drinks",
+      "image_asset": "assets/catalog/images/4801981116270.webp"
+    },
+    {
+      "barcode": "4806506520808",
+      "name": "Suncoast Lightwater",
+      "brand": "Suncoast",
+      "variant": "Lightwater",
+      "size": "650 mL",
+      "category": "Drinks",
+      "image_asset": "assets/catalog/images/4806506520808.webp"
+    },
+    {
+      "barcode": "4804888815918",
+      "name": "Sunrich Peanut Crunch",
+      "brand": "Sunrich",
+      "variant": "Peanut Crunch",
+      "size": "120 g",
+      "category": "Snacks & biscuits",
+      "image_asset": "assets/catalog/images/4804888815918.webp"
+    },
+    {
+      "barcode": "4800365881315",
+      "name": "Super delight Super Delights Brownie Bites",
+      "brand": "Super delight",
+      "variant": "Super Delights Brownie Bites",
+      "size": "14 g",
+      "category": "Snacks & biscuits",
+      "image_asset": "assets/catalog/images/4800365881315.webp"
+    },
+    {
+      "barcode": "4801981120369",
+      "name": "The Coca-Cola Company Real Leaf Honey Lemon Green Tea",
+      "brand": "The Coca-Cola Company",
+      "variant": "Real Leaf Honey Lemon Green Tea",
+      "size": "480 mL",
+      "category": "Coffee & tea",
+      "image_asset": "assets/catalog/images/4801981120369.webp"
+    },
+    {
+      "barcode": "4806533310373",
+      "name": "UCC Iced creamy 3in1 coffee mix",
+      "brand": "UCC",
+      "variant": "Iced creamy 3in1 coffee mix",
+      "size": "25 g",
+      "category": "Milk & dairy",
+      "image_asset": "assets/catalog/images/4806533310373.webp"
+    },
+    {
+      "barcode": "4800016022258",
+      "name": "Universal Robina Great Taste Choco Coffee Mix Twin Pack",
+      "brand": "Universal Robina",
+      "variant": "Great Taste Choco Coffee Mix Twin Pack",
+      "size": "50 g",
+      "category": "Coffee & tea",
+      "image_asset": "assets/catalog/images/4800016022258.webp"
+    },
+    {
+      "barcode": "4800016783609",
+      "name": "Universal Robina El Real. Rumble pasta",
+      "brand": "Universal Robina",
+      "variant": "El Real. Rumble pasta",
+      "size": "400 g",
+      "category": "Pantry staples",
+      "image_asset": "assets/catalog/images/4800016783609.webp"
+    },
+    {
+      "barcode": "4800016022210",
+      "name": "Universal Robina Corporation Great Taste White Caramel",
+      "brand": "Universal Robina Corporation",
+      "variant": "Great Taste White Caramel",
+      "size": "30 g",
+      "category": "Coffee & tea",
+      "image_asset": "assets/catalog/images/4800016022210.webp"
+    },
+    {
+      "barcode": "4800016025457",
+      "name": "Universal Robina Corporation B'lue Z-RO",
+      "brand": "Universal Robina Corporation",
+      "variant": "B'lue Z-RO",
+      "size": "330 mL",
+      "category": "Drinks",
+      "image_asset": "assets/catalog/images/4800016025457.webp"
+    },
+    {
+      "barcode": "4800016074899",
+      "name": "Universal Robina Corporation Great Taste Chocolate Mocha",
+      "brand": "Universal Robina Corporation",
+      "variant": "Great Taste Chocolate Mocha",
+      "size": "200 mL",
+      "category": "Snacks & biscuits",
+      "image_asset": "assets/catalog/images/4800016074899.webp"
+    },
+    {
+      "barcode": "4800016964466",
+      "name": "Universal Robina Corporation Cloud 9 Almond Fudge",
+      "brand": "Universal Robina Corporation",
+      "variant": "Cloud 9 Almond Fudge",
+      "size": "35 g",
+      "category": "Snacks & biscuits",
+      "image_asset": "assets/catalog/images/4800016964466.webp"
+    },
+    {
+      "barcode": "4806521791719",
+      "name": "W.L.Foods Tattoos Corn Chips",
+      "brand": "W.L.Foods",
+      "variant": "Tattoos Corn Chips",
+      "size": "120 g",
+      "category": "Snacks & biscuits",
+      "image_asset": "assets/catalog/images/4806521791719.webp"
+    },
+    {
+      "barcode": "4801981107971",
+      "name": "Wilkins Pure Purified Drinking Water",
+      "brand": "Wilkins",
+      "variant": "Pure Purified Drinking Water",
+      "size": "500 mL",
+      "category": "Drinks",
+      "image_asset": "assets/catalog/images/4801981107971.webp"
+    },
+    {
+      "barcode": "48042857",
+      "name": "Yakult Light cultured milk",
+      "brand": "Yakult",
+      "variant": "Light cultured milk",
+      "size": "80 mL",
+      "category": "Milk & dairy",
+      "image_asset": "assets/catalog/images/48042857.webp"
+    },
+    {
+      "barcode": "4800527629083",
+      "name": "Youngs Town Sardines (G)",
+      "brand": "Young's Town",
+      "variant": "Sardines (G)",
+      "size": "155 g",
+      "category": "Canned goods",
+      "image_asset": "assets/catalog/images/4800527629083.webp"
+    },
+    {
+      "barcode": "0748485800110",
+      "name": "Argentina Beef Loaf",
+      "brand": "Argentina",
+      "variant": "Beef Loaf",
+      "size": "250 g",
+      "category": "Canned goods",
+      "image_asset": "assets/catalog/images/0748485800110.webp"
+    },
+    {
+      "barcode": "0748485800233",
+      "name": "Argentina Meatloaf",
+      "brand": "Argentina",
+      "variant": "Meatloaf",
+      "size": "170 g",
+      "category": "Canned goods",
+      "image_asset": "assets/catalog/images/0748485800233.webp"
+    },
+    {
+      "barcode": "0748485800431",
+      "name": "Argentina Corned Beef",
+      "brand": "Argentina",
+      "variant": "Corned Beef",
+      "size": "150 g",
+      "category": "Canned goods",
+      "image_asset": "assets/catalog/images/0748485800431.webp"
+    },
+    {
+      "barcode": "0748485801803",
+      "name": "Argentina Corned Beef",
+      "brand": "Argentina",
+      "variant": "Corned Beef",
+      "size": "100 g",
+      "category": "Canned goods",
+      "image_asset": "assets/catalog/images/0748485801803.webp"
+    },
+    {
+      "barcode": "0748485803685",
+      "name": "Argentina Spicy Corned Chicken",
+      "brand": "Argentina",
+      "variant": "Spicy Corned Chicken",
+      "size": "150 g",
+      "category": "Canned goods",
+      "image_asset": "assets/catalog/images/0748485803685.webp"
+    },
+    {
+      "barcode": "0748485802473",
+      "name": "Argentina Brand Argentina Corned Chicken",
+      "brand": "Argentina Brand",
+      "variant": "Argentina Corned Chicken",
+      "size": "150 g",
+      "category": "Canned goods",
+      "image_asset": "assets/catalog/images/0748485802473.webp"
+    },
+    {
+      "barcode": "0074305401169",
+      "name": "Bragg Apple Cider Vinegar",
+      "brand": "Bragg",
+      "variant": "Apple Cider Vinegar",
+      "size": "473 mL",
+      "category": "Sauces & seasonings",
+      "image_asset": "assets/catalog/images/0074305401169.webp"
+    },
+    {
+      "barcode": "21080661",
+      "name": "C2 Apple Green Tea",
+      "brand": "C2",
+      "variant": "Apple Green Tea",
+      "size": "355 mL",
+      "category": "Coffee & tea",
+      "image_asset": "assets/catalog/images/21080661.webp"
+    },
+    {
+      "barcode": "8901233024219",
+      "name": "Cadbury Dairy Milk with Oreo",
+      "brand": "Cadbury",
+      "variant": "Dairy Milk with Oreo",
+      "size": "49 g",
+      "category": "Snacks & biscuits",
+      "image_asset": "assets/catalog/images/8901233024219.webp"
+    },
+    {
+      "barcode": "0748485100050",
+      "name": "Century Pacific Food Century Tuna Premium Red Chunks Spanish Style",
+      "brand": "Century Pacific Food",
+      "variant": "Century Tuna Premium Red Chunks Spanish Style",
+      "size": "184 g",
+      "category": "Canned goods",
+      "image_asset": "assets/catalog/images/0748485100050.webp"
+    },
+    {
+      "barcode": "72217887",
+      "name": "Century Pacific Food 555 Fried sardines hot & spicy",
+      "brand": "Century Pacific Food",
+      "variant": "555 Fried sardines hot & spicy",
+      "size": "155 g",
+      "category": "Canned goods",
+      "image_asset": "assets/catalog/images/72217887.webp"
+    },
+    {
+      "barcode": "0748485100081",
+      "name": "Century Tuna Flakes in Oil",
+      "brand": "Century Tuna",
+      "variant": "Flakes in Oil",
+      "size": "180 g",
+      "category": "Canned goods",
+      "image_asset": "assets/catalog/images/0748485100081.webp"
+    },
+    {
+      "barcode": "1828981189533",
+      "name": "Coca-Cola Nutriboost Orange Flavor",
+      "brand": "Coca-Cola",
+      "variant": "Nutriboost Orange Flavor",
+      "size": "330 mL",
+      "category": "Milk & dairy",
+      "image_asset": "assets/catalog/images/1828981189533.webp"
+    },
+    {
+      "barcode": "8888440000048",
+      "name": "Cowhead Pure Milk",
+      "brand": "Cowhead",
+      "variant": "Pure Milk",
+      "size": "1 L",
+      "category": "Milk & dairy",
+      "image_asset": "assets/catalog/images/8888440000048.webp"
+    },
+    {
+      "barcode": "8996001603192",
+      "name": "Energen Champion Pwdered Chocolate Malt Drink with Vitamins & Egg",
+      "brand": "Energen Champion",
+      "variant": "Pwdered Chocolate Malt Drink with Vitamins & Egg",
+      "size": "32 g",
+      "category": "Snacks & biscuits",
+      "image_asset": "assets/catalog/images/8996001603192.webp"
+    },
+    {
+      "barcode": "8992775711910",
+      "name": "GarudaFood Gery chocolatõs",
+      "brand": "GarudaFood",
+      "variant": "Gery chocolatõs",
+      "size": "16 g",
+      "category": "Snacks & biscuits",
+      "image_asset": "assets/catalog/images/8992775711910.webp"
+    },
+    {
+      "barcode": "4002309007540",
+      "name": "Goya Double Hazelnut Spread",
+      "brand": "Goya",
+      "variant": "Double Hazelnut Spread",
+      "size": "350 g",
+      "category": "Snacks & biscuits",
+      "image_asset": "assets/catalog/images/4002309007540.webp"
+    },
+    {
+      "barcode": "4002309028460",
+      "name": "Goya Choco Hazelnut and Milk Choco Spread",
+      "brand": "Goya",
+      "variant": "Choco Hazelnut and Milk Choco Spread",
+      "size": "400 g",
+      "category": "Snacks & biscuits",
+      "image_asset": "assets/catalog/images/4002309028460.webp"
+    },
+    {
+      "barcode": "6942836702403",
+      "name": "Hershey's Creamy Chocolate With Whole Almonds",
+      "brand": "Hershey's",
+      "variant": "Creamy Chocolate With Whole Almonds",
+      "size": "40 g",
+      "category": "Snacks & biscuits",
+      "image_asset": "assets/catalog/images/6942836702403.webp"
+    },
+    {
+      "barcode": "9555805800009",
+      "name": "Kellogg's Instant Oats",
+      "brand": "Kellogg's",
+      "variant": "Instant Oats",
+      "size": "200 g",
+      "category": "Pantry staples",
+      "image_asset": "assets/catalog/images/9555805800009.webp"
+    },
+    {
+      "barcode": "8936066340021",
+      "name": "Kewpie Mayonnaise Japanese Style",
+      "brand": "Kewpie",
+      "variant": "Mayonnaise Japanese Style",
+      "size": "130 g",
+      "category": "Sauces & seasonings",
+      "image_asset": "assets/catalog/images/8936066340021.webp"
+    },
+    {
+      "barcode": "1200108000080",
+      "name": "Lay's Stax Original",
+      "brand": "Lay's",
+      "variant": "Stax Original",
+      "size": "105 g",
+      "category": "Snacks & biscuits",
+      "image_asset": "assets/catalog/images/1200108000080.webp"
+    },
+    {
+      "barcode": "0750515030008",
+      "name": "M.Y. San Skyflakes Fit Crackers with Flax Seeds",
+      "brand": "M.Y. San",
+      "variant": "Skyflakes Fit Crackers with Flax Seeds",
+      "size": "25 g",
+      "category": "Snacks & biscuits",
+      "image_asset": "assets/catalog/images/0750515030008.webp"
+    },
+    {
+      "barcode": "0750515018303",
+      "name": "M.y.san skyflakes Sky Flakes Crackers",
+      "brand": "M.y.san skyflakes",
+      "variant": "Sky Flakes Crackers",
+      "size": "100 g",
+      "category": "Snacks & biscuits",
+      "image_asset": "assets/catalog/images/0750515018303.webp"
+    },
+    {
+      "barcode": "88534664",
+      "name": "Magnolia Cheezee Squeeze",
+      "brand": "Magnolia",
+      "variant": "Cheezee Squeeze",
+      "size": "235 g",
+      "category": "Milk & dairy",
+      "image_asset": "assets/catalog/images/88534664.webp"
+    },
+    {
+      "barcode": "6902131112925",
+      "name": "MaLing Chicken Luncheon Meat",
+      "brand": "MaLing",
+      "variant": "Chicken Luncheon Meat",
+      "size": "397 g",
+      "category": "Canned goods",
+      "image_asset": "assets/catalog/images/6902131112925.webp"
+    },
+    {
+      "barcode": "8888077102078",
+      "name": "Meiji Hello Panda Fun Filled Biscuits Treats 10 Packets",
+      "brand": "Meiji",
+      "variant": "Hello Panda Fun Filled Biscuits Treats 10 Packets",
+      "size": "260 g",
+      "category": "Snacks & biscuits",
+      "image_asset": "assets/catalog/images/8888077102078.webp"
+    },
+    {
+      "barcode": "7622300743000",
+      "name": "Mondelez Tiger Vanilla",
+      "brand": "Mondelez",
+      "variant": "Tiger Vanilla",
+      "size": "22.8 g",
+      "category": "Snacks & biscuits",
+      "image_asset": "assets/catalog/images/7622300743000.webp"
+    },
+    {
+      "barcode": "8850120990246",
+      "name": "Moniegold Tamarind",
+      "brand": "Moniegold",
+      "variant": "Tamarind",
+      "size": "150 g",
+      "category": "Snacks & biscuits",
+      "image_asset": "assets/catalog/images/8850120990246.webp"
+    },
+    {
+      "barcode": "18921496",
+      "name": "Nissin Yakisoba savory beef flavor with real vegetables",
+      "brand": "Nissin",
+      "variant": "Yakisoba savory beef flavor with real vegetables",
+      "size": "59 g",
+      "category": "Instant noodles",
+      "image_asset": "assets/catalog/images/18921496.webp"
+    },
+    {
+      "barcode": "4891208040143",
+      "name": "Oishi Prawn Crackers",
+      "brand": "Oishi",
+      "variant": "Prawn Crackers",
+      "size": "24 g",
+      "category": "Snacks & biscuits",
+      "image_asset": "assets/catalog/images/4891208040143.webp"
+    },
+    {
+      "barcode": "9555076300123",
+      "name": "OldTown White Coffee Classic",
+      "brand": "OldTown",
+      "variant": "White Coffee Classic",
+      "size": "40 g",
+      "category": "Coffee & tea",
+      "image_asset": "assets/catalog/images/9555076300123.webp"
+    },
+    {
+      "barcode": "8992760121014",
+      "name": "OREO Original",
+      "brand": "Oreo",
+      "variant": "Original",
+      "size": "27 g",
+      "category": "Snacks & biscuits",
+      "image_asset": "assets/catalog/images/8992760121014.webp"
+    },
+    {
+      "barcode": "7612100061046",
+      "name": "Ovaltine Prime Nutri 10",
+      "brand": "Ovaltine",
+      "variant": "Prime Nutri 10",
+      "size": "25 g",
+      "category": "Milk & dairy",
+      "image_asset": "assets/catalog/images/7612100061046.webp"
+    },
+    {
+      "barcode": "8850086250316",
+      "name": "Ovaltine Chocolate Malt Cookies",
+      "brand": "Ovaltine",
+      "variant": "Chocolate Malt Cookies",
+      "size": "30 g",
+      "category": "Snacks & biscuits",
+      "image_asset": "assets/catalog/images/8850086250316.webp"
+    },
+    {
+      "barcode": "9556174816578",
+      "name": "Pepsico Lay' Stax Sour Cream & Onion",
+      "brand": "Pepsico",
+      "variant": "Lay' Stax Sour Cream & Onion",
+      "size": "135 g",
+      "category": "Snacks & biscuits",
+      "image_asset": "assets/catalog/images/9556174816578.webp"
+    },
+    {
+      "barcode": "9556174100028",
+      "name": "Quaker Instant Oatmeal",
+      "brand": "Quaker",
+      "variant": "Instant Oatmeal",
+      "size": "1 kg",
+      "category": "Pantry staples",
+      "image_asset": "assets/catalog/images/9556174100028.webp"
+    },
+    {
+      "barcode": "84001771",
+      "name": "Rebisco Hansel Crackers",
+      "brand": "Rebisco",
+      "variant": "Hansel Crackers",
+      "size": "32 g",
+      "category": "Snacks & biscuits",
+      "image_asset": "assets/catalog/images/84001771.webp"
+    },
+    {
+      "barcode": "0037600840804",
+      "name": "Skippy Extra Crunchy Peanut Butter",
+      "brand": "Skippy",
+      "variant": "Extra Crunchy Peanut Butter",
+      "size": "462 g",
+      "category": "Pantry staples",
+      "image_asset": "assets/catalog/images/0037600840804.webp"
+    },
+    {
+      "barcode": "0750515018402",
+      "name": "SkyFlakes Sky Flakes",
+      "brand": "SkyFlakes",
+      "variant": "Sky Flakes",
+      "size": "25 g",
+      "category": "Snacks & biscuits",
+      "image_asset": "assets/catalog/images/0750515018402.webp"
+    },
+    {
+      "barcode": "9556007000372",
+      "name": "Soyfresh Soya Milk Malt",
+      "brand": "Soyfresh",
+      "variant": "Soya Milk Malt",
+      "size": "1 l",
+      "category": "Milk & dairy",
+      "image_asset": "assets/catalog/images/9556007000372.webp"
+    },
+    {
+      "barcode": "9556007000556",
+      "name": "Soyfresh Non-Dairy Soya With Calcium",
+      "brand": "Soyfresh",
+      "variant": "Non-Dairy Soya With Calcium",
+      "size": "1 L",
+      "category": "Drinks",
+      "image_asset": "assets/catalog/images/9556007000556.webp"
+    },
+    {
+      "barcode": "9556007002222",
+      "name": "Soyfresh Hershey's Cookies 'N' Cream",
+      "brand": "Soyfresh",
+      "variant": "Hershey's Cookies 'N' Cream",
+      "size": "946 mL",
+      "category": "Snacks & biscuits",
+      "image_asset": "assets/catalog/images/9556007002222.webp"
+    },
+    {
+      "barcode": "7622300098964",
+      "name": "Tang Apple Iced Tea",
+      "brand": "Tang",
+      "variant": "Apple Iced Tea",
+      "size": "20 g",
+      "category": "Coffee & tea",
+      "image_asset": "assets/catalog/images/7622300098964.webp"
+    },
+    {
+      "barcode": "7622300858612",
+      "name": "Tang Honey Lemon",
+      "brand": "Tang",
+      "variant": "Honey Lemon",
+      "size": "20 g",
+      "category": "Drinks",
+      "image_asset": "assets/catalog/images/7622300858612.webp"
+    },
+    {
+      "barcode": "8850338024580",
+      "name": "Tang Mixed berries",
+      "brand": "Tang",
+      "variant": "Mixed berries",
+      "size": "20 g",
+      "category": "Drinks",
+      "image_asset": "assets/catalog/images/8850338024580.webp"
+    },
+    {
+      "barcode": "0054028367911",
+      "name": "Yakult Probiotic Drink",
+      "brand": "Yakult",
+      "variant": "Probiotic Drink",
+      "size": "80 mL",
+      "category": "Milk & dairy",
+      "image_asset": "assets/catalog/images/0054028367911.webp"
+    },
+    {
+      "barcode": "4800194104869",
+      "name": "Oishi Crispy Patata",
+      "brand": "Oishi",
+      "variant": "Crispy Patata",
+      "size": "24 g",
+      "category": "Snacks & biscuits",
+      "image_asset": "assets/catalog/images/4800194104869.webp"
+    },
+    {
+      "barcode": "4800092660634",
+      "name": "Choco Mucho Caramel",
+      "brand": "Choco Mucho",
+      "variant": "Caramel",
+      "size": "33 g",
+      "category": "Snacks & biscuits",
+      "image_asset": "assets/catalog/images/4800092660634.webp"
+    },
+    {
+      "barcode": "4800361410816",
+      "name": "Bear Brand Fortified Milk Drink Powder",
+      "brand": "Bear Brand",
+      "variant": "Fortified Milk Drink Powder",
+      "size": "33 g",
+      "category": "Milk & dairy",
+      "image_asset": "assets/catalog/images/4800361410816.webp"
+    },
+    {
+      "barcode": "4800016663802",
+      "name": "Jack 'n Jill Nova Country Cheddar",
+      "brand": "Jack 'n Jill",
+      "variant": "Nova Country Cheddar",
+      "size": "40 g",
+      "category": "Snacks & biscuits",
+      "image_asset": "assets/catalog/images/4800016663802.webp"
+    },
+    {
+      "barcode": "4800016622533",
+      "name": "Jack 'n Jill V-Cut Spicy Barbecue",
+      "brand": "Jack 'n Jill",
+      "variant": "V-Cut Spicy Barbecue",
+      "size": "25 g",
+      "category": "Snacks & biscuits",
+      "image_asset": "assets/catalog/images/4800016622533.webp"
+    },
+    {
+      "barcode": "0089686010947",
+      "name": "Indomie Mi Goreng Regular",
+      "brand": "Indomie",
+      "variant": "Mi Goreng Regular",
+      "size": "85 g",
+      "category": "Instant noodles",
+      "image_asset": "assets/catalog/images/0089686010947.webp"
+    },
+    {
+      "barcode": "0748485401492",
+      "name": "Birch Tree Fortified Milk Powder",
+      "brand": "Birch Tree",
+      "variant": "Fortified Milk Powder",
+      "size": "33 g",
+      "category": "Milk & dairy",
+      "image_asset": "assets/catalog/images/0748485401492.webp"
+    },
+    {
+      "barcode": "4809010524034",
+      "name": "Sugo Greaseless Salted Peanuts",
+      "brand": "Sugo",
+      "variant": "Greaseless Salted Peanuts",
+      "size": "100 g",
+      "category": "Snacks & biscuits",
+      "image_asset": "assets/catalog/images/4809010524034.webp"
+    },
+    {
+      "barcode": "4801668605967",
+      "name": "Datu Puti Spicy Adobo Sauce",
+      "brand": "Datu Puti",
+      "variant": "Spicy Adobo Sauce",
+      "size": "180 mL",
+      "category": "Sauces & seasonings",
+      "image_asset": "assets/catalog/images/4801668605967.webp"
+    },
+    {
+      "barcode": "0748485801162",
+      "name": "555 Carne Norte",
+      "brand": "555",
+      "variant": "Carne Norte",
+      "size": "175 g",
+      "category": "Canned goods",
+      "image_asset": "assets/catalog/images/0748485801162.webp"
+    },
+    {
+      "barcode": "4807770100529",
+      "name": "Monde Nissin Butter Coconut",
+      "brand": "Monde Nissin",
+      "variant": "Butter Coconut",
+      "size": "14 g",
+      "category": "Snacks & biscuits",
+      "image_asset": "assets/catalog/images/4807770100529.webp"
+    },
+    {
+      "barcode": "7622300808365",
+      "name": "Tang Four Seasons Powder Drink",
+      "brand": "Tang",
+      "variant": "Four Seasons Powder Drink",
+      "size": "19 g",
+      "category": "Drinks",
+      "image_asset": "assets/catalog/images/7622300808365.webp"
+    },
+    {
+      "barcode": "7622300868635",
+      "name": "Tang Orange Mango Powder Drink",
+      "brand": "Tang",
+      "variant": "Orange Mango Powder Drink",
+      "size": "18 g",
+      "category": "Drinks",
+      "image_asset": "assets/catalog/images/7622300868635.webp"
+    },
+    {
+      "barcode": "8858705602379",
+      "name": "Bear Brand Milk Drink",
+      "brand": "Bear Brand",
+      "variant": "Milk Drink",
+      "size": "200 mL",
+      "category": "Milk & dairy",
+      "image_asset": "assets/catalog/images/8858705602379.webp"
+    },
+    {
+      "barcode": "0748485100401",
+      "name": "Century Tuna Flakes in Oil",
+      "brand": "Century Tuna",
+      "variant": "Flakes in Oil",
+      "size": "155 g",
+      "category": "Canned goods",
+      "image_asset": "assets/catalog/images/0748485100401.webp"
+    },
+    {
+      "barcode": "0750515017429",
+      "name": "M.Y. San Fita Crackers",
+      "brand": "M.Y. San",
+      "variant": "Fita Crackers",
+      "size": "30 g",
+      "category": "Snacks & biscuits",
+      "image_asset": "assets/catalog/images/0750515017429.webp"
+    },
+    {
+      "barcode": "4800092113536",
+      "name": "Rebisco Combi Triple Choco Wafer",
+      "brand": "Rebisco",
+      "variant": "Combi Triple Choco Wafer",
+      "size": "30 g",
+      "category": "Snacks & biscuits",
+      "image_asset": "assets/catalog/images/4800092113536.webp"
+    },
+    {
+      "barcode": "4807770270024",
+      "name": "Lucky Me! Instant Mami Chicken",
+      "brand": "Lucky Me!",
+      "variant": "Instant Mami Chicken",
+      "size": "55 g",
+      "category": "Instant noodles",
+      "image_asset": "assets/catalog/images/4807770270024.webp"
+    },
+    {
+      "barcode": "4800361339568",
+      "name": "Nescafé Classic Pure Soluble Coffee Stick",
+      "brand": "Nescafé",
+      "variant": "Classic Pure Soluble Coffee Stick",
+      "size": "1.9 g",
+      "category": "Coffee & tea",
+      "image_asset": "assets/catalog/images/4800361339568.webp"
+    },
+    {
+      "barcode": "4800016671807",
+      "name": "Jack 'n Jill Piattos Cheese Potato Crisps",
+      "brand": "Jack 'n Jill",
+      "variant": "Piattos Cheese Potato Crisps",
+      "size": "40 g",
+      "category": "Snacks & biscuits",
+      "image_asset": "assets/catalog/images/4800016671807.webp"
+    },
+    {
+      "barcode": "4800092550904",
+      "name": "Fudgee Barr Chocolate Cake Bar",
+      "brand": "Fudgee Barr",
+      "variant": "Chocolate Cake Bar",
+      "size": "42 g",
+      "category": "Snacks & biscuits",
+      "image_asset": "assets/catalog/images/4800092550904.webp"
+    },
+    {
+      "barcode": "4808887119480",
+      "name": "Purefoods Sizzling Sisig",
+      "brand": "Purefoods",
+      "variant": "Sizzling Sisig",
+      "size": "150 g",
+      "category": "Canned goods",
+      "image_asset": "assets/catalog/images/4808887119480.webp"
+    },
+    {
+      "barcode": "4808887030204",
+      "name": "Purefoods Luncheon Meat Chinese Style",
+      "brand": "Purefoods",
+      "variant": "Luncheon Meat Chinese Style",
+      "size": "165 g",
+      "category": "Canned goods",
+      "image_asset": "assets/catalog/images/4808887030204.webp"
+    }
+  ]
+}

@@ -1,0 +1,1456 @@
+Starter grocery catalog
+
+Contains information from Open Food Facts, made available here under the Open Database License (ODbL) 1.0. Individual database contents are available under the Database Contents License (DbCL) 1.0.
+
+Product photos: © Open Food Facts contributors. Photos and resized WebP derivatives are distributed under Creative Commons Attribution-ShareAlike 3.0 Unported (CC BY-SA 3.0).
+
+Photos were proportionally resized to at most 180 pixels and encoded as WebP. Source product pages, photo URLs, contributor names (where supplied), sizes and transformations are included in the bundled assets/catalog/provenance.json file. The freely redistributable catalog subset is bundled as assets/catalog/products.json.
+
+Open Food Facts: https://world.openfoodfacts.org
+ODbL: https://opendatacommons.org/licenses/odbl/1-0/
+DbCL: https://opendatacommons.org/licenses/dbcl/1-0/
+Photos: https://creativecommons.org/licenses/by-sa/3.0/
+
+Product names, labels and quantities are community-contributed reference information. Check the exact brand, variant and package size when matching a receipt. No purchase prices, sales prices or purchase records come from this catalog. Product trademarks belong to their respective owners. Open Food Facts and its contributors do not endorse Reseebo.
+
+Photo details
+
+alaska crema all purpose 250ml — 250ml
+Photo: foodless (CC BY-SA 3.0)
+https://world.openfoodfacts.org/product/4800575480254
+https://images.openfoodfacts.net/images/products/480/057/548/0254/front_en.10.200.jpg
+
+Cobra Energy Drink — 350ml
+Photo: antoniojr (CC BY-SA 3.0)
+https://world.openfoodfacts.org/product/4800611546760
+https://images.openfoodfacts.net/images/products/480/061/154/6760/front_en.4.200.jpg
+
+Bear Brand fortified — 2000g
+Photo: Open Food Facts contributors (CC BY-SA 3.0)
+https://world.openfoodfacts.org/product/4800361403474
+https://images.openfoodfacts.net/images/products/480/036/140/3474/front_en.4.200.jpg
+
+Virgin Coconut Oil — 250 ml
+Photo: Open Food Facts contributors (CC BY-SA 3.0)
+https://world.openfoodfacts.org/product/4802222046295
+https://images.openfoodfacts.net/images/products/480/222/204/6295/front_en.4.200.jpg
+
+C2 Apple Green — 1l
+Photo: Open Food Facts contributors (CC BY-SA 3.0)
+https://world.openfoodfacts.org/product/4800016052774
+https://images.openfoodfacts.net/images/products/480/001/605/2774/front_en.17.200.jpg
+
+Solo Apple Flavored Green Tea — 230 ml
+Photo: fooducate.69AEC9A4-3194-E476-4E94-8F46A651FCF0 (CC BY-SA 3.0)
+https://world.openfoodfacts.org/product/4800016068010
+https://images.openfoodfacts.net/images/products/480/001/606/8010/front_en.18.200.jpg
+
+Calbee Honey Butter — 60g
+Photo: foodless (CC BY-SA 3.0)
+https://world.openfoodfacts.org/product/4800016680267
+https://images.openfoodfacts.net/images/products/480/001/668/0267/front_en.4.200.jpg
+
+beef loaf — 150g
+Photo: foodless (CC BY-SA 3.0)
+https://world.openfoodfacts.org/product/4800249909319
+https://images.openfoodfacts.net/images/products/480/024/990/9319/front_en.4.200.jpg
+
+Peanut Milk Chocolate — 200g
+Photo: foodless (CC BY-SA 3.0)
+https://world.openfoodfacts.org/product/4806537026805
+https://images.openfoodfacts.net/images/products/480/653/702/6805/front_en.24.200.jpg
+
+Coca Cola original taste — 1.5l
+Photo: fooducate.691356DD-31AD-5B0D-43C7-8F4BFE105518 (CC BY-SA 3.0)
+https://world.openfoodfacts.org/product/4801981116072
+https://images.openfoodfacts.net/images/products/480/198/111/6072/front_en.20.200.jpg
+
+Coke Mismo 290mL — 290 mL
+Photo: foodless (CC BY-SA 3.0)
+https://world.openfoodfacts.org/product/4801981118502
+https://images.openfoodfacts.net/images/products/480/198/111/8502/front_en.40.200.jpg
+
+Nutri Boost Chocolate Milk — 110 mL
+Photo: allyuh (CC BY-SA 3.0)
+https://world.openfoodfacts.org/product/4801981190119
+https://images.openfoodfacts.net/images/products/480/198/119/0119/front_en.13.200.jpg
+
+Coke light — 320 ml
+Photo: Open Food Facts contributors (CC BY-SA 3.0)
+https://world.openfoodfacts.org/product/4801981110001
+https://images.openfoodfacts.net/images/products/480/198/111/0001/front_en.3.200.jpg
+
+Cocacola — 2000 ml
+Photo: foodless (CC BY-SA 3.0)
+https://world.openfoodfacts.org/product/4801981112005
+https://images.openfoodfacts.net/images/products/480/198/111/2005/front_en.8.200.jpg
+
+Coca-Cola Zero Sugar — 1.5l
+Photo: foodless (CC BY-SA 3.0)
+https://world.openfoodfacts.org/product/4801981116645
+https://images.openfoodfacts.net/images/products/480/198/111/6645/front_en.10.200.jpg
+
+Wilkins Pure Purified Drinking Water — 1L
+Photo: foodless (CC BY-SA 3.0)
+https://world.openfoodfacts.org/product/4801981119981
+https://images.openfoodfacts.net/images/products/480/198/111/9981/front_en.6.200.jpg
+
+Coca-Cola Original Taste — 190ml
+Photo: foodless (CC BY-SA 3.0)
+https://world.openfoodfacts.org/product/4801981127177
+https://images.openfoodfacts.net/images/products/480/198/112/7177/front_en.6.200.jpg
+
+Nutriboost Strawberry Flavor — 330ml
+Photo: Open Food Facts contributors (CC BY-SA 3.0)
+https://world.openfoodfacts.org/product/4801981189540
+https://images.openfoodfacts.net/images/products/480/198/118/9540/front_en.4.200.jpg
+
+Coca-Cola — 500 ml
+Photo: baje (CC BY-SA 3.0)
+https://world.openfoodfacts.org/product/4801981120000
+https://images.openfoodfacts.net/images/products/480/198/112/0000/front_en.15.200.jpg
+
+LÜV-LOV — 20g
+Photo: Open Food Facts contributors (CC BY-SA 3.0)
+https://world.openfoodfacts.org/product/4800818601385
+https://images.openfoodfacts.net/images/products/480/081/860/1385/front_en.4.200.jpg
+
+Queso de Bola — 350 g
+Photo: antoniojr (CC BY-SA 3.0)
+https://world.openfoodfacts.org/product/4800249013719
+https://images.openfoodfacts.net/images/products/480/024/901/3719/front_en.4.200.jpg
+
+Fiesta Fruit Cocktail in Extra Light Syrup — 836 g
+Photo: antoniojr (CC BY-SA 3.0)
+https://world.openfoodfacts.org/product/4800024037480
+https://images.openfoodfacts.net/images/products/480/002/403/7480/front_en.4.200.jpg
+
+Italian style spaghetti sauce — 250g
+Photo: silver-wolf (CC BY-SA 3.0)
+https://world.openfoodfacts.org/product/4800024555533
+https://images.openfoodfacts.net/images/products/480/002/455/5533/front_en.7.200.jpg
+
+Original style tomato sauce — 1kg
+Photo: Open Food Facts contributors (CC BY-SA 3.0)
+https://world.openfoodfacts.org/product/4800024556165
+https://images.openfoodfacts.net/images/products/480/002/455/6165/front_en.3.200.jpg
+
+del monte tomato paste 150g — 150g
+Photo: foodless (CC BY-SA 3.0)
+https://world.openfoodfacts.org/product/4800024556899
+https://images.openfoodfacts.net/images/products/480/002/455/6899/front_en.21.200.jpg
+
+Del Monte 100% Pineapple Juice Drink — 220 ml
+Photo: mazhii (CC BY-SA 3.0)
+https://world.openfoodfacts.org/product/4800024562616
+https://images.openfoodfacts.net/images/products/480/002/456/2616/front_en.11.200.jpg
+
+Italian Style Spaghetti Sauce — 900 g
+Photo: Open Food Facts contributors (CC BY-SA 3.0)
+https://world.openfoodfacts.org/product/4800024573520
+https://images.openfoodfacts.net/images/products/480/002/457/3520/front_en.5.200.jpg
+
+DM Spaghetti Pasta Merienda Pack — 175g
+Photo: foodless (CC BY-SA 3.0)
+https://world.openfoodfacts.org/product/4800024573926
+https://images.openfoodfacts.net/images/products/480/002/457/3926/front_en.3.200.jpg
+
+Del Monte Tomato Ketchup Original — 320 g
+Photo: smoothie-app (CC BY-SA 3.0)
+https://world.openfoodfacts.org/product/4800024577122
+https://images.openfoodfacts.net/images/products/480/002/457/7122/front_en.3.200.jpg
+
+Del Monte Sweet Blend Ketchup — 320 g
+Photo: foodless (CC BY-SA 3.0)
+https://world.openfoodfacts.org/product/4800024577139
+https://images.openfoodfacts.net/images/products/480/002/457/7139/front_en.15.200.jpg
+
+Pineapple Heart Smart — 1 L
+Photo: foodless (CC BY-SA 3.0)
+https://world.openfoodfacts.org/product/4800024579317
+https://images.openfoodfacts.net/images/products/480/002/457/9317/front_en.9.200.jpg
+
+Del Monte Sweet Chili Sauce — 320g
+Photo: antoniojr (CC BY-SA 3.0)
+https://world.openfoodfacts.org/product/4800024582461
+https://images.openfoodfacts.net/images/products/480/002/458/2461/front_en.4.200.jpg
+
+Del Monte Potato Crisp — 80g
+Photo: Open Food Facts contributors (CC BY-SA 3.0)
+https://world.openfoodfacts.org/product/4800024583161
+https://images.openfoodfacts.net/images/products/480/002/458/3161/front_en.12.200.jpg
+
+Fruity Munchsters — 26g
+Photo: Open Food Facts contributors (CC BY-SA 3.0)
+https://world.openfoodfacts.org/product/4800024583802
+https://images.openfoodfacts.net/images/products/480/002/458/3802/front_en.4.200.jpg
+
+Fiesta Fruit Cocktail — 385 g
+Photo: Open Food Facts contributors (CC BY-SA 3.0)
+https://world.openfoodfacts.org/product/4800024584403
+https://images.openfoodfacts.net/images/products/480/002/458/4403/front_en.4.200.jpg
+
+Mountain Dew — 500 ml
+Photo: mazhii (CC BY-SA 3.0)
+https://world.openfoodfacts.org/product/4803925251146
+https://images.openfoodfacts.net/images/products/480/392/525/1146/front_en.7.200.jpg
+
+Eden Original — 430g
+Photo: kiliweb (CC BY-SA 3.0)
+https://world.openfoodfacts.org/product/4808647020100
+https://images.openfoodfacts.net/images/products/480/864/702/0100/front_fr.3.200.jpg
+
+The Ultimate Chocolate Chip Cookies — 400g
+Photo: Open Food Facts contributors (CC BY-SA 3.0)
+https://world.openfoodfacts.org/product/4800040314138
+https://images.openfoodfacts.net/images/products/480/004/031/4138/front_en.4.200.jpg
+
+Frootees Strawberry Cookie Sandwich — 32g
+Photo: fooducate.69775C4B-CDEE-99AB-4E9C-8F9355DF3DD1 (CC BY-SA 3.0)
+https://world.openfoodfacts.org/product/4800092113352
+https://images.openfoodfacts.net/images/products/480/009/211/3352/front_en.17.200.jpg
+
+Toasties — 25 g
+Photo: thebarcodescanneratthegrocerystore (CC BY-SA 3.0)
+https://world.openfoodfacts.org/product/4806502720219
+https://images.openfoodfacts.net/images/products/480/650/272/0219/front_en.4.200.jpg
+
+High Fiber Whole Wheat Bread — 600 g
+Photo: macrofactor (CC BY-SA 3.0)
+https://world.openfoodfacts.org/product/4806502720301
+https://images.openfoodfacts.net/images/products/480/650/272/0301/front_en.30.200.jpg
+
+Gardenia White Bread Classic 600G — 600 g
+Photo: kiliweb (CC BY-SA 3.0)
+https://world.openfoodfacts.org/product/4806502720615
+https://images.openfoodfacts.net/images/products/480/650/272/0615/front_en.14.200.jpg
+
+High Fiber Whole Wheat Bread — 400 g
+Photo: macrofactor (CC BY-SA 3.0)
+https://world.openfoodfacts.org/product/4806502721452
+https://images.openfoodfacts.net/images/products/480/650/272/1452/front_en.24.200.jpg
+
+Neu Bake White Bread — 450 g
+Photo: macrofactor (CC BY-SA 3.0)
+https://world.openfoodfacts.org/product/4806502726822
+https://images.openfoodfacts.net/images/products/480/650/272/6822/front_en.18.200.jpg
+
+Neu Bake Wheaten bread — 480 g
+Photo: kiliweb (CC BY-SA 3.0)
+https://world.openfoodfacts.org/product/4806502727423
+https://images.openfoodfacts.net/images/products/480/650/272/7423/front_en.23.200.jpg
+
+Enriched White Bread — 400 g
+Photo: foodless (CC BY-SA 3.0)
+https://world.openfoodfacts.org/product/4806502720417
+https://images.openfoodfacts.net/images/products/480/650/272/0417/front_en.8.200.jpg
+
+Goya Cream White Chocolate Bar (35g) — 35g
+Photo: foodless (CC BY-SA 3.0)
+https://world.openfoodfacts.org/product/4806517042061
+https://images.openfoodfacts.net/images/products/480/651/704/2061/front_en.25.200.jpg
+
+Goya Dark Chocolate — 35g
+Photo: macrofactor (CC BY-SA 3.0)
+https://world.openfoodfacts.org/product/4806517042085
+https://images.openfoodfacts.net/images/products/480/651/704/2085/front_en.20.200.jpg
+
+Supreme Toffee Hazel — 26g
+Photo: antoniojr (CC BY-SA 3.0)
+https://world.openfoodfacts.org/product/4800016022920
+https://images.openfoodfacts.net/images/products/480/001/602/2920/front_en.15.200.jpg
+
+Vanilla Latte — 200 ml
+Photo: Open Food Facts contributors (CC BY-SA 3.0)
+https://world.openfoodfacts.org/product/4800016074882
+https://images.openfoodfacts.net/images/products/480/001/607/4882/front_en.4.200.jpg
+
+Isopropyl alcohol — 500mL
+Photo: hochelaga (CC BY-SA 3.0)
+https://world.openfoodfacts.org/product/4800047820014
+https://images.openfoodfacts.net/images/products/480/004/782/0014/front_fr.6.200.jpg
+
+Isopropyl alcohol — 150mL
+Photo: foodless (CC BY-SA 3.0)
+https://world.openfoodfacts.org/product/4800047820236
+https://images.openfoodfacts.net/images/products/480/004/782/0236/front_en.3.200.jpg
+
+Hansel Choco — 310 g
+Photo: foodless (CC BY-SA 3.0)
+https://world.openfoodfacts.org/product/4800092110528
+https://images.openfoodfacts.net/images/products/480/009/211/0528/front_en.7.200.jpg
+
+Corned beef — 150g
+Photo: foodless (CC BY-SA 3.0)
+https://world.openfoodfacts.org/product/4800066122168
+https://images.openfoodfacts.net/images/products/480/006/612/2168/front_en.4.200.jpg
+
+Yum Yum Strawberry Snack 30g — 30g
+Photo: smoothie-app (CC BY-SA 3.0)
+https://world.openfoodfacts.org/product/4800098122952
+https://images.openfoodfacts.net/images/products/480/009/812/2952/front_en.3.200.jpg
+
+Cream-O — 90g
+Photo: Open Food Facts contributors (CC BY-SA 3.0)
+https://world.openfoodfacts.org/product/4800010075076
+https://images.openfoodfacts.net/images/products/480/001/007/5076/front_en.23.200.jpg
+
+Jack 'n Jill Wafrets Choco Brix (Creamy Crunch Wafer) — 24g
+Photo: antoniojr (CC BY-SA 3.0)
+https://world.openfoodfacts.org/product/4800016084058
+https://images.openfoodfacts.net/images/products/480/001/608/4058/front_en.29.200.jpg
+
+Quake Overload Black Forest — 30 g
+Photo: antoniojr (CC BY-SA 3.0)
+https://world.openfoodfacts.org/product/4800016112430
+https://images.openfoodfacts.net/images/products/480/001/611/2430/front_en.14.200.jpg
+
+Dewberry Blueberry Cheesecake — 33 g
+Photo: Open Food Facts contributors (CC BY-SA 3.0)
+https://world.openfoodfacts.org/product/4800016114274
+https://images.openfoodfacts.net/images/products/480/001/611/4274/front_en.18.200.jpg
+
+Chicharon Ni Mang Juan Cracking Chips — 70 g
+Photo: fooducate.69849C82-D500-1422-4587-94492B8AE877 (CC BY-SA 3.0)
+https://world.openfoodfacts.org/product/4800016115257
+https://images.openfoodfacts.net/images/products/480/001/611/5257/front_en.8.200.jpg
+
+Potato Chips Classic - Plain salted flavor — 130g
+Photo: kiliweb (CC BY-SA 3.0)
+https://world.openfoodfacts.org/product/4800016629686
+https://images.openfoodfacts.net/images/products/480/001/662/9686/front_en.14.200.jpg
+
+Piattos Sour Cream and Onion — 170 g
+Photo: kiliweb (CC BY-SA 3.0)
+https://world.openfoodfacts.org/product/4800016635809
+https://images.openfoodfacts.net/images/products/480/001/663/5809/front_en.7.200.jpg
+
+Cloud 9 Overload — 50 g
+Photo: macrofactor (CC BY-SA 3.0)
+https://world.openfoodfacts.org/product/4800016963827
+https://images.openfoodfacts.net/images/products/480/001/696/3827/front_en.25.200.jpg
+
+Cloud 9 White — 28g
+Photo: Open Food Facts contributors (CC BY-SA 3.0)
+https://world.openfoodfacts.org/product/4800016964060
+https://images.openfoodfacts.net/images/products/480/001/696/4060/front_en.4.200.jpg
+
+Nova Homestyle BBQ — 78g
+Photo: foodless (CC BY-SA 3.0)
+https://world.openfoodfacts.org/product/4800016604232
+https://images.openfoodfacts.net/images/products/480/001/660/4232/front_en.3.200.jpg
+
+Tostillas nacho cheese flavored tortilla chips — 72g
+Photo: foodless (CC BY-SA 3.0)
+https://world.openfoodfacts.org/product/4800016652134
+https://images.openfoodfacts.net/images/products/480/001/665/2134/front_en.17.200.jpg
+
+Quake Overload Choco Strawberry — 30 g
+Photo: antoniojr (CC BY-SA 3.0)
+https://world.openfoodfacts.org/product/4800016112379
+https://images.openfoodfacts.net/images/products/480/001/611/2379/front_en.4.200.jpg
+
+Quake Overload Mallow Vanilla — 29 g
+Photo: antoniojr (CC BY-SA 3.0)
+https://world.openfoodfacts.org/product/4800016113871
+https://images.openfoodfacts.net/images/products/480/001/611/3871/front_en.17.200.jpg
+
+Magic Flakes Cheese — 28 g
+Photo: openfoodfacts-contributors (CC BY-SA 3.0)
+https://world.openfoodfacts.org/product/4800016082641
+https://images.openfoodfacts.net/images/products/480/001/608/2641/front_en.10.200.jpg
+
+Nova Multigrain Snacks Classic Crunch Lightly Salted Flavor — 30g
+Photo: Open Food Facts contributors (CC BY-SA 3.0)
+https://world.openfoodfacts.org/product/4800016666261
+https://images.openfoodfacts.net/images/products/480/001/666/6261/front_en.3.200.jpg
+
+Black Coffee with Ginseng — 2g
+Photo: Open Food Facts contributors (CC BY-SA 3.0)
+https://world.openfoodfacts.org/product/4806509690898
+https://images.openfoodfacts.net/images/products/480/650/969/0898/front_en.4.200.jpg
+
+jolly green peas 155g — 155g
+Photo: foodless (CC BY-SA 3.0)
+https://world.openfoodfacts.org/product/4806014092811
+https://images.openfoodfacts.net/images/products/480/601/409/2811/front_en.18.200.jpg
+
+Knorr Sinigang Miso — 23g
+Photo: foodless (CC BY-SA 3.0)
+https://world.openfoodfacts.org/product/4800888600219
+https://images.openfoodfacts.net/images/products/480/088/860/0219/front_en.27.200.jpg
+
+knorr cube pork 10g — 10g
+Photo: foodless (CC BY-SA 3.0)
+https://world.openfoodfacts.org/product/4800888602725
+https://images.openfoodfacts.net/images/products/480/088/860/2725/front_en.26.200.jpg
+
+Knorr Ginataan Gulay — 40g
+Photo: foodless (CC BY-SA 3.0)
+https://world.openfoodfacts.org/product/4800888603364
+https://images.openfoodfacts.net/images/products/480/088/860/3364/front_en.3.200.jpg
+
+Sinigang sa Sampalok Mix Original — 11g
+Photo: foodless (CC BY-SA 3.0)
+https://world.openfoodfacts.org/product/4800888603692
+https://images.openfoodfacts.net/images/products/480/088/860/3692/front_en.7.200.jpg
+
+Knorr Nido Oriental Style — 55g
+Photo: foodless (CC BY-SA 3.0)
+https://world.openfoodfacts.org/product/4808680210902
+https://images.openfoodfacts.net/images/products/480/868/021/0902/front_en.3.200.jpg
+
+Real Chinese-Style Soup Crab & Corn — 60 g
+Photo: kiliweb (CC BY-SA 3.0)
+https://world.openfoodfacts.org/product/4808680210957
+https://images.openfoodfacts.net/images/products/480/868/021/0957/front_fr.21.200.jpg
+
+Knorr Crab and Corn Soup — 40 g
+Photo: Open Food Facts contributors (CC BY-SA 3.0)
+https://world.openfoodfacts.org/product/4808680211251
+https://images.openfoodfacts.net/images/products/480/868/021/1251/front_fr.14.200.jpg
+
+Cream of Mushroom — 68g
+Photo: silver-wolf (CC BY-SA 3.0)
+https://world.openfoodfacts.org/product/4808680221250
+https://images.openfoodfacts.net/images/products/480/868/022/1250/front_en.4.200.jpg
+
+Real Mayonnaise — 220 mL
+Photo: thebarcodescanneratthegrocerystore (CC BY-SA 3.0)
+https://world.openfoodfacts.org/product/4800888602268
+https://images.openfoodfacts.net/images/products/480/088/860/2268/front_en.3.200.jpg
+
+Lady's Choice Sandwich Spread — 220ml
+Photo: openfoodfacts-contributors (CC BY-SA 3.0)
+https://world.openfoodfacts.org/product/4800888602299
+https://images.openfoodfacts.net/images/products/480/088/860/2299/front_en.4.200.jpg
+
+Mayonaise — 220 mL
+Photo: foodless (CC BY-SA 3.0)
+https://world.openfoodfacts.org/product/4808680021430
+https://images.openfoodfacts.net/images/products/480/868/002/1430/front_en.3.200.jpg
+
+CREAMY PEANUT BUTTER — 1 kg
+Photo: Open Food Facts contributors (CC BY-SA 3.0)
+https://world.openfoodfacts.org/product/4808680061191
+https://images.openfoodfacts.net/images/products/480/868/006/1191/front_en.4.200.jpg
+
+Lemon Square Whatta Tops Chocolahat Flavor (Cupcakes with Toppings) — 35g
+Photo: waistline-app (CC BY-SA 3.0)
+https://world.openfoodfacts.org/product/4806018403712
+https://images.openfoodfacts.net/images/products/480/601/840/3712/front_en.3.200.jpg
+
+Lava Cake Chocolate — 40 g
+Photo: kiliweb (CC BY-SA 3.0)
+https://world.openfoodfacts.org/product/4806018405655
+https://images.openfoodfacts.net/images/products/480/601/840/5655/front_fr.3.200.jpg
+
+Cheese Cake — 30 g
+Photo: fooducate.69B615A6-5002-7055-49A7-AD07A15A55FC (CC BY-SA 3.0)
+https://world.openfoodfacts.org/product/4809010626011
+https://images.openfoodfacts.net/images/products/480/901/062/6011/front_en.22.200.jpg
+
+Choochoo Cake Bites — 38 g
+Photo: fooducate.697B70B9-CA32-31A9-46C4-9D52E2B9431D (CC BY-SA 3.0)
+https://world.openfoodfacts.org/product/4806018403859
+https://images.openfoodfacts.net/images/products/480/601/840/3859/front_en.12.200.jpg
+
+Cheezy corn crunch spicy — 22g
+Photo: fooducate.695DD7A6-618E-A3E9-4C77-B58C1C6EFFDF (CC BY-SA 3.0)
+https://world.openfoodfacts.org/product/4800216121911
+https://images.openfoodfacts.net/images/products/480/021/612/1911/front_en.27.200.jpg
+
+Nacho corn chips cheese — 100g
+Photo: smoothie-app (CC BY-SA 3.0)
+https://world.openfoodfacts.org/product/4800216121720
+https://images.openfoodfacts.net/images/products/480/021/612/1720/front_en.3.200.jpg
+
+Red Tea orange Flavored Ice Tea — 450 ml
+Photo: Open Food Facts contributors (CC BY-SA 3.0)
+https://world.openfoodfacts.org/product/4803925270116
+https://images.openfoodfacts.net/images/products/480/392/527/0116/front_en.7.200.jpg
+
+BEEF NA BEEF FLAVOR INSTANT MAMI NOODLE SOUP — 55 g
+Photo: foodless (CC BY-SA 3.0)
+https://world.openfoodfacts.org/product/4807770270017
+https://images.openfoodfacts.net/images/products/480/777/027/0017/front_en.60.200.jpg
+
+Lucky Me! Go Cup Bulalo Instant Noodle Soup — 40g
+Photo: mazhii (CC BY-SA 3.0)
+https://world.openfoodfacts.org/product/4807770271175
+https://images.openfoodfacts.net/images/products/480/777/027/1175/front_en.15.200.jpg
+
+lucky me beef spicy 50g — 50g
+Photo: foodless (CC BY-SA 3.0)
+https://world.openfoodfacts.org/product/4807770272097
+https://images.openfoodfacts.net/images/products/480/777/027/2097/front_en.22.200.jpg
+
+Lucky Me Batchoy (Instant Noodle Soup) — 55 g
+Photo: allyuh (CC BY-SA 3.0)
+https://world.openfoodfacts.org/product/4807770272813
+https://images.openfoodfacts.net/images/products/480/777/027/2813/front_en.9.200.jpg
+
+Lucky Me! Go Cup Mini Instant Noodle Soup Spicy Bulalo Flavor — 40g
+Photo: mazhii (CC BY-SA 3.0)
+https://world.openfoodfacts.org/product/4807770273612
+https://images.openfoodfacts.net/images/products/480/777/027/3612/front_en.18.200.jpg
+
+lucky me chicken spicy 50g — 50 g
+Photo: foodless (CC BY-SA 3.0)
+https://world.openfoodfacts.org/product/4807770273650
+https://images.openfoodfacts.net/images/products/480/777/027/3650/front_en.21.200.jpg
+
+Pancit Canton ChiliMansi 80g — 80 g
+Photo: foodless (CC BY-SA 3.0)
+https://world.openfoodfacts.org/product/4807770273698
+https://images.openfoodfacts.net/images/products/480/777/027/3698/front_en.54.200.jpg
+
+lucky me pancit canton extra hot chili 75g — 75g
+Photo: foodless (CC BY-SA 3.0)
+https://world.openfoodfacts.org/product/4807770274305
+https://images.openfoodfacts.net/images/products/480/777/027/4305/front_en.20.200.jpg
+
+Seafood Shrimp Tonkotsu — 60 g
+Photo: foodless (CC BY-SA 3.0)
+https://world.openfoodfacts.org/product/4807770274459
+https://images.openfoodfacts.net/images/products/480/777/027/4459/front_en.7.200.jpg
+
+Pancit Canton Kasalo Pack (Chilimansi) — 120 g
+Photo: foodless (CC BY-SA 3.0)
+https://world.openfoodfacts.org/product/4807770274480
+https://images.openfoodfacts.net/images/products/480/777/027/4480/front_en.21.200.jpg
+
+lucky me pancit canton kalamansi 80g — 80 g
+Photo: foodless (CC BY-SA 3.0)
+https://world.openfoodfacts.org/product/4807770273674
+https://images.openfoodfacts.net/images/products/480/777/027/3674/front_en.63.200.jpg
+
+Liquid seasoning — 130 ml
+Photo: kiliweb (CC BY-SA 3.0)
+https://world.openfoodfacts.org/product/4800361050104
+https://images.openfoodfacts.net/images/products/480/036/105/0104/front_fr.3.200.jpg
+
+Savor Liquid Seasoning Chilimansi — 130 ml
+Photo: wblondel (CC BY-SA 3.0)
+https://world.openfoodfacts.org/product/4800361316934
+https://images.openfoodfacts.net/images/products/480/036/131/6934/front_en.24.200.jpg
+
+Magic Sarap — 55g
+Photo: smoothie-app (CC BY-SA 3.0)
+https://world.openfoodfacts.org/product/4800361420129
+https://images.openfoodfacts.net/images/products/480/036/142/0129/front_en.3.200.jpg
+
+magic sarap 8g — 8g
+Photo: foodless (CC BY-SA 3.0)
+https://world.openfoodfacts.org/product/48025522
+https://images.openfoodfacts.net/images/products/000/004/802/5522/front_en.56.200.jpg
+
+Onion Chives Flavored Crackers — 28 g
+Photo: fooducate.6936DC1E-9733-664B-40C1-96F9431F48A8 (CC BY-SA 3.0)
+https://world.openfoodfacts.org/product/4800016082917
+https://images.openfoodfacts.net/images/products/480/001/608/2917/front_en.18.200.jpg
+
+Cheese Squeeze Cheddar — 220g
+Photo: neonridex (CC BY-SA 3.0)
+https://world.openfoodfacts.org/product/4805358324664
+https://images.openfoodfacts.net/images/products/480/535/832/4664/front_en.3.200.jpg
+
+Daily Quezo — 165 g
+Photo: waistline-app (CC BY-SA 3.0)
+https://world.openfoodfacts.org/product/4805358373037
+https://images.openfoodfacts.net/images/products/480/535/837/3037/front_en.4.200.jpg
+
+Magnolia Creamy Chicken Spread — 80ml
+Photo: Open Food Facts contributors (CC BY-SA 3.0)
+https://world.openfoodfacts.org/product/4805358810877
+https://images.openfoodfacts.net/images/products/480/535/881/0877/front_en.4.200.jpg
+
+Oyster sauce — 405g
+Photo: smoothie-app (CC BY-SA 3.0)
+https://world.openfoodfacts.org/product/4804888804240
+https://images.openfoodfacts.net/images/products/480/488/880/4240/front_en.3.200.jpg
+
+All-around sarsa — 550g
+Photo: foodless (CC BY-SA 3.0)
+https://world.openfoodfacts.org/product/4801668100271
+https://images.openfoodfacts.net/images/products/480/166/810/0271/front_en.4.200.jpg
+
+Whole Wheat Bread — 600g
+Photo: antoniojr (CC BY-SA 3.0)
+https://world.openfoodfacts.org/product/4800148531598
+https://images.openfoodfacts.net/images/products/480/014/853/1598/front_en.4.200.jpg
+
+Sardines in Tomato Sauce — 155g (5.5 oz.)
+Photo: foodless (CC BY-SA 3.0)
+https://world.openfoodfacts.org/product/4806504710119
+https://images.openfoodfacts.net/images/products/480/650/471/0119/front_en.27.200.jpg
+
+Mega Prime Quality Whole Mushrooms Champignons — 198g
+Photo: Open Food Facts contributors (CC BY-SA 3.0)
+https://world.openfoodfacts.org/product/4806504713059
+https://images.openfoodfacts.net/images/products/480/650/471/3059/front_en.3.200.jpg
+
+Fried Sardine With Tausi — 155 g
+Photo: antoniojr (CC BY-SA 3.0)
+https://world.openfoodfacts.org/product/4806504710812
+https://images.openfoodfacts.net/images/products/480/650/471/0812/front_en.16.200.jpg
+
+Flakes Hot and Spicy — 155g
+Photo: smoothie-app (CC BY-SA 3.0)
+https://world.openfoodfacts.org/product/4806504712052
+https://images.openfoodfacts.net/images/products/480/650/471/2052/front_en.5.200.jpg
+
+Nourishing Energy Zero Added Table Sugar — 26 g
+Photo: Open Food Facts contributors (CC BY-SA 3.0)
+https://world.openfoodfacts.org/product/4800361418225
+https://images.openfoodfacts.net/images/products/480/036/141/8225/front_en.3.200.jpg
+
+Orange Juice Drink — 250ml
+Photo: Open Food Facts contributors (CC BY-SA 3.0)
+https://world.openfoodfacts.org/product/4801981120147
+https://images.openfoodfacts.net/images/products/480/198/112/0147/front_en.19.200.jpg
+
+Minute Maid Apple Juice — 180 mL
+Photo: foodless (CC BY-SA 3.0)
+https://world.openfoodfacts.org/product/4801981164851
+https://images.openfoodfacts.net/images/products/480/198/116/4851/front_en.14.200.jpg
+
+Eggnog Cookies — 130g
+Photo: kiliweb (CC BY-SA 3.0)
+https://world.openfoodfacts.org/product/4807770100406
+https://images.openfoodfacts.net/images/products/480/777/010/0406/front_en.31.200.jpg
+
+Wafer Choco — 12 g
+Photo: fooducate.69710EBC-BA37-2614-4A1A-95A9405ACD4F (CC BY-SA 3.0)
+https://world.openfoodfacts.org/product/4807770120206
+https://images.openfoodfacts.net/images/products/480/777/012/0206/front_en.25.200.jpg
+
+Choco Mucho White Chocolate — 30 g
+Photo: antoniojr (CC BY-SA 3.0)
+https://world.openfoodfacts.org/product/4800092660788
+https://images.openfoodfacts.net/images/products/480/009/266/0788/front_en.4.200.jpg
+
+Choco Mucho Peanut Butter — 33g
+Photo: antoniojr (CC BY-SA 3.0)
+https://world.openfoodfacts.org/product/4800092660801
+https://images.openfoodfacts.net/images/products/480/009/266/0801/front_en.4.200.jpg
+
+Choco Mucho Dark Chocolate — 33g
+Photo: antoniojr (CC BY-SA 3.0)
+https://world.openfoodfacts.org/product/4800092660962
+https://images.openfoodfacts.net/images/products/480/009/266/0962/front_en.15.200.jpg
+
+Superstix — 250.0g
+Photo: Open Food Facts contributors (CC BY-SA 3.0)
+https://world.openfoodfacts.org/product/4800092661174
+https://images.openfoodfacts.net/images/products/480/009/266/1174/front_en.3.200.jpg
+
+Nescafe Café Creations Caramel Latte — 33g
+Photo: Open Food Facts contributors (CC BY-SA 3.0)
+https://world.openfoodfacts.org/product/4800361417204
+https://images.openfoodfacts.net/images/products/480/036/141/7204/front_en.4.200.jpg
+
+Cafe Creation Mocha Latte — 33g
+Photo: Open Food Facts contributors (CC BY-SA 3.0)
+https://world.openfoodfacts.org/product/4800361418874
+https://images.openfoodfacts.net/images/products/480/036/141/8874/front_en.4.200.jpg
+
+Nestea Honey Blend Black Tea — 25g
+Photo: openfoodfacts-contributors (CC BY-SA 3.0)
+https://world.openfoodfacts.org/product/4800361387989
+https://images.openfoodfacts.net/images/products/480/036/138/7989/front_en.4.200.jpg
+
+Lemon Cucumber Green Tea — 250ml
+Photo: municorn-calorie-counter-app (CC BY-SA 3.0)
+https://world.openfoodfacts.org/product/4800361417198
+https://images.openfoodfacts.net/images/products/480/036/141/7198/front_en.21.200.jpg
+
+Nestea Cranberry — 25g
+Photo: antoniojr (CC BY-SA 3.0)
+https://world.openfoodfacts.org/product/4800361392549
+https://images.openfoodfacts.net/images/products/480/036/139/2549/front_en.4.200.jpg
+
+Low-Fat Milk — 1000ml
+Photo: foodless (CC BY-SA 3.0)
+https://world.openfoodfacts.org/product/4800361015165
+https://images.openfoodfacts.net/images/products/480/036/101/5165/front_en.3.200.jpg
+
+Low-Fat Milk — 250ml
+Photo: Open Food Facts contributors (CC BY-SA 3.0)
+https://world.openfoodfacts.org/product/4800361015172
+https://images.openfoodfacts.net/images/products/480/036/101/5172/front_en.3.200.jpg
+
+Koko Krunch Pack — 20g
+Photo: fooducate.6989BE49-238C-9128-4D39-A8A93579FE72 (CC BY-SA 3.0)
+https://world.openfoodfacts.org/product/4800361028639
+https://images.openfoodfacts.net/images/products/480/036/102/8639/front_en.10.200.jpg
+
+Milo Cereal — 20 g
+Photo: waistline-app (CC BY-SA 3.0)
+https://world.openfoodfacts.org/product/4800361028646
+https://images.openfoodfacts.net/images/products/480/036/102/8646/front_en.3.200.jpg
+
+Nestle Chuckie — 1000ml
+Photo: antoniojr (CC BY-SA 3.0)
+https://world.openfoodfacts.org/product/4800361331265
+https://images.openfoodfacts.net/images/products/480/036/133/1265/front_en.23.200.jpg
+
+Nestlé Bear Brand Sterilized Full Cream Milk (UHT Processed) — 1L
+Photo: kiliweb (CC BY-SA 3.0)
+https://world.openfoodfacts.org/product/4800361331289
+https://images.openfoodfacts.net/images/products/480/036/133/1289/front_fr.3.200.jpg
+
+Coffee mate — 450g
+Photo: kiliweb (CC BY-SA 3.0)
+https://world.openfoodfacts.org/product/4800361380737
+https://images.openfoodfacts.net/images/products/480/036/138/0737/front_en.4.200.jpg
+
+Nescafe Coffee Mate — 170 g
+Photo: foodless (CC BY-SA 3.0)
+https://world.openfoodfacts.org/product/4800361390804
+https://images.openfoodfacts.net/images/products/480/036/139/0804/front_en.3.200.jpg
+
+Chuckie — 110ml
+Photo: jeth888 (CC BY-SA 3.0)
+https://world.openfoodfacts.org/product/4800361395687
+https://images.openfoodfacts.net/images/products/480/036/139/5687/front_en.23.200.jpg
+
+Bear brand Adult plus — 33g
+Photo: smoothie-app (CC BY-SA 3.0)
+https://world.openfoodfacts.org/product/4800361396677
+https://images.openfoodfacts.net/images/products/480/036/139/6677/front_fr.3.200.jpg
+
+nescafe original 20g — 20g
+Photo: foodless (CC BY-SA 3.0)
+https://world.openfoodfacts.org/product/4800361403764
+https://images.openfoodfacts.net/images/products/480/036/140/3764/front_en.30.200.jpg
+
+Coffee Mate — 5 g
+Photo: foodless (CC BY-SA 3.0)
+https://world.openfoodfacts.org/product/48025515
+https://images.openfoodfacts.net/images/products/000/004/802/5515/front_en.21.200.jpg
+
+Bear Brand Fortified Powdered Milk Drink — 300g
+Photo: kiliweb (CC BY-SA 3.0)
+https://world.openfoodfacts.org/product/4800361410892
+https://images.openfoodfacts.net/images/products/480/036/141/0892/front_fr.3.200.jpg
+
+Yakisoba spicy chicken flavor with real vegetables — 59g
+Photo: Open Food Facts contributors (CC BY-SA 3.0)
+https://world.openfoodfacts.org/product/4800016551604
+https://images.openfoodfacts.net/images/products/480/001/655/1604/front_en.15.200.jpg
+
+Yakisoba instant pancit savory beef flavor with real vegetables — 59g
+Photo: foodless (CC BY-SA 3.0)
+https://world.openfoodfacts.org/product/4800016551611
+https://images.openfoodfacts.net/images/products/480/001/655/1611/front_en.16.200.jpg
+
+nissin cup batchoy 40g — 40g
+Photo: foodless (CC BY-SA 3.0)
+https://world.openfoodfacts.org/product/4800016552137
+https://images.openfoodfacts.net/images/products/480/001/655/2137/front_en.20.200.jpg
+
+Bread Stix — 20 g
+Photo: foodless (CC BY-SA 3.0)
+https://world.openfoodfacts.org/product/4807770100703
+https://images.openfoodfacts.net/images/products/480/777/010/0703/front_en.12.200.jpg
+
+Butter Coconut — 90 g
+Photo: foodless (CC BY-SA 3.0)
+https://world.openfoodfacts.org/product/4807770101694
+https://images.openfoodfacts.net/images/products/480/777/010/1694/front_en.19.200.jpg
+
+Nissin Wafer Vanilla — 240g
+Photo: Open Food Facts contributors (CC BY-SA 3.0)
+https://world.openfoodfacts.org/product/4807770120251
+https://images.openfoodfacts.net/images/products/480/777/012/0251/front_en.3.200.jpg
+
+Waffle Deluxe Chocolate — 23g
+Photo: Open Food Facts contributors (CC BY-SA 3.0)
+https://world.openfoodfacts.org/product/4807770121708
+https://images.openfoodfacts.net/images/products/480/777/012/1708/front_en.4.200.jpg
+
+Butter Coconut — 28 g
+Photo: fooducate.692F1E4A-07FD-6779-42D8-B8EFE7D47C59 (CC BY-SA 3.0)
+https://world.openfoodfacts.org/product/4807770122163
+https://images.openfoodfacts.net/images/products/480/777/012/2163/front_en.17.200.jpg
+
+Butter Coconut — 280g
+Photo: foodless (CC BY-SA 3.0)
+https://world.openfoodfacts.org/product/4807770122170
+https://images.openfoodfacts.net/images/products/480/777/012/2170/front_en.4.200.jpg
+
+Malkist Sandwich — 24g
+Photo: Open Food Facts contributors (CC BY-SA 3.0)
+https://world.openfoodfacts.org/product/4807770122705
+https://images.openfoodfacts.net/images/products/480/777/012/2705/front_en.22.200.jpg
+
+Nissin Stick Wafer — 264 g
+Photo: Open Food Facts contributors (CC BY-SA 3.0)
+https://world.openfoodfacts.org/product/4807770123153
+https://images.openfoodfacts.net/images/products/480/777/012/3153/front_en.17.200.jpg
+
+nissin cup spicy hot beef 45g — 45g
+Photo: foodless (CC BY-SA 3.0)
+https://world.openfoodfacts.org/product/4800016560927
+https://images.openfoodfacts.net/images/products/480/001/656/0927/front_en.16.200.jpg
+
+Cheez On Chips — 22 g
+Photo: fooducate.695B3C1C-4243-CB41-48B4-BD527A7E70A8 (CC BY-SA 3.0)
+https://world.openfoodfacts.org/product/4800194104128
+https://images.openfoodfacts.net/images/products/480/019/410/4128/front_en.6.200.jpg
+
+Oishi Prawn Crackers Spicy — 24 g
+Photo: openfoodfacts-contributors (CC BY-SA 3.0)
+https://world.openfoodfacts.org/product/4800194104968
+https://images.openfoodfacts.net/images/products/480/019/410/4968/front_en.4.200.jpg
+
+Oishi Prawn Crackers (Sweet Extra Flavor) — 60 g
+Photo: openfoodfacts-contributors (CC BY-SA 3.0)
+https://world.openfoodfacts.org/product/4800194105958
+https://images.openfoodfacts.net/images/products/480/019/410/5958/front_en.7.200.jpg
+
+Oishi Potato Fries Barbeque (BBQ) — 50 g
+Photo: foodless (CC BY-SA 3.0)
+https://world.openfoodfacts.org/product/4800194106696
+https://images.openfoodfacts.net/images/products/480/019/410/6696/front_en.5.200.jpg
+
+Oishi 4x Corn Snack - Cheddar Flavor — 24 g
+Photo: openfoodfacts-contributors (CC BY-SA 3.0)
+https://world.openfoodfacts.org/product/4800194106900
+https://images.openfoodfacts.net/images/products/480/019/410/6900/front_en.4.200.jpg
+
+Potato Fries Plain — 30 g
+Photo: waistline-app (CC BY-SA 3.0)
+https://world.openfoodfacts.org/product/4800194131230
+https://images.openfoodfacts.net/images/products/480/019/413/1230/front_en.3.200.jpg
+
+Fishda Fish Kropeck — 22 g
+Photo: foodless (CC BY-SA 3.0)
+https://world.openfoodfacts.org/product/4800194136648
+https://images.openfoodfacts.net/images/products/480/019/413/6648/front_en.11.200.jpg
+
+Smart C + Dalandan Burst Juice Drink — 350 ml
+Photo: Open Food Facts contributors (CC BY-SA 3.0)
+https://world.openfoodfacts.org/product/4800194150965
+https://images.openfoodfacts.net/images/products/480/019/415/0965/front_en.4.200.jpg
+
+Oishi Grab Nuts Roasted Almonds — 30 g
+Photo: foodless (CC BY-SA 3.0)
+https://world.openfoodfacts.org/product/4800194152594
+https://images.openfoodfacts.net/images/products/480/019/415/2594/front_en.3.200.jpg
+
+Bread Pan Onion & Garlic — 24 g
+Photo: kiliweb (CC BY-SA 3.0)
+https://world.openfoodfacts.org/product/4800194153232
+https://images.openfoodfacts.net/images/products/480/019/415/3232/front_fr.3.200.jpg
+
+smart c lemon squeeze 350ml — 350 ml
+Photo: antoniojr (CC BY-SA 3.0)
+https://world.openfoodfacts.org/product/4800194184083
+https://images.openfoodfacts.net/images/products/480/019/418/4083/front_en.4.200.jpg
+
+Oishi Smart C+ Pomelo Grapefruit Vitamin C Juice Drink — 500ml
+Photo: hiroshi23 (CC BY-SA 3.0)
+https://world.openfoodfacts.org/product/4800194185103
+https://images.openfoodfacts.net/images/products/480/019/418/5103/front_en.8.200.jpg
+
+Smart C Lemon Squeese — 1 L
+Photo: foodless (CC BY-SA 3.0)
+https://world.openfoodfacts.org/product/4800194187084
+https://images.openfoodfacts.net/images/products/480/019/418/7084/front_en.5.200.jpg
+
+ovaltine — 20 g
+Photo: openfoodfacts-contributors (CC BY-SA 3.0)
+https://world.openfoodfacts.org/product/4808591800049
+https://images.openfoodfacts.net/images/products/480/859/180/0049/front_en.4.200.jpg
+
+Tropicana Twister — 1000ml
+Photo: antoniojr (CC BY-SA 3.0)
+https://world.openfoodfacts.org/product/4803925260124
+https://images.openfoodfacts.net/images/products/480/392/526/0124/front_en.4.200.jpg
+
+Quaker Oats Caldo Chicken & Mushroom flavor — 28g
+Photo: Open Food Facts contributors (CC BY-SA 3.0)
+https://world.openfoodfacts.org/product/4800274700011
+https://images.openfoodfacts.net/images/products/480/027/470/0011/front_en.4.200.jpg
+
+Pocari Sweat Ion Supply Drink — 900ml
+Photo: smoothie-app (CC BY-SA 3.0)
+https://world.openfoodfacts.org/product/4800350108878
+https://images.openfoodfacts.net/images/products/480/035/010/8878/front_en.3.200.jpg
+
+Purefoods Corned Beef — 150 g
+Photo: kiliweb (CC BY-SA 3.0)
+https://world.openfoodfacts.org/product/4808887010022
+https://images.openfoodfacts.net/images/products/480/888/701/0022/front_en.13.200.jpg
+
+Purefoods Corned Beef (Classic) — 150g
+Photo: hyceiin (CC BY-SA 3.0)
+https://world.openfoodfacts.org/product/4808887010077
+https://images.openfoodfacts.net/images/products/480/888/701/0077/front_en.3.200.jpg
+
+Quick Cook Oatmeal — 200g
+Photo: foodless (CC BY-SA 3.0)
+https://world.openfoodfacts.org/product/4800274020027
+https://images.openfoodfacts.net/images/products/480/027/402/0027/front_en.4.200.jpg
+
+Instant Oatmeal Chocolate Flavor — 33 g
+Photo: municorn-calorie-counter-app (CC BY-SA 3.0)
+https://world.openfoodfacts.org/product/4800274330355
+https://images.openfoodfacts.net/images/products/480/027/433/0355/front_en.31.200.jpg
+
+Oaties mini oats cookies Apple Cinnamon — 28 g
+Photo: Open Food Facts contributors (CC BY-SA 3.0)
+https://world.openfoodfacts.org/product/4800274834280
+https://images.openfoodfacts.net/images/products/480/027/483/4280/front_en.4.200.jpg
+
+Pasteurized Processed Cheese Food — 500 g
+Photo: Open Food Facts contributors (CC BY-SA 3.0)
+https://world.openfoodfacts.org/product/4800056161023
+https://images.openfoodfacts.net/images/products/480/005/616/1023/front_en.4.200.jpg
+
+Quiickchow Instant Mami Chicken — 55g
+Photo: odinh (CC BY-SA 3.0)
+https://world.openfoodfacts.org/product/4804888889018
+https://images.openfoodfacts.net/images/products/480/488/888/9018/front_nb.11.200.jpg
+
+Sweet Corn Balls — 420 g
+Photo: Open Food Facts contributors (CC BY-SA 3.0)
+https://world.openfoodfacts.org/product/4806505854973
+https://images.openfoodfacts.net/images/products/480/650/585/4973/front_en.3.200.jpg
+
+Green Peas — 225 g
+Photo: Open Food Facts contributors (CC BY-SA 3.0)
+https://world.openfoodfacts.org/product/4800017905505
+https://images.openfoodfacts.net/images/products/480/001/790/5505/front_en.7.200.jpg
+
+RAM Hotcake Mix — 200g
+Photo: Open Food Facts contributors (CC BY-SA 3.0)
+https://world.openfoodfacts.org/product/4800017952301
+https://images.openfoodfacts.net/images/products/480/001/795/2301/front_en.4.200.jpg
+
+Hansel Milk Sandwhich — 31 g
+Photo: qalzy (CC BY-SA 3.0)
+https://world.openfoodfacts.org/product/4800092113314
+https://images.openfoodfacts.net/images/products/480/009/211/3314/front_en.14.200.jpg
+
+Rebisco Bravo — 30g
+Photo: foodless (CC BY-SA 3.0)
+https://world.openfoodfacts.org/product/4800092113413
+https://images.openfoodfacts.net/images/products/480/009/211/3413/front_en.38.200.jpg
+
+Wafer time — 27 g
+Photo: kiliweb (CC BY-SA 3.0)
+https://world.openfoodfacts.org/product/4800092115707
+https://images.openfoodfacts.net/images/products/480/009/211/5707/front_en.26.200.jpg
+
+Crossini Hazel Choco — 41 g
+Photo: smoothie-app (CC BY-SA 3.0)
+https://world.openfoodfacts.org/product/4800092550669
+https://images.openfoodfacts.net/images/products/480/009/255/0669/front_en.10.200.jpg
+
+B'lue Flavored Drink — 500 ml
+Photo: Open Food Facts contributors (CC BY-SA 3.0)
+https://world.openfoodfacts.org/product/4800016073335
+https://images.openfoodfacts.net/images/products/480/001/607/3335/front_en.4.200.jpg
+
+Vitasoy Chocolate — 330ml
+Photo: Open Food Facts contributors (CC BY-SA 3.0)
+https://world.openfoodfacts.org/product/4800016073960
+https://images.openfoodfacts.net/images/products/480/001/607/3960/front_en.12.200.jpg
+
+Sugar free Orange soda — 250 ml
+Photo: antoniojr (CC BY-SA 3.0)
+https://world.openfoodfacts.org/product/4806527717218
+https://images.openfoodfacts.net/images/products/480/652/771/7218/front_en.4.200.jpg
+
+Royal Tru-Orange — 250ml
+Photo: foodless (CC BY-SA 3.0)
+https://world.openfoodfacts.org/product/4801981118519
+https://images.openfoodfacts.net/images/products/480/198/111/8519/front_en.11.200.jpg
+
+Royal Tru-Orange Carbonated Orange Drink (Fortified with B-Vitamins) — 290 ml
+Photo: waistline-app (CC BY-SA 3.0)
+https://world.openfoodfacts.org/product/4801981118571
+https://images.openfoodfacts.net/images/products/480/198/111/8571/front_en.3.200.jpg
+
+tru-orange — 195ml
+Photo: foodless (CC BY-SA 3.0)
+https://world.openfoodfacts.org/product/4801981127207
+https://images.openfoodfacts.net/images/products/480/198/112/7207/front_en.5.200.jpg
+
+San Mig Super Coffee — 7 g
+Photo: antoniojr (CC BY-SA 3.0)
+https://world.openfoodfacts.org/product/4806513742569
+https://images.openfoodfacts.net/images/products/480/651/374/2569/front_en.4.200.jpg
+
+Moo Fortified — 245ml
+Photo: Open Food Facts contributors (CC BY-SA 3.0)
+https://world.openfoodfacts.org/product/4800110080482
+https://images.openfoodfacts.net/images/products/480/011/008/0482/front_en.3.200.jpg
+
+Fortified Milk — 1000ml
+Photo: macrofactor (CC BY-SA 3.0)
+https://world.openfoodfacts.org/product/4800110093888
+https://images.openfoodfacts.net/images/products/480/011/009/3888/front_en.17.200.jpg
+
+Creamy Peanut Butter — 470 g
+Photo: antoniojr (CC BY-SA 3.0)
+https://world.openfoodfacts.org/product/4802222039969
+https://images.openfoodfacts.net/images/products/480/222/203/9969/front_en.4.200.jpg
+
+Banana chips — 80 g
+Photo: kiliweb (CC BY-SA 3.0)
+https://world.openfoodfacts.org/product/4802222046141
+https://images.openfoodfacts.net/images/products/480/222/204/6141/front_en.16.200.jpg
+
+Coffee Mate — 60g
+Photo: Open Food Facts contributors (CC BY-SA 3.0)
+https://world.openfoodfacts.org/product/4800361411110
+https://images.openfoodfacts.net/images/products/480/036/141/1110/front_en.4.200.jpg
+
+Honey Stars — 20 g
+Photo: thebarcodescanneratthegrocerystore (CC BY-SA 3.0)
+https://world.openfoodfacts.org/product/4800361028158
+https://images.openfoodfacts.net/images/products/480/036/102/8158/front_en.4.200.jpg
+
+nestea lemon 20g — 20 g
+Photo: foodless (CC BY-SA 3.0)
+https://world.openfoodfacts.org/product/4800361379557
+https://images.openfoodfacts.net/images/products/480/036/137/9557/front_en.47.200.jpg
+
+sprite — 195ml
+Photo: kiliweb (CC BY-SA 3.0)
+https://world.openfoodfacts.org/product/4801981127191
+https://images.openfoodfacts.net/images/products/480/198/112/7191/front_en.6.200.jpg
+
+Lemon-Lime Drink Sprite — 1.5l
+Photo: kiliweb (CC BY-SA 3.0)
+https://world.openfoodfacts.org/product/4801981116270
+https://images.openfoodfacts.net/images/products/480/198/111/6270/front_en.23.200.jpg
+
+Lightwater — 650 ml
+Photo: antoniojr (CC BY-SA 3.0)
+https://world.openfoodfacts.org/product/4806506520808
+https://images.openfoodfacts.net/images/products/480/650/652/0808/front_en.4.200.jpg
+
+Sunrich Peanut Crunch — 120 g
+Photo: Open Food Facts contributors (CC BY-SA 3.0)
+https://world.openfoodfacts.org/product/4804888815918
+https://images.openfoodfacts.net/images/products/480/488/881/5918/front_en.4.200.jpg
+
+Super Delights Brownie Bites — 14 g
+Photo: hiroshi23 (CC BY-SA 3.0)
+https://world.openfoodfacts.org/product/4800365881315
+https://images.openfoodfacts.net/images/products/480/036/588/1315/front_en.7.200.jpg
+
+Real Leaf Honey Lemon Green Tea — 480ml
+Photo: Open Food Facts contributors (CC BY-SA 3.0)
+https://world.openfoodfacts.org/product/4801981120369
+https://images.openfoodfacts.net/images/products/480/198/112/0369/front_en.4.200.jpg
+
+Iced creamy 3in1 coffee mix — 25g
+Photo: Open Food Facts contributors (CC BY-SA 3.0)
+https://world.openfoodfacts.org/product/4806533310373
+https://images.openfoodfacts.net/images/products/480/653/331/0373/front_en.3.200.jpg
+
+Great Taste Choco Coffee Mix Twin Pack — 50g
+Photo: maruco (CC BY-SA 3.0)
+https://world.openfoodfacts.org/product/4800016022258
+https://images.openfoodfacts.net/images/products/480/001/602/2258/front_en.11.200.jpg
+
+El Real. Rumble pasta — 400g
+Photo: Open Food Facts contributors (CC BY-SA 3.0)
+https://world.openfoodfacts.org/product/4800016783609
+https://images.openfoodfacts.net/images/products/480/001/678/3609/front_en.4.200.jpg
+
+Great Taste White Caramel — 30g
+Photo: mazhii (CC BY-SA 3.0)
+https://world.openfoodfacts.org/product/4800016022210
+https://images.openfoodfacts.net/images/products/480/001/602/2210/front_en.9.200.jpg
+
+B'lue Z-RO — 330 ml
+Photo: Open Food Facts contributors (CC BY-SA 3.0)
+https://world.openfoodfacts.org/product/4800016025457
+https://images.openfoodfacts.net/images/products/480/001/602/5457/front_en.4.200.jpg
+
+Great Taste Chocolate Mocha — 200ml
+Photo: Open Food Facts contributors (CC BY-SA 3.0)
+https://world.openfoodfacts.org/product/4800016074899
+https://images.openfoodfacts.net/images/products/480/001/607/4899/front_en.14.200.jpg
+
+Cloud 9 Almond Fudge — 35g
+Photo: antoniojr (CC BY-SA 3.0)
+https://world.openfoodfacts.org/product/4800016964466
+https://images.openfoodfacts.net/images/products/480/001/696/4466/front_en.7.200.jpg
+
+Tattoos Corn Chips — 120 g
+Photo: antoniojr (CC BY-SA 3.0)
+https://world.openfoodfacts.org/product/4806521791719
+https://images.openfoodfacts.net/images/products/480/652/179/1719/front_en.4.200.jpg
+
+Wilkins Pure Purified Drinking Water — 500 ml
+Photo: openfoodfacts-contributors (CC BY-SA 3.0)
+https://world.openfoodfacts.org/product/4801981107971
+https://images.openfoodfacts.net/images/products/480/198/110/7971/front_en.19.200.jpg
+
+Light cultured milk — 80ml
+Photo: kiliweb (CC BY-SA 3.0)
+https://world.openfoodfacts.org/product/48042857
+https://images.openfoodfacts.net/images/products/000/004/804/2857/front_fr.3.200.jpg
+
+youngs town sardines (g) 155g — 155 g
+Photo: foodless (CC BY-SA 3.0)
+https://world.openfoodfacts.org/product/4800527629083
+https://images.openfoodfacts.net/images/products/480/052/762/9083/front_en.18.200.jpg
+
+Beef Loaf — 250g
+Photo: kiliweb (CC BY-SA 3.0)
+https://world.openfoodfacts.org/product/0748485800110
+https://images.openfoodfacts.net/images/products/074/848/580/0110/front_en.6.200.jpg
+
+Meatloaf — 170 g
+Photo: fooducate.6984B54A-97BD-B1E5-41BC-8B3988BB39CD (CC BY-SA 3.0)
+https://world.openfoodfacts.org/product/0748485800233
+https://images.openfoodfacts.net/images/products/074/848/580/0233/front_en.26.200.jpg
+
+argentina corned beef 150g — 150 g
+Photo: foodless (CC BY-SA 3.0)
+https://world.openfoodfacts.org/product/0748485800431
+https://images.openfoodfacts.net/images/products/074/848/580/0431/front_en.28.200.jpg
+
+argentina corned beef 100g — 100g
+Photo: foodless (CC BY-SA 3.0)
+https://world.openfoodfacts.org/product/0748485801803
+https://images.openfoodfacts.net/images/products/074/848/580/1803/front_en.12.200.jpg
+
+argentina spicy corned chicken 150g — 150g
+Photo: foodless (CC BY-SA 3.0)
+https://world.openfoodfacts.org/product/0748485803685
+https://images.openfoodfacts.net/images/products/074/848/580/3685/front_en.17.200.jpg
+
+argentina corned chicken 150g — 150g
+Photo: foodless (CC BY-SA 3.0)
+https://world.openfoodfacts.org/product/0748485802473
+https://images.openfoodfacts.net/images/products/074/848/580/2473/front_en.9.200.jpg
+
+Apple Cider Vinegar — 473mL
+Photo: wobblyblonket03 (CC BY-SA 3.0)
+https://world.openfoodfacts.org/product/0074305401169
+https://images.openfoodfacts.net/images/products/007/430/540/1169/front_en.3.200.jpg
+
+Apple Green Tea — 355ml
+Photo: Open Food Facts contributors (CC BY-SA 3.0)
+https://world.openfoodfacts.org/product/21080661
+https://images.openfoodfacts.net/images/products/000/002/108/0661/front_en.4.200.jpg
+
+Cadbury Dairy Milk with Oreo — 49g
+Photo: Open Food Facts contributors (CC BY-SA 3.0)
+https://world.openfoodfacts.org/product/8901233024219
+https://images.openfoodfacts.net/images/products/890/123/302/4219/front_en.13.200.jpg
+
+Century Tuna Premium Red Chunks Spanish Style — 184g
+Photo: jeth888 (CC BY-SA 3.0)
+https://world.openfoodfacts.org/product/0748485100050
+https://images.openfoodfacts.net/images/products/074/848/510/0050/front_en.3.200.jpg
+
+555 Fried sardines hot & spicy — 155g
+Photo: Open Food Facts contributors (CC BY-SA 3.0)
+https://world.openfoodfacts.org/product/72217887
+https://images.openfoodfacts.net/images/products/000/007/221/7887/front_en.4.200.jpg
+
+Century Tuna Flakes in Oil — 180g
+Photo: zenoalexei (CC BY-SA 3.0)
+https://world.openfoodfacts.org/product/0748485100081
+https://images.openfoodfacts.net/images/products/074/848/510/0081/front_en.41.200.jpg
+
+Nutriboost Orange Flavor — 330 ml
+Photo: Open Food Facts contributors (CC BY-SA 3.0)
+https://world.openfoodfacts.org/product/1828981189533
+https://images.openfoodfacts.net/images/products/182/898/118/9533/front_en.4.200.jpg
+
+Pure Milk — 1L
+Photo: kiliweb (CC BY-SA 3.0)
+https://world.openfoodfacts.org/product/8888440000048
+https://images.openfoodfacts.net/images/products/888/844/000/0048/front_fr.4.200.jpg
+
+Energen Champion Pwdered Chocolate Malt Drink with Vitamins & Egg — 32 g
+Photo: foodless (CC BY-SA 3.0)
+https://world.openfoodfacts.org/product/8996001603192
+https://images.openfoodfacts.net/images/products/899/600/160/3192/front_en.8.200.jpg
+
+Gery chocolatõs — 16g
+Photo: Open Food Facts contributors (CC BY-SA 3.0)
+https://world.openfoodfacts.org/product/8992775711910
+https://images.openfoodfacts.net/images/products/899/277/571/1910/front_id.3.200.jpg
+
+Goya Double Hazelnut Spread — 350g
+Photo: foodless (CC BY-SA 3.0)
+https://world.openfoodfacts.org/product/4002309007540
+https://images.openfoodfacts.net/images/products/400/230/900/7540/front_en.3.200.jpg
+
+Choco Hazelnut and Milk Choco Spread — 400g
+Photo: Open Food Facts contributors (CC BY-SA 3.0)
+https://world.openfoodfacts.org/product/4002309028460
+https://images.openfoodfacts.net/images/products/400/230/902/8460/front_en.9.200.jpg
+
+Hershey's Creamy Chocolate With Whole Almonds — 40g
+Photo: foodless (CC BY-SA 3.0)
+https://world.openfoodfacts.org/product/6942836702403
+https://images.openfoodfacts.net/images/products/694/283/670/2403/front_en.7.200.jpg
+
+Instant Oats — 200g
+Photo: antoniojr (CC BY-SA 3.0)
+https://world.openfoodfacts.org/product/9555805800009
+https://images.openfoodfacts.net/images/products/955/580/580/0009/front_en.4.200.jpg
+
+Mayonnaise Japanese Style — 130 g
+Photo: Open Food Facts contributors (CC BY-SA 3.0)
+https://world.openfoodfacts.org/product/8936066340021
+https://images.openfoodfacts.net/images/products/893/606/634/0021/front_en.4.200.jpg
+
+Lay's Stax Original — 105g
+Photo: kiliweb (CC BY-SA 3.0)
+https://world.openfoodfacts.org/product/1200108000080
+https://images.openfoodfacts.net/images/products/120/010/800/0080/front_fr.8.200.jpg
+
+Skyflakes Fit Crackers with Flax Seeds — 25g
+Photo: fooducate.697F2E2A-3555-BB6E-4DE9-8AB4DC028D02 (CC BY-SA 3.0)
+https://world.openfoodfacts.org/product/0750515030008
+https://images.openfoodfacts.net/images/products/075/051/503/0008/front_en.29.200.jpg
+
+Sky Flakes Crackers — 100g
+Photo: foodless (CC BY-SA 3.0)
+https://world.openfoodfacts.org/product/0750515018303
+https://images.openfoodfacts.net/images/products/075/051/501/8303/front_en.3.200.jpg
+
+Cheezee Squeeze — 235g
+Photo: Open Food Facts contributors (CC BY-SA 3.0)
+https://world.openfoodfacts.org/product/88534664
+https://images.openfoodfacts.net/images/products/000/008/853/4664/front_en.4.200.jpg
+
+MaLing Chicken Luncheon Meat — 397g
+Photo: aherbie (CC BY-SA 3.0)
+https://world.openfoodfacts.org/product/6902131112925
+https://images.openfoodfacts.net/images/products/690/213/111/2925/front_en.4.200.jpg
+
+Hello Panda Fun Filled Biscuits Treats 10 Packets — 260g
+Photo: kiliweb (CC BY-SA 3.0)
+https://world.openfoodfacts.org/product/8888077102078
+https://images.openfoodfacts.net/images/products/888/807/710/2078/front_fr.3.200.jpg
+
+Tiger Vanilla — 22.8 g
+Photo: fooducate.67B286F1-7C33-8227-4076-B0DAB0CF90A3 (CC BY-SA 3.0)
+https://world.openfoodfacts.org/product/7622300743000
+https://images.openfoodfacts.net/images/products/762/230/074/3000/front_en.14.200.jpg
+
+Moniegold Tamarind — 150g
+Photo: macrofactor (CC BY-SA 3.0)
+https://world.openfoodfacts.org/product/8850120990246
+https://images.openfoodfacts.net/images/products/885/012/099/0246/front_en.23.200.jpg
+
+Yakisoba savory beef flavor with real vegetables — 59g
+Photo: Open Food Facts contributors (CC BY-SA 3.0)
+https://world.openfoodfacts.org/product/18921496
+https://images.openfoodfacts.net/images/products/000/001/892/1496/front_fr.4.200.jpg
+
+Oishi Prawn Crackers — 24 g
+Photo: foodless (CC BY-SA 3.0)
+https://world.openfoodfacts.org/product/4891208040143
+https://images.openfoodfacts.net/images/products/489/120/804/0143/front_en.16.200.jpg
+
+White Coffee Classic — 40 g
+Photo: Open Food Facts contributors (CC BY-SA 3.0)
+https://world.openfoodfacts.org/product/9555076300123
+https://images.openfoodfacts.net/images/products/955/507/630/0123/front_en.4.200.jpg
+
+OREO Original — 27g
+Photo: foodless (CC BY-SA 3.0)
+https://world.openfoodfacts.org/product/8992760121014
+https://images.openfoodfacts.net/images/products/899/276/012/1014/front_en.54.200.jpg
+
+Ovaltine Prime Nutri 10 — 25g
+Photo: Open Food Facts contributors (CC BY-SA 3.0)
+https://world.openfoodfacts.org/product/7612100061046
+https://images.openfoodfacts.net/images/products/761/210/006/1046/front_en.4.200.jpg
+
+Ovaltine Chocolate Malt Cookies — 30g
+Photo: Open Food Facts contributors (CC BY-SA 3.0)
+https://world.openfoodfacts.org/product/8850086250316
+https://images.openfoodfacts.net/images/products/885/008/625/0316/front_en.4.200.jpg
+
+Lay' Stax Sour Cream & Onion — 135g
+Photo: antoniojr (CC BY-SA 3.0)
+https://world.openfoodfacts.org/product/9556174816578
+https://images.openfoodfacts.net/images/products/955/617/481/6578/front_en.4.200.jpg
+
+Quaker Instant Oatmeal — 1kg
+Photo: openfoodfacts-contributors (CC BY-SA 3.0)
+https://world.openfoodfacts.org/product/9556174100028
+https://images.openfoodfacts.net/images/products/955/617/410/0028/front_en.3.200.jpg
+
+Hansel Crackers — 32g
+Photo: antoniojr (CC BY-SA 3.0)
+https://world.openfoodfacts.org/product/84001771
+https://images.openfoodfacts.net/images/products/000/008/400/1771/front_en.17.200.jpg
+
+Skippy Extra Crunchy Peanut Butter — 462 g
+Photo: kiliweb (CC BY-SA 3.0)
+https://world.openfoodfacts.org/product/0037600840804
+https://images.openfoodfacts.net/images/products/003/760/084/0804/front_en.11.200.jpg
+
+sky flakes 25g — 25 g
+Photo: foodless (CC BY-SA 3.0)
+https://world.openfoodfacts.org/product/0750515018402
+https://images.openfoodfacts.net/images/products/075/051/501/8402/front_en.72.200.jpg
+
+Soya Milk Malt — 1l
+Photo: Open Food Facts contributors (CC BY-SA 3.0)
+https://world.openfoodfacts.org/product/9556007000372
+https://images.openfoodfacts.net/images/products/955/600/700/0372/front_en.4.200.jpg
+
+Non-Dairy Soya With Calcium — 1L
+Photo: vonshly (CC BY-SA 3.0)
+https://world.openfoodfacts.org/product/9556007000556
+https://images.openfoodfacts.net/images/products/955/600/700/0556/front_en.4.200.jpg
+
+Hershey's Cookies 'N' Cream — 946ml
+Photo: macrofactor (CC BY-SA 3.0)
+https://world.openfoodfacts.org/product/9556007002222
+https://images.openfoodfacts.net/images/products/955/600/700/2222/front_en.17.200.jpg
+
+Tang Apple Iced Tea — 20g
+Photo: Open Food Facts contributors (CC BY-SA 3.0)
+https://world.openfoodfacts.org/product/7622300098964
+https://images.openfoodfacts.net/images/products/762/230/009/8964/front_en.4.200.jpg
+
+Honey Lemon — 20 g
+Photo: antoniojr (CC BY-SA 3.0)
+https://world.openfoodfacts.org/product/7622300858612
+https://images.openfoodfacts.net/images/products/762/230/085/8612/front_en.4.200.jpg
+
+Tang Mixed berries — 20g
+Photo: Open Food Facts contributors (CC BY-SA 3.0)
+https://world.openfoodfacts.org/product/8850338024580
+https://images.openfoodfacts.net/images/products/885/033/802/4580/front_en.25.200.jpg
+
+Probiotic Drink — 80 ml
+Photo: fooducate.69775C4B-CDEE-99AB-4E9C-8F9355DF3DD1 (CC BY-SA 3.0)
+https://world.openfoodfacts.org/product/0054028367911
+https://images.openfoodfacts.net/images/products/005/402/836/7911/front_en.59.200.jpg
+
+Oishi Crispy Patata — 24 g
+Photo: foodless (CC BY-SA 3.0)
+https://world.openfoodfacts.org/product/4800194104869
+https://images.openfoodfacts.net/images/products/480/019/410/4869/front_en.23.200.jpg
+
+Choco Mucho Caramel — 33 g
+Photo: antoniojr (CC BY-SA 3.0)
+https://world.openfoodfacts.org/product/4800092660634
+https://images.openfoodfacts.net/images/products/480/009/266/0634/front_en.4.200.jpg
+
+Bear Brand Fortified Milk Drink Powder — 33 g
+Photo: foodless (CC BY-SA 3.0)
+https://world.openfoodfacts.org/product/4800361410816
+https://images.openfoodfacts.net/images/products/480/036/141/0816/front_en.90.200.jpg
+
+Jack 'n Jill Nova Country Cheddar — 40 g
+Photo: foodless (CC BY-SA 3.0)
+https://world.openfoodfacts.org/product/4800016663802
+https://images.openfoodfacts.net/images/products/480/001/666/3802/front_en.53.200.jpg
+
+Jack 'n Jill V-Cut Spicy Barbecue — 25 g
+Photo: foodless (CC BY-SA 3.0)
+https://world.openfoodfacts.org/product/4800016622533
+https://images.openfoodfacts.net/images/products/480/001/662/2533/front_en.37.200.jpg
+
+Indomie Mi Goreng Regular — 85 g
+Photo: mfarisaf23 (CC BY-SA 3.0)
+https://world.openfoodfacts.org/product/0089686010947
+https://images.openfoodfacts.net/images/products/008/968/601/0947/front_en.72.200.jpg
+
+Birch Tree Fortified Milk Powder — 33 g
+Photo: fooducate.697FA824-307B-4F2C-49A4-9851ECE0ADB9 (CC BY-SA 3.0)
+https://world.openfoodfacts.org/product/0748485401492
+https://images.openfoodfacts.net/images/products/074/848/540/1492/front_en.32.200.jpg
+
+Sugo Greaseless Salted Peanuts — 100 g
+Photo: kiliweb (CC BY-SA 3.0)
+https://world.openfoodfacts.org/product/4809010524034
+https://images.openfoodfacts.net/images/products/480/901/052/4034/front_en.3.200.jpg
+
+Datu Puti Spicy Adobo Sauce — 180 mL
+Photo: foodless (CC BY-SA 3.0)
+https://world.openfoodfacts.org/product/4801668605967
+https://images.openfoodfacts.net/images/products/480/166/860/5967/front_en.3.200.jpg
+
+555 Carne Norte — 175 g
+Photo: foodless (CC BY-SA 3.0)
+https://world.openfoodfacts.org/product/0748485801162
+https://images.openfoodfacts.net/images/products/074/848/580/1162/front_en.3.200.jpg
+
+Monde Nissin Butter Coconut — 14 g
+Photo: openfoodfacts-contributors (CC BY-SA 3.0)
+https://world.openfoodfacts.org/product/4807770100529
+https://images.openfoodfacts.net/images/products/480/777/010/0529/front_en.11.200.jpg
+
+Tang Four Seasons Powder Drink — 19 g
+Photo: foodless (CC BY-SA 3.0)
+https://world.openfoodfacts.org/product/7622300808365
+https://images.openfoodfacts.net/images/products/762/230/080/8365/front_en.9.200.jpg
+
+Tang Orange Mango Powder Drink — 18 g
+Photo: ashleyeuge56 (CC BY-SA 3.0)
+https://world.openfoodfacts.org/product/7622300868635
+https://images.openfoodfacts.net/images/products/762/230/086/8635/front_es.16.200.jpg
+
+Bear Brand Milk Drink — 200 mL
+Photo: macrofactor (CC BY-SA 3.0)
+https://world.openfoodfacts.org/product/8858705602379
+https://images.openfoodfacts.net/images/products/885/870/560/2379/front_en.28.200.jpg
+
+Century Tuna Flakes in Oil — 155 g
+Photo: foodless (CC BY-SA 3.0)
+https://world.openfoodfacts.org/product/0748485100401
+https://images.openfoodfacts.net/images/products/074/848/510/0401/front_en.65.200.jpg
+
+M.Y. San Fita Crackers — 30 g
+Photo: fooducate.69D5869E-A60A-19E9-417E-972C2B199C0F (CC BY-SA 3.0)
+https://world.openfoodfacts.org/product/0750515017429
+https://images.openfoodfacts.net/images/products/075/051/501/7429/front_en.45.200.jpg
+
+Rebisco Combi Triple Choco Wafer — 30 g
+Photo: foodless (CC BY-SA 3.0)
+https://world.openfoodfacts.org/product/4800092113536
+https://images.openfoodfacts.net/images/products/480/009/211/3536/front_en.38.200.jpg
+
+Lucky Me! Instant Mami Chicken — 55 g
+Photo: imeldac (CC BY-SA 3.0)
+https://world.openfoodfacts.org/product/4807770270024
+https://images.openfoodfacts.net/images/products/480/777/027/0024/front_en.56.200.jpg
+
+Nescafé Classic Pure Soluble Coffee Stick — 1.9 g
+Photo: foodless (CC BY-SA 3.0)
+https://world.openfoodfacts.org/product/4800361339568
+https://images.openfoodfacts.net/images/products/480/036/133/9568/front_en.38.200.jpg
+
+Jack 'n Jill Piattos Cheese Potato Crisps — 40 g
+Photo: fooducate.69A05AC2-C38F-1C4E-4BC4-A58A8338F733 (CC BY-SA 3.0)
+https://world.openfoodfacts.org/product/4800016671807
+https://images.openfoodfacts.net/images/products/480/001/667/1807/front_en.26.200.jpg
+
+Fudgee Barr Chocolate Cake Bar — 42 g
+Photo: foodless (CC BY-SA 3.0)
+https://world.openfoodfacts.org/product/4800092550904
+https://images.openfoodfacts.net/images/products/480/009/255/0904/front_fr.37.200.jpg
+
+Purefoods Sizzling Sisig — 150 g
+Photo: foodless (CC BY-SA 3.0)
+https://world.openfoodfacts.org/product/4808887119480
+https://images.openfoodfacts.net/images/products/480/888/711/9480/front_en.19.200.jpg
+
+Purefoods Luncheon Meat Chinese Style — 165 g
+Photo: prepperapp (CC BY-SA 3.0)
+https://world.openfoodfacts.org/product/4808887030204
+https://images.openfoodfacts.net/images/products/480/888/703/0204/front_en.3.200.jpg

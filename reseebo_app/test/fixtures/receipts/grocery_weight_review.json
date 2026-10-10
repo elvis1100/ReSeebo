@@ -1,0 +1,30 @@
+{
+  "synthetic": true,
+  "name": "fractional weight is never a piece count",
+  "layoutFamily": "grocery_weight_review",
+  "lines": [
+    {
+      "text": "GROCERY A"
+    },
+    {
+      "text": "2026-10-09"
+    },
+    {
+      "text": "DESCRIPTION QTY PRICE AMOUNT"
+    },
+    {
+      "text": "BANANA 0.50 80.00 40.00"
+    }
+  ],
+  "expected": {
+    "date": "2026-10-09",
+    "lines": [
+      {
+        "description": "BANANA",
+        "quantity": null,
+        "unit": null,
+        "amount": null
+      }
+    ]
+  }
+}

@@ -1,0 +1,428 @@
+{
+  "id": "user_dali_mlkit_enhanced",
+  "provenance": "Native Android bundled ML Kit Latin; enhanced photo; uncorrected; sanitized to supplier header and item/total region; no transcription corrections",
+  "sourceImageSha256": "f62890bbe945dca230070e1f3644c7925843cc7e769e1b03b83ede6d6a4cf6c4",
+  "imageSha256": "6f8de407b1ee5c4016c0b33c91fc74ce30ffd4387ecb4105ce1496574463d571",
+  "elapsedMilliseconds": 326,
+  "lines": [
+    {
+      "text": "DALI Everyday Grocery",
+      "left": 364.0,
+      "top": 237.0,
+      "width": 415.0,
+      "height": 38.0,
+      "tokens": [
+        {
+          "text": "DALI",
+          "left": 364.0,
+          "top": 237.0,
+          "width": 76.0,
+          "height": 38.0
+        },
+        {
+          "text": "Everyday",
+          "left": 463.0,
+          "top": 237.0,
+          "width": 160.0,
+          "height": 38.0
+        },
+        {
+          "text": "Grocery",
+          "left": 643.0,
+          "top": 237.0,
+          "width": 136.0,
+          "height": 38.0
+        }
+      ]
+    },
+    {
+      "text": "UFC Golden Fiesta Canoia 01| SUP )L",
+      "left": 149.0,
+      "top": 623.0,
+      "width": 678.0,
+      "height": 72.0,
+      "tokens": [
+        {
+          "text": "UFC",
+          "left": 149.0,
+          "top": 624.0,
+          "width": 61.0,
+          "height": 43.0
+        },
+        {
+          "text": "Golden",
+          "left": 228.0,
+          "top": 627.0,
+          "width": 118.0,
+          "height": 46.0
+        },
+        {
+          "text": "Fiesta",
+          "left": 366.0,
+          "top": 633.0,
+          "width": 115.0,
+          "height": 47.0
+        },
+        {
+          "text": "Canoia",
+          "left": 504.0,
+          "top": 640.0,
+          "width": 118.0,
+          "height": 46.0
+        },
+        {
+          "text": "01|",
+          "left": 659.0,
+          "top": 646.0,
+          "width": 49.0,
+          "height": 44.0
+        },
+        {
+          "text": "SUP",
+          "left": 722.0,
+          "top": 650.0,
+          "width": 54.0,
+          "height": 43.0
+        },
+        {
+          "text": ")L",
+          "left": 800.0,
+          "top": 653.0,
+          "width": 26.0,
+          "height": 42.0
+        }
+      ]
+    },
+    {
+      "text": "T PC",
+      "left": 226.0,
+      "top": 677.0,
+      "width": 59.0,
+      "height": 44.0,
+      "tokens": [
+        {
+          "text": "T",
+          "left": 226.0,
+          "top": 678.0,
+          "width": 15.0,
+          "height": 40.0
+        },
+        {
+          "text": "PC",
+          "left": 249.0,
+          "top": 679.0,
+          "width": 36.0,
+          "height": 41.0
+        }
+      ]
+    },
+    {
+      "text": "144.00",
+      "left": 471.0,
+      "top": 693.0,
+      "width": 109.0,
+      "height": 38.0,
+      "tokens": [
+        {
+          "text": "144.00",
+          "left": 471.0,
+          "top": 693.0,
+          "width": 109.0,
+          "height": 38.0
+        }
+      ]
+    },
+    {
+      "text": "Hr. Zippy Dishwashing Liquid",
+      "left": 152.0,
+      "top": 728.0,
+      "width": 551.0,
+      "height": 62.0,
+      "tokens": [
+        {
+          "text": "Hr.",
+          "left": 152.0,
+          "top": 729.0,
+          "width": 58.0,
+          "height": 41.0
+        },
+        {
+          "text": "Zippy",
+          "left": 236.0,
+          "top": 732.0,
+          "width": 90.0,
+          "height": 42.0
+        },
+        {
+          "text": "Dishwashing",
+          "left": 350.0,
+          "top": 736.0,
+          "width": 214.0,
+          "height": 48.0
+        },
+        {
+          "text": "Liquid",
+          "left": 583.0,
+          "top": 745.0,
+          "width": 120.0,
+          "height": 44.0
+        }
+      ]
+    },
+    {
+      "text": "1 PC",
+      "left": 229.0,
+      "top": 775.0,
+      "width": 65.0,
+      "height": 48.0,
+      "tokens": [
+        {
+          "text": "1",
+          "left": 229.0,
+          "top": 776.0,
+          "width": 16.0,
+          "height": 42.0
+        },
+        {
+          "text": "PC",
+          "left": 253.0,
+          "top": 778.0,
+          "width": 41.0,
+          "height": 44.0
+        }
+      ]
+    },
+    {
+      "text": "Hayr Carne Norte 1509",
+      "left": 167.0,
+      "top": 823.0,
+      "width": 396.0,
+      "height": 61.0,
+      "tokens": [
+        {
+          "text": "Hayr",
+          "left": 167.0,
+          "top": 823.0,
+          "width": 88.0,
+          "height": 46.0
+        },
+        {
+          "text": "Carne",
+          "left": 256.0,
+          "top": 828.0,
+          "width": 94.0,
+          "height": 45.0
+        },
+        {
+          "text": "Norte",
+          "left": 369.0,
+          "top": 834.0,
+          "width": 98.0,
+          "height": 45.0
+        },
+        {
+          "text": "1509",
+          "left": 490.0,
+          "top": 840.0,
+          "width": 73.0,
+          "height": 44.0
+        }
+      ]
+    },
+    {
+      "text": "3 PC",
+      "left": 240.0,
+      "top": 880.0,
+      "width": 54.0,
+      "height": 40.0,
+      "tokens": [
+        {
+          "text": "3",
+          "left": 240.0,
+          "top": 880.0,
+          "width": 12.0,
+          "height": 40.0
+        },
+        {
+          "text": "PC",
+          "left": 262.0,
+          "top": 880.0,
+          "width": 32.0,
+          "height": 40.0
+        }
+      ]
+    },
+    {
+      "text": "TOTAL",
+      "left": 181.0,
+      "top": 979.0,
+      "width": 85.0,
+      "height": 37.0,
+      "tokens": [
+        {
+          "text": "TOTAL",
+          "left": 181.0,
+          "top": 979.0,
+          "width": 85.0,
+          "height": 37.0
+        }
+      ]
+    },
+    {
+      "text": "27.50",
+      "left": 487.0,
+      "top": 794.0,
+      "width": 94.0,
+      "height": 34.0,
+      "tokens": [
+        {
+          "text": "27.50",
+          "left": 487.0,
+          "top": 794.0,
+          "width": 94.0,
+          "height": 34.0
+        }
+      ]
+    },
+    {
+      "text": "5",
+      "left": 474.0,
+      "top": 992.0,
+      "width": 16.0,
+      "height": 28.0,
+      "tokens": [
+        {
+          "text": "5",
+          "left": 474.0,
+          "top": 992.0,
+          "width": 16.0,
+          "height": 28.0
+        }
+      ]
+    },
+    {
+      "text": "21.00",
+      "left": 491.0,
+      "top": 896.0,
+      "width": 93.0,
+      "height": 32.0,
+      "tokens": [
+        {
+          "text": "21.00",
+          "left": 491.0,
+          "top": 896.0,
+          "width": 93.0,
+          "height": 32.0
+        }
+      ]
+    },
+    {
+      "text": "144.00 \u0172",
+      "left": 751.0,
+      "top": 707.0,
+      "width": 143.0,
+      "height": 32.0,
+      "tokens": [
+        {
+          "text": "144.00",
+          "left": 751.0,
+          "top": 707.0,
+          "width": 104.0,
+          "height": 32.0
+        },
+        {
+          "text": "\u0172",
+          "left": 877.0,
+          "top": 707.0,
+          "width": 17.0,
+          "height": 32.0
+        }
+      ]
+    },
+    {
+      "text": "Kalanans I",
+      "left": 736.0,
+      "top": 751.0,
+      "width": 161.0,
+      "height": 46.0,
+      "tokens": [
+        {
+          "text": "Kalanans",
+          "left": 736.0,
+          "top": 751.0,
+          "width": 148.0,
+          "height": 45.0
+        },
+        {
+          "text": "I",
+          "left": 884.0,
+          "top": 758.0,
+          "width": 13.0,
+          "height": 39.0
+        }
+      ]
+    },
+    {
+      "text": "27.50 \u0172",
+      "left": 766.0,
+      "top": 807.0,
+      "width": 133.0,
+      "height": 32.0,
+      "tokens": [
+        {
+          "text": "27.50",
+          "left": 766.0,
+          "top": 807.0,
+          "width": 95.0,
+          "height": 32.0
+        },
+        {
+          "text": "\u0172",
+          "left": 882.0,
+          "top": 807.0,
+          "width": 17.0,
+          "height": 32.0
+        }
+      ]
+    },
+    {
+      "text": "234.50",
+      "left": 706.0,
+      "top": 996.0,
+      "width": 119.0,
+      "height": 42.0,
+      "tokens": [
+        {
+          "text": "234.50",
+          "left": 706.0,
+          "top": 996.0,
+          "width": 119.0,
+          "height": 42.0
+        }
+      ]
+    },
+    {
+      "text": "63.00 \u0172",
+      "left": 767.0,
+      "top": 904.0,
+      "width": 137.0,
+      "height": 34.0,
+      "tokens": [
+        {
+          "text": "63.00",
+          "left": 767.0,
+          "top": 904.0,
+          "width": 96.0,
+          "height": 34.0
+        },
+        {
+          "text": "\u0172",
+          "left": 887.0,
+          "top": 904.0,
+          "width": 17.0,
+          "height": 34.0
+        }
+      ]
+    }
+  ]
+}

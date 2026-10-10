@@ -1,0 +1,70 @@
+{
+  "synthetic": true,
+  "name": "modest skew joins cells without merging adjacent rows",
+  "lines": [
+    {
+      "text": "SUPPLIER A",
+      "top": 0,
+      "height": 12
+    },
+    {
+      "text": "2",
+      "left": 0,
+      "top": 50,
+      "height": 12,
+      "width": 10
+    },
+    {
+      "text": "COFFEE 26G",
+      "left": 30,
+      "top": 51,
+      "height": 12,
+      "width": 150
+    },
+    {
+      "text": "168.00",
+      "left": 300,
+      "top": 58,
+      "height": 12,
+      "width": 60
+    },
+    {
+      "text": "1",
+      "left": 0,
+      "top": 68,
+      "height": 12,
+      "width": 10
+    },
+    {
+      "text": "MILK 500G",
+      "left": 30,
+      "top": 69,
+      "height": 12,
+      "width": 150
+    },
+    {
+      "text": "40.00",
+      "left": 300,
+      "top": 76,
+      "height": 12,
+      "width": 60
+    }
+  ],
+  "expected": {
+    "date": null,
+    "lines": [
+      {
+        "description": "COFFEE 26G",
+        "quantity": 2,
+        "unit": null,
+        "amount": 16800
+      },
+      {
+        "description": "MILK 500G",
+        "quantity": 1,
+        "unit": null,
+        "amount": 4000
+      }
+    ]
+  }
+}

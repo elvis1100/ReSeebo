@@ -1,0 +1,52 @@
+name: reseebo_app
+description: "Reseebo: offline store purchase and profit tracker."
+publish_to: 'none'
+
+version: 1.0.0+1
+
+environment:
+  sdk: ^3.11.0
+
+dependencies:
+  flutter:
+    sdk: flutter
+
+  sqflite: '>=2.3.0 <2.4.0'
+  path_provider: ^2.1.6
+  path: ^1.9.1
+  image_picker: ^1.2.4
+  google_mlkit_text_recognition: ^0.16.0
+  intl: ^0.20.3
+  uuid: ^4.5.3
+  crypto: ^3.0.7
+  image: ^4.5.4
+  pdf: ^3.13.1
+  printing: ^5.15.1
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+
+  flutter_lints: ^6.0.0
+  sqflite_common_ffi: '>=2.3.0 <2.4.0'
+  integration_test:
+    sdk: flutter
+
+flutter:
+  uses-material-design: true
+  fonts:
+    - family: Inter
+      fonts:
+        - asset: assets/fonts/Inter.ttf
+  assets:
+    - assets/brand/
+    - assets/placeholders/
+    - assets/fonts/
+    - assets/catalog/
+    - assets/catalog/images/
+    - assets/ocr/
+    - assets/ocr/ppocr_v5_mobile/det/
+    - assets/ocr/ppocr_v5_mobile/rec/
+    - assets/ocr/ppocr_v6_medium/det/
+    - assets/ocr/ppocr_v6_medium/rec/
+

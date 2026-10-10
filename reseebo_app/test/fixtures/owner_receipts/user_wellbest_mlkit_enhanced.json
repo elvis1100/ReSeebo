@@ -1,0 +1,302 @@
+{
+  "id": "user_wellbest_mlkit_enhanced",
+  "provenance": "Native Android bundled ML Kit Latin; enhanced photo; uncorrected; sanitized to supplier header and item/total region; no transcription corrections",
+  "sourceImageSha256": "9b1fe91ab4d6cd86e7c4f451160fa371308358c8dae9cfaebd5e67c39f945df9",
+  "imageSha256": "a712fa3b023c3a579c47f3c2a2f0a69844762b60601a07039caf7c1c368274ea",
+  "elapsedMilliseconds": 301,
+  "lines": [
+    {
+      "text": "WELLBEST BATANGAS CITY",
+      "left": 206.0,
+      "top": 303.0,
+      "width": 399.0,
+      "height": 47.0,
+      "tokens": [
+        {
+          "text": "WELLBEST",
+          "left": 206.0,
+          "top": 309.0,
+          "width": 143.0,
+          "height": 41.0
+        },
+        {
+          "text": "BATANGAS",
+          "left": 372.0,
+          "top": 305.0,
+          "width": 143.0,
+          "height": 41.0
+        },
+        {
+          "text": "CITY",
+          "left": 536.0,
+          "top": 304.0,
+          "width": 69.0,
+          "height": 38.0
+        }
+      ]
+    },
+    {
+      "text": "001747347 BIRCH TREE FORTIFIEI 646 TP",
+      "left": 49.0,
+      "top": 1141.0,
+      "width": 691.0,
+      "height": 67.0,
+      "tokens": [
+        {
+          "text": "001747347",
+          "left": 49.0,
+          "top": 1164.0,
+          "width": 166.0,
+          "height": 44.0
+        },
+        {
+          "text": "BIRCH",
+          "left": 229.0,
+          "top": 1159.0,
+          "width": 98.0,
+          "height": 41.0
+        },
+        {
+          "text": "TREE",
+          "left": 349.0,
+          "top": 1155.0,
+          "width": 71.0,
+          "height": 40.0
+        },
+        {
+          "text": "FORTIFIEI",
+          "left": 441.0,
+          "top": 1147.0,
+          "width": 167.0,
+          "height": 44.0
+        },
+        {
+          "text": "646",
+          "left": 629.0,
+          "top": 1144.0,
+          "width": 55.0,
+          "height": 38.0
+        },
+        {
+          "text": "TP",
+          "left": 706.0,
+          "top": 1142.0,
+          "width": 33.0,
+          "height": 37.0
+        }
+      ]
+    },
+    {
+      "text": "10 X 13.75",
+      "left": 91.0,
+      "top": 1208.0,
+      "width": 234.0,
+      "height": 44.0,
+      "tokens": [
+        {
+          "text": "10",
+          "left": 91.0,
+          "top": 1211.0,
+          "width": 41.0,
+          "height": 41.0
+        },
+        {
+          "text": "X",
+          "left": 141.0,
+          "top": 1211.0,
+          "width": 16.0,
+          "height": 40.0
+        },
+        {
+          "text": "13.75",
+          "left": 237.0,
+          "top": 1208.0,
+          "width": 88.0,
+          "height": 42.0
+        }
+      ]
+    },
+    {
+      "text": "TOTAL",
+      "left": 63.0,
+      "top": 1517.0,
+      "width": 86.0,
+      "height": 30.0,
+      "tokens": [
+        {
+          "text": "TOTAL",
+          "left": 63.0,
+          "top": 1517.0,
+          "width": 86.0,
+          "height": 30.0
+        }
+      ]
+    },
+    {
+      "text": "001500381 b+1ARIEL LAU LIe.SR FRS 58G",
+      "left": 50.0,
+      "top": 1246.0,
+      "width": 688.0,
+      "height": 57.0,
+      "tokens": [
+        {
+          "text": "001500381",
+          "left": 50.0,
+          "top": 1265.0,
+          "width": 162.0,
+          "height": 38.0
+        },
+        {
+          "text": "b+1ARIEL",
+          "left": 236.0,
+          "top": 1258.0,
+          "width": 146.0,
+          "height": 38.0
+        },
+        {
+          "text": "LAU",
+          "left": 405.0,
+          "top": 1256.0,
+          "width": 52.0,
+          "height": 34.0
+        },
+        {
+          "text": "LIe.SR",
+          "left": 479.0,
+          "top": 1252.0,
+          "width": 110.0,
+          "height": 35.0
+        },
+        {
+          "text": "FRS",
+          "left": 610.0,
+          "top": 1249.0,
+          "width": 55.0,
+          "height": 34.0
+        },
+        {
+          "text": "58G",
+          "left": 687.0,
+          "top": 1246.0,
+          "width": 51.0,
+          "height": 34.0
+        }
+      ]
+    },
+    {
+      "text": "1X 93.00",
+      "left": 109.0,
+      "top": 1312.0,
+      "width": 217.0,
+      "height": 39.0,
+      "tokens": [
+        {
+          "text": "1X",
+          "left": 109.0,
+          "top": 1316.0,
+          "width": 50.0,
+          "height": 35.0
+        },
+        {
+          "text": "93.00",
+          "left": 237.0,
+          "top": 1311.0,
+          "width": 89.0,
+          "height": 37.0
+        }
+      ]
+    },
+    {
+      "text": "Total Items: 11",
+      "left": 56.0,
+      "top": 1411.0,
+      "width": 326.0,
+      "height": 40.0,
+      "tokens": [
+        {
+          "text": "Total",
+          "left": 56.0,
+          "top": 1417.0,
+          "width": 87.0,
+          "height": 34.0
+        },
+        {
+          "text": "Items:",
+          "left": 168.0,
+          "top": 1414.0,
+          "width": 101.0,
+          "height": 35.0
+        },
+        {
+          "text": "11",
+          "left": 354.0,
+          "top": 1412.0,
+          "width": 29.0,
+          "height": 30.0
+        }
+      ]
+    },
+    {
+      "text": "157.50 y",
+      "left": 632.0,
+      "top": 1193.0,
+      "width": 163.0,
+      "height": 38.0,
+      "tokens": [
+        {
+          "text": "157.50",
+          "left": 632.0,
+          "top": 1195.0,
+          "width": 107.0,
+          "height": 36.0
+        },
+        {
+          "text": "y",
+          "left": 781.0,
+          "top": 1193.0,
+          "width": 14.0,
+          "height": 32.0
+        }
+      ]
+    },
+    {
+      "text": "93.00 y",
+      "left": 648.0,
+      "top": 1293.0,
+      "width": 146.0,
+      "height": 41.0,
+      "tokens": [
+        {
+          "text": "93.00",
+          "left": 648.0,
+          "top": 1296.0,
+          "width": 91.0,
+          "height": 38.0
+        },
+        {
+          "text": "y",
+          "left": 780.0,
+          "top": 1294.0,
+          "width": 14.0,
+          "height": 32.0
+        }
+      ]
+    },
+    {
+      "text": "P250.50",
+      "left": 650.0,
+      "top": 1494.0,
+      "width": 127.0,
+      "height": 36.0,
+      "tokens": [
+        {
+          "text": "P250.50",
+          "left": 650.0,
+          "top": 1494.0,
+          "width": 127.0,
+          "height": 36.0
+        }
+      ]
+    }
+  ]
+}

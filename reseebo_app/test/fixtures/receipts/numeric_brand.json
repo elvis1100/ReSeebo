@@ -1,0 +1,26 @@
+{
+  "synthetic": true,
+  "name": "numeric brand prefix remains product identity",
+  "lines": [
+    {
+      "text": "SUPPLIER A"
+    },
+    {
+      "text": "2026-10-09"
+    },
+    {
+      "text": "7 UP LEMON 1L 72.00"
+    }
+  ],
+  "expected": {
+    "date": "2026-10-09",
+    "lines": [
+      {
+        "description": "7 UP LEMON 1L",
+        "quantity": null,
+        "unit": null,
+        "amount": 7200
+      }
+    ]
+  }
+}

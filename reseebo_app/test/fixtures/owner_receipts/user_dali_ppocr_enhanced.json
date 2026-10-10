@@ -1,0 +1,434 @@
+{
+  "id": "user_dali_ppocr_enhanced",
+  "provenance": "Local desktop CPU PP-OCRv5 mobile via RapidOCR/ONNX; not Android verification; sanitized to supplier header and item/total region; no transcription corrections",
+  "rapidocrVersion": "3.10.0",
+  "onnxruntimeVersion": "1.31.0",
+  "imageSha256": "6f8de407b1ee5c4016c0b33c91fc74ce30ffd4387ecb4105ce1496574463d571",
+  "modelSha256": {
+    "en_PP-OCRv5_rec_mobile.onnx": "c3461add59bb4323ecba96a492ab75e06dda42467c9e3d0c18db5d1d21924be8",
+    "ch_ppocr_mobile_v2.0_cls_mobile.onnx": "e47acedf663230f8863ff1ab0e64dd2d82b838fceb5957146dab185a89d6215c",
+    "ch_PP-OCRv5_det_mobile.onnx": "4d97c44a20d30a81aad087d6a396b08f786c4635742afc391f6621f5c6ae78ae"
+  },
+  "elapsedSeconds": 2.5516827370011015,
+  "lines": [
+    {
+      "text": "DALI Everyday Grocery",
+      "confidence": 0.98732,
+      "tokens": [
+        {
+          "text": "DALI",
+          "left": 366.0,
+          "top": 225.0,
+          "width": 78.0,
+          "height": 60.0
+        },
+        {
+          "text": "Everyday",
+          "left": 463.0,
+          "top": 224.0,
+          "width": 157.0,
+          "height": 60.0
+        },
+        {
+          "text": "Grocery",
+          "left": 638.0,
+          "top": 223.0,
+          "width": 148.0,
+          "height": 60.0
+        }
+      ],
+      "left": 352.60797119140625,
+      "top": 223.4636993408203,
+      "width": 438.835205078125,
+      "height": 60.80647277832031
+    },
+    {
+      "text": "UFC Golden Fiesta Canoia Oil SUP IL",
+      "confidence": 0.96768,
+      "tokens": [
+        {
+          "text": "UFC",
+          "left": 146.0,
+          "top": 611.0,
+          "width": 66.0,
+          "height": 65.0
+        },
+        {
+          "text": "Golden",
+          "left": 231.0,
+          "top": 615.0,
+          "width": 119.0,
+          "height": 67.0
+        },
+        {
+          "text": "Fiesta",
+          "left": 369.0,
+          "top": 621.0,
+          "width": 119.0,
+          "height": 67.0
+        },
+        {
+          "text": "Canoia",
+          "left": 507.0,
+          "top": 627.0,
+          "width": 119.0,
+          "height": 67.0
+        },
+        {
+          "text": "Oil",
+          "left": 645.0,
+          "top": 633.0,
+          "width": 65.0,
+          "height": 65.0
+        },
+        {
+          "text": "SUP",
+          "left": 719.0,
+          "top": 636.0,
+          "width": 66.0,
+          "height": 65.0
+        },
+        {
+          "text": "IL",
+          "left": 793.0,
+          "top": 639.0,
+          "width": 45.0,
+          "height": 64.0
+        }
+      ],
+      "left": 141.65908813476562,
+      "top": 611.1048583984375,
+      "width": 699.056884765625,
+      "height": 92.72979736328125
+    },
+    {
+      "text": "I PC",
+      "confidence": 0.8956,
+      "tokens": [
+        {
+          "text": "I",
+          "left": 199.0,
+          "top": 663.0,
+          "width": 35.0,
+          "height": 61.0
+        },
+        {
+          "text": "PC",
+          "left": 238.0,
+          "top": 666.0,
+          "width": 64.0,
+          "height": 64.0
+        }
+      ],
+      "left": 190.93182373046875,
+      "top": 662.7903442382812,
+      "width": 118.5625,
+      "height": 66.8870849609375
+    },
+    {
+      "text": "144.00",
+      "confidence": 0.99976,
+      "tokens": [
+        {
+          "text": "144.00",
+          "left": 463.0,
+          "top": 683.0,
+          "width": 128.0,
+          "height": 58.0
+        }
+      ],
+      "left": 452.69317626953125,
+      "top": 682.5524291992188,
+      "width": 143.1988525390625,
+      "height": 57.76611328125
+    },
+    {
+      "text": "144.00 U",
+      "confidence": 0.96418,
+      "tokens": [
+        {
+          "text": "144.00",
+          "left": 739.0,
+          "top": 696.0,
+          "width": 123.0,
+          "height": 50.0
+        },
+        {
+          "text": "U",
+          "left": 876.0,
+          "top": 696.0,
+          "width": 20.0,
+          "height": 50.0
+        }
+      ],
+      "left": 737.5511474609375,
+      "top": 696.23388671875,
+      "width": 167.835205078125,
+      "height": 50.165283203125
+    },
+    {
+      "text": "Mr. Zippy Dishwashing Liquid Kalamanst",
+      "confidence": 0.97351,
+      "tokens": [
+        {
+          "text": "Mr.",
+          "left": 145.0,
+          "top": 716.0,
+          "width": 73.0,
+          "height": 62.0
+        },
+        {
+          "text": "Zippy",
+          "left": 233.0,
+          "top": 720.0,
+          "width": 103.0,
+          "height": 63.0
+        },
+        {
+          "text": "Dishwashing",
+          "left": 351.0,
+          "top": 725.0,
+          "width": 220.0,
+          "height": 68.0
+        },
+        {
+          "text": "Liquid",
+          "left": 577.0,
+          "top": 735.0,
+          "width": 132.0,
+          "height": 64.0
+        },
+        {
+          "text": "Kalamanst",
+          "left": 724.0,
+          "top": 741.0,
+          "width": 181.0,
+          "height": 67.0
+        }
+      ],
+      "left": 141.65908813476562,
+      "top": 715.9959716796875,
+      "width": 765.26708984375,
+      "height": 91.20965576171875
+    },
+    {
+      "text": "| PC",
+      "confidence": 0.75246,
+      "tokens": [
+        {
+          "text": "|",
+          "left": 219.0,
+          "top": 769.0,
+          "width": 22.0,
+          "height": 62.0
+        },
+        {
+          "text": "PC",
+          "left": 251.0,
+          "top": 769.0,
+          "width": 41.0,
+          "height": 62.0
+        }
+      ],
+      "left": 204.78977966308594,
+      "top": 769.2015991210938,
+      "width": 104.70454406738281,
+      "height": 60.80645751953125
+    },
+    {
+      "text": "27.50",
+      "confidence": 0.9993,
+      "tokens": [
+        {
+          "text": "27.50",
+          "left": 486.0,
+          "top": 780.0,
+          "width": 99.0,
+          "height": 61.0
+        }
+      ],
+      "left": 472.7102355957031,
+      "top": 779.8427124023438,
+      "width": 124.72158813476562,
+      "height": 62.32666015625
+    },
+    {
+      "text": "27.50 U",
+      "confidence": 0.9333,
+      "tokens": [
+        {
+          "text": "27.50",
+          "left": 765.0,
+          "top": 792.0,
+          "width": 94.0,
+          "height": 57.0
+        },
+        {
+          "text": "U",
+          "left": 877.0,
+          "top": 794.0,
+          "width": 19.0,
+          "height": 56.0
+        }
+      ],
+      "left": 752.9488525390625,
+      "top": 792.0040283203125,
+      "width": 158.59661865234375,
+      "height": 57.76611328125
+    },
+    {
+      "text": "Wagi Carne Norte 150g",
+      "confidence": 0.97261,
+      "tokens": [
+        {
+          "text": "Wagi",
+          "left": 159.0,
+          "top": 815.0,
+          "width": 82.0,
+          "height": 60.0
+        },
+        {
+          "text": "Carne",
+          "left": 257.0,
+          "top": 820.0,
+          "width": 98.0,
+          "height": 61.0
+        },
+        {
+          "text": "Norte",
+          "left": 371.0,
+          "top": 826.0,
+          "width": 97.0,
+          "height": 60.0
+        },
+        {
+          "text": "150g",
+          "left": 484.0,
+          "top": 832.0,
+          "width": 86.0,
+          "height": 59.0
+        }
+      ],
+      "left": 146.27841186523438,
+      "top": 814.8064575195312,
+      "width": 434.2159118652344,
+      "height": 77.5281982421875
+    },
+    {
+      "text": "3 PC",
+      "confidence": 0.98506,
+      "tokens": [
+        {
+          "text": "3",
+          "left": 219.0,
+          "top": 867.0,
+          "width": 22.0,
+          "height": 60.0
+        },
+        {
+          "text": "PC",
+          "left": 260.0,
+          "top": 868.0,
+          "width": 41.0,
+          "height": 61.0
+        }
+      ],
+      "left": 204.78977966308594,
+      "top": 866.491943359375,
+      "width": 106.24430847167969,
+      "height": 63.84674072265625
+    },
+    {
+      "text": "21.00",
+      "confidence": 0.9991,
+      "tokens": [
+        {
+          "text": "21.00",
+          "left": 489.0,
+          "top": 886.0,
+          "width": 99.0,
+          "height": 52.0
+        }
+      ],
+      "left": 478.86932373046875,
+      "top": 886.2540283203125,
+      "width": 117.022705078125,
+      "height": 51.68548583984375
+    },
+    {
+      "text": "63.00 U",
+      "confidence": 0.98652,
+      "tokens": [
+        {
+          "text": "63.00",
+          "left": 767.0,
+          "top": 889.0,
+          "width": 101.0,
+          "height": 56.0
+        },
+        {
+          "text": "U",
+          "left": 881.0,
+          "top": 894.0,
+          "width": 21.0,
+          "height": 52.0
+        }
+      ],
+      "left": 756.0284423828125,
+      "top": 889.2943725585938,
+      "width": 158.5965576171875,
+      "height": 56.24591064453125
+    },
+    {
+      "text": "TOTAL",
+      "confidence": 0.99101,
+      "tokens": [
+        {
+          "text": "TOTAL",
+          "left": 171.0,
+          "top": 964.0,
+          "width": 103.0,
+          "height": 65.0
+        }
+      ],
+      "left": 167.83523559570312,
+      "top": 963.7822265625,
+      "width": 120.10226440429688,
+      "height": 65.366943359375
+    },
+    {
+      "text": "5",
+      "confidence": 0.99963,
+      "tokens": [
+        {
+          "text": "5",
+          "left": 464.0,
+          "top": 983.0,
+          "width": 34.0,
+          "height": 47.0
+        }
+      ],
+      "left": 463.4715881347656,
+      "top": 983.5443725585938,
+      "width": 35.414794921875,
+      "height": 45.60479736328125
+    },
+    {
+      "text": "234.50",
+      "confidence": 0.99929,
+      "tokens": [
+        {
+          "text": "234.50",
+          "left": 710.0,
+          "top": 987.0,
+          "width": 116.0,
+          "height": 58.0
+        }
+      ],
+      "left": 695.977294921875,
+      "top": 986.5846557617188,
+      "width": 143.1988525390625,
+      "height": 59.28631591796875
+    }
+  ]
+}

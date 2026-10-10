@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Matches the Flutter welcome surface while the engine initializes. -->
+    <color name="reseebo_launch_background">#FFF7EB</color>
+</resources>

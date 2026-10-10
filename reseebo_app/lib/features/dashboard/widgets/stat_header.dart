@@ -1,0 +1,117 @@
+import 'package:flutter/material.dart';
+
+import '../../../core/models/store_profile.dart';
+import '../../../core/theme/app_colors.dart';
+import '../../../core/theme/app_spacing.dart';
+import '../../../core/theme/app_typography.dart';
+
+/// Compact store identity; receipt and product counts belong to the tabs.
+class StatHeader extends StatelessWidget {
+  final StoreProfile profile;
+  final VoidCallback? onSettingsTap;
+  final VoidCallback? onInsightsTap;
+
+  const StatHeader({
+    super.key,
+    required this.profile,
+    this.onSettingsTap,
+    this.onInsightsTap,
+  });
+
+  @override
+  Widget build(BuildContext context) => Tooltip(
+    message: 'Store settings',
+    child: Material(
+      color: AppColors.primary,
+      borderRadius: BorderRadius.circular(AppSpacing.radiusM),
+      clipBehavior: Clip.antiAlias,
+      child: Ink(
+        decoration: const BoxDecoration(
+          gradient: LinearGradient(
+            colors: [
+              AppColors.primaryDark,
+              AppColors.primary,
+              AppColors.primaryLight,
+            ],
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+          ),
+        ),
+        child: InkWell(
+          onTap: onSettingsTap,
+          borderRadius: BorderRadius.circular(AppSpacing.radiusM),
+          child: Padding(
+            padding: const EdgeInsets.all(AppSpacing.m),
+            child: LayoutBuilder(
+              builder: (context, constraints) {
+                final identity = Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      profile.storeName,
+                      style: AppTypography.headingMedium.copyWith(
+                        fontSize: 17,
+                        color: Colors.white,
+                      ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                    if (profile.ownerName.trim().isNotEmpty)
+                      Text(
+                        profile.ownerName,
+                        style: AppTypography.bodySmall.copyWith(
+                          color: Colors.white,
+                        ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                  ],
+                );
+                final insights = Material(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(AppSpacing.radiusPill),
+                  clipBehavior: Clip.antiAlias,
+                  child: InkWell(
+                    onTap: onInsightsTap,
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 10,
+                        vertical: 4,
+                      ),
+                      child: Text(
+                        'View insights',
+                        style: AppTypography.caption.copyWith(
+                          color: AppColors.primaryDark,
+                          fontWeight: FontWeight.w700,
+                          fontSize: 11,
+                        ),
+                      ),
+                    ),
+                  ),
+                );
+                if (constraints.maxWidth < 360 &&
+                    MediaQuery.textScalerOf(context).scale(11) > 16) {
+                  return Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      identity,
+                      const SizedBox(height: AppSpacing.s),
+                      insights,
+                    ],
+                  );
+                }
+                return Row(
+                  children: [
+                    Expanded(child: identity),
+                    const SizedBox(width: AppSpacing.s),
+                    insights,
+                  ],
+                );
+              },
+            ),
+          ),
+        ),
+      ),
+    ),
+  );
+}

@@ -1,0 +1,35 @@
+{
+  "synthetic": true,
+  "name": "payment footer cannot create product candidates",
+  "lines": [
+    {
+      "text": "SUPPLIER A"
+    },
+    {
+      "text": "2026-10-09"
+    },
+    {
+      "text": "1 pcs Coffee 26G 84.00"
+    },
+    {
+      "text": "CASH 100.00"
+    },
+    {
+      "text": "PROMO COFFEE 26G"
+    },
+    {
+      "text": "CHANGE 16.00"
+    }
+  ],
+  "expected": {
+    "date": "2026-10-09",
+    "lines": [
+      {
+        "description": "Coffee 26G",
+        "quantity": 1,
+        "unit": "piece",
+        "amount": 8400
+      }
+    ]
+  }
+}
