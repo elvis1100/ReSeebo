@@ -21,7 +21,7 @@ class PaddleOcrChannel(context: Context, messenger: BinaryMessenger) {
 
     init {
         channel.setMethodCallHandler { call, result ->
-            if (call.method !in listOf("recognize", "release", "engines")) {
+            if (call.method !in listOf("recognize", "release", "engines", "assetSha256")) {
                 result.notImplemented()
             } else {
                 scope.launch {
@@ -31,6 +31,7 @@ class PaddleOcrChannel(context: Context, messenger: BinaryMessenger) {
                             when (call.method) {
                                 "release" -> { session.release(); null }
                                 "engines" -> session.descriptors()
+                                "assetSha256" -> session.assetSha256(call.argument<String>("path") ?: "")
                                 else -> {
                                     val engineId = call.argument<String>("engineId")
                                     val imagePath = call.argument<String>("imagePath")

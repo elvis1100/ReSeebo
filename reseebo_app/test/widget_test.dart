@@ -207,6 +207,8 @@ void main() {
       addTearDown(tester.view.resetDevicePixelRatio);
       await tester.pumpWidget(ReseeboApp(dataAdapter: _LongCatalogAdapter()));
       await _enterStore(tester);
+      await tester.tap(find.text('Products (100)'));
+      await tester.pumpAndSettle();
       final list = find.byKey(const PageStorageKey('dashboard-products-list'));
       final search = find.byKey(const ValueKey('dashboard-search'));
       expect(search.hitTestable(), findsOneWidget);

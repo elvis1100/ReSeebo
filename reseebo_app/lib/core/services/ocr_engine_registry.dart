@@ -142,18 +142,25 @@ class OcrEngineRegistry {
                 ).hasMatch(artifact['sha256'] as String)) {
               throw const FormatException('Invalid OCR artifact identity.');
             }
-            final data = await (loadAsset ?? rootBundle.load)(
-              artifact['path'] as String,
-            );
-            if (sha256
-                    .convert(
-                      data.buffer.asUint8List(
-                        data.offsetInBytes,
-                        data.lengthInBytes,
-                      ),
-                    )
-                    .toString() !=
-                artifact['sha256']) {
+            final String? digest;
+            if (loadAsset != null) {
+              final data = await loadAsset(artifact['path'] as String);
+              digest = sha256
+                  .convert(
+                    data.buffer.asUint8List(
+                      data.offsetInBytes,
+                      data.lengthInBytes,
+                    ),
+                  )
+                  .toString();
+            } else {
+              // Large model assets must stay off Flutter's binary channel:
+              // loading the entire asset there can exhaust Android's Java heap.
+              digest = await const MethodChannel(
+                'reseebo/ocr',
+              ).invokeMethod<String>('assetSha256', {'path': artifact['path']});
+            }
+            if (digest != artifact['sha256']) {
               throw const FormatException('Bundled OCR asset hash mismatch.');
             }
           }

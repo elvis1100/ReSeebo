@@ -239,6 +239,61 @@ void main() {
     });
   }
 
+  for (final matches in [true, false]) {
+    test(
+      'native streaming hash ${matches ? 'enables' : 'rejects'} model',
+      () async {
+        const channel = MethodChannel('reseebo/ocr');
+        const expected =
+            'ba7816bf8f01cfea414140de5dae2223b00361a396177a9cb410ff61f20015ad';
+        final calls = <MethodCall>[];
+        TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+            .setMockMethodCallHandler(channel, (call) async {
+              calls.add(call);
+              if (call.method == 'assetSha256') {
+                return matches ? expected : 'different';
+              }
+              if (call.method == 'engines') {
+                return [
+                  {
+                    'engineId': paddle.id.wireId,
+                    'modelVersion': paddle.modelVersion,
+                    'runtimeVersion': paddle.runtimeVersion,
+                  },
+                ];
+              }
+              throw StateError('Unexpected native call');
+            });
+        addTearDown(
+          () => TestDefaultBinaryMessengerBinding
+              .instance
+              .defaultBinaryMessenger
+              .setMockMethodCallHandler(channel, null),
+        );
+        final registry = await OcrEngineRegistry.fromManifest({
+          'schemaVersion': 1,
+          'engines': [
+            {
+              'id': paddle.id.wireId,
+              'label': paddle.label,
+              'modelVersion': paddle.modelVersion,
+              'runtimeVersion': paddle.runtimeVersion,
+              'available': true,
+              'verifiedOnDevice': true,
+              'artifacts': [
+                {'path': 'assets/ocr/large.onnx', 'sha256': expected},
+              ],
+            },
+          ],
+        }, mlKitService: RecordingOcr());
+        expect(registry.descriptorFor(paddle.id).available, matches);
+        expect(calls.first.method, 'assetSha256');
+        expect(calls.first.arguments, {'path': 'assets/ocr/large.onnx'});
+        await registry.close();
+      },
+    );
+  }
+
   test('run_metadata_roundtrips_and_rejects_unknown_engine', () {
     const run = OcrRunMetadata(
       engineId: OcrEngineId.ppOcrV5Mobile,

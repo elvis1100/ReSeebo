@@ -29,6 +29,33 @@ void main() {
   }
 
   test(
+    'direct correction lookup survives restart and clears on confirmation',
+    () async {
+      final saved = await initial();
+      expect(await f.adapter.getPendingCorrection(saved.receiptId), isNull);
+      final edit = await f.adapter.getConfirmedReceiptEdit(saved.receiptId);
+      final pending = await f.adapter.savePendingReceipt(
+        edit.draft..lines.single.grossAmountCents = 130000,
+        operationId: 'lookup-correction',
+        correctionOfReceiptId: saved.receiptId,
+        expectedConfirmedRevision: edit.revision,
+      );
+      await f.adapter.close();
+      await f.reopen();
+      final found = await f.adapter.getPendingCorrection(saved.receiptId);
+      expect(found!.id, pending.id);
+      expect(found.revision, pending.revision);
+      expect(found.draft.lines.single.grossAmountCents, 130000);
+      await f.adapter.confirmPendingReceipt(
+        found.id,
+        expectedRevision: found.revision,
+        operationId: 'lookup-confirm',
+      );
+      expect(await f.adapter.getPendingCorrection(saved.receiptId), isNull);
+    },
+  );
+
+  test(
     'correction_preserves_recorded_order_and_images and one active purchase',
     () async {
       final first = await initial();

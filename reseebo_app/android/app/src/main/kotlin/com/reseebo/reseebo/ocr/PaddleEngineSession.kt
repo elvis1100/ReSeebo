@@ -105,24 +105,34 @@ class PaddleEngineSession(private val context: Context) {
         for (index in 0 until artifacts.length()) {
             val artifact = artifacts.getJSONObject(index)
             val path = artifact.getString("path")
-            val digest = MessageDigest.getInstance("SHA-256")
-            try {
-                context.assets.open("flutter_assets/$path").use { input ->
-                    val buffer = ByteArray(64 * 1024)
-                    while (true) {
-                        val count = input.read(buffer)
-                        if (count < 0) break
-                        digest.update(buffer, 0, count)
-                    }
-                }
-            } catch (error: Exception) {
-                throw PaddleChannelError("missing_assets", "Missing bundled OCR artifact: $path")
-            }
-            val actual = digest.digest().joinToString("") { "%02x".format(it.toInt() and 0xff) }
+            val actual = hashAsset(path)
             if (actual != artifact.getString("sha256")) {
                 throw PaddleChannelError("asset_integrity", "SHA-256 mismatch: $path")
             }
         }
+    }
+
+    /** Hash on the native worker without allocating a model-sized channel buffer. */
+    suspend fun assetSha256(path: String): String = withContext(Dispatchers.IO) { hashAsset(path) }
+
+    private fun hashAsset(path: String): String {
+        if (!path.startsWith("assets/ocr/") || path.split('/').any { it == ".." || it == "." }) {
+            throw PaddleChannelError("invalid_asset", "Expected a bundled OCR asset path")
+        }
+        val digest = MessageDigest.getInstance("SHA-256")
+        try {
+            context.assets.open("flutter_assets/$path").use { input ->
+                val buffer = ByteArray(64 * 1024)
+                while (true) {
+                    val count = input.read(buffer)
+                    if (count < 0) break
+                    digest.update(buffer, 0, count)
+                }
+            }
+        } catch (error: Exception) {
+            throw PaddleChannelError("missing_assets", "Missing bundled OCR artifact: $path")
+        }
+        return digest.digest().joinToString("") { "%02x".format(it.toInt() and 0xff) }
     }
 
     suspend fun release() = withContext(Dispatchers.IO) {

@@ -5,10 +5,9 @@
       "id": "ppocr_v5_mobile",
       "label": "PP-OCRv5 Mobile",
       "modelVersion": "PP-OCRv5_mobile_det_onnx@e6f4fa85f00e168c862bc462aebca69eef9b3d3d;en_PP-OCRv5_mobile_rec_onnx@3fafbc3b5dcf93dd72add9f48368be8a3a2cd33b",
-      "runtimeVersion": "onnxruntime-android-1.21.1/sdk-dab3fe35379033fdcb2d0e9572fac0b36c9a9ebf/opencv-4.5.3.0",
-      "available": false,
-      "verifiedOnDevice": false,
-      "unavailableReason": "Samsung API 36 OpenCV 4.5.3 load failed (__sfp_handle_exceptions); corrected 4.5.3.0 runtime awaits physical acceptance.",
+      "runtimeVersion": "onnxruntime-android-1.21.1/sdk-dab3fe35379033fdcb2d0e9572fac0b36c9a9ebf/opencv-4.5.3.0/reseebo-streamed-models-2",
+      "available": true,
+      "verifiedOnDevice": true,
       "artifacts": [
         {
           "path": "assets/ocr/LICENSE-PaddleOCR.txt",
@@ -86,10 +85,9 @@
       "id": "ppocr_v6_medium",
       "label": "PP-OCRv6 Medium",
       "modelVersion": "PP-OCRv6_medium_det_onnx@61323801669c338b7891481ec7bac61ce31b576a;PP-OCRv6_medium_rec_onnx@50c7eacafc52fa7bcf4194e8cd08e46f8558504b",
-      "runtimeVersion": "onnxruntime-android-1.21.1/sdk-dab3fe35379033fdcb2d0e9572fac0b36c9a9ebf/opencv-4.5.3.0",
-      "available": false,
-      "verifiedOnDevice": false,
-      "unavailableReason": "Samsung API 36 OpenCV 4.5.3 load failed (__sfp_handle_exceptions); corrected 4.5.3.0 runtime awaits physical acceptance.",
+      "runtimeVersion": "onnxruntime-android-1.21.1/sdk-dab3fe35379033fdcb2d0e9572fac0b36c9a9ebf/opencv-4.5.3.0/reseebo-streamed-models-2",
+      "available": true,
+      "verifiedOnDevice": true,
       "artifacts": [
         {
           "path": "assets/ocr/LICENSE-PaddleOCR.txt",
@@ -229,6 +227,8 @@
         "path": "android/paddle_ocr/src/main/java/com/paddle/ocr/engine/ORTSessionManager.kt",
         "url": "https://raw.githubusercontent.com/PaddlePaddle/PaddleOCR/dab3fe35379033fdcb2d0e9572fac0b36c9a9ebf/deploy/ppocr-android/ppocr-sdk/src/main/java/com/paddle/ocr/engine/ORTSessionManager.kt",
         "sha256": "edc1b780d5277bcef93d052f3f1bddcad49830dcfa0a3b13ae63e18300e6f394",
+        "localSha256": "3764aa3b5bad19905ee6343a1a9f37169a21454b87a393ebdb1cc0aa198e3462",
+        "localModification": "Stream models to private temporary files, recover interrupted copies, and disable retained CPU arenas and memory patterns for dynamic OCR shapes.",
         "bytes": 5886,
         "license": "Apache-2.0"
       },

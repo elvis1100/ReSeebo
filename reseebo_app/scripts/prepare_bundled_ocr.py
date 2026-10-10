@@ -24,7 +24,7 @@ def prepare(root: Path, manifest: dict, verify_only: bool) -> None:
         target = (root / artifact['path']).resolve()
         if not target.is_relative_to(root):
             raise ValueError('Artifact path is outside project root')
-        expected = artifact['sha256']
+        expected = artifact.get('localSha256', artifact['sha256'])
         if len(expected) != 64 or any(c not in '0123456789abcdef' for c in expected):
             raise ValueError('Invalid SHA-256 in manifest')
         if target.exists():
@@ -37,6 +37,8 @@ def prepare(root: Path, manifest: dict, verify_only: bool) -> None:
                 raise ValueError(f'SHA-256 mismatch: {artifact["path"]}')
         elif verify_only:
             raise ValueError(f'Missing artifact: {artifact["path"]}')
+        if 'localSha256' in artifact:
+            raise ValueError(f'Locally modified artifact must be restored from the project checkout: {artifact["path"]}')
         url = artifact['url']
         if not url.startswith('https://'):
             raise ValueError('Artifact download must use HTTPS')

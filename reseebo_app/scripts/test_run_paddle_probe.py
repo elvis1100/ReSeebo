@@ -58,6 +58,57 @@ class ProbeGuardTest(unittest.TestCase):
                 launch=launch))
             self.assertEqual(1, len(commands))
             self.assertIn('--device-user=0', commands[0])
+            self.assertNotIn('--keep-app-running', commands[0])
+
+
+    def test_keep_app_running_preserves_only_guarded_verification_package(self):
+        helper = self.load_helper()
+        with tempfile.TemporaryDirectory() as directory:
+            apk = Path(directory) / 'test.apk'
+            apk.write_bytes(b'controlled-apk-fixture')
+            digest = hashlib.sha256(apk.read_bytes()).hexdigest()
+            commands = []
+            self.assertEqual(0, helper.guarded_drive(apk, digest,
+                Path(directory) / 'snapshots', 'aapt2', 'flutter', 'device',
+                package_reader=lambda *_: helper.VERIFICATION_ID,
+                launch=lambda command: commands.append(command) or 0,
+                keep_app_running=True))
+            self.assertIn('--keep-app-running', commands[0])
+            with self.assertRaisesRegex(ValueError, 'Refusing package ID'):
+                helper.guarded_drive(apk, digest, Path(directory) / 'snapshots',
+                    'aapt2', 'flutter', 'device',
+                    package_reader=lambda *_: 'com.reseebo.reseebo',
+                    launch=lambda _: self.fail('Owner app launched'),
+                    keep_app_running=True)
+
+
+
+    def test_existing_app_connects_without_install_binary(self):
+        helper = self.load_helper()
+        with tempfile.TemporaryDirectory() as directory:
+            apk = Path(directory) / 'test.apk'
+            apk.write_bytes(b'controlled-apk-fixture')
+            digest = hashlib.sha256(apk.read_bytes()).hexdigest()
+            commands = []
+            options = dict(package_reader=lambda *_: helper.VERIFICATION_ID,
+                launch=lambda command: commands.append(command) or 0,
+                keep_app_running=True, use_existing_app='http://127.0.0.1:12345/token=/')
+            self.assertEqual(0, helper.guarded_drive(apk, digest,
+                Path(directory) / 'snapshots', 'aapt2', 'flutter', 'device', **options))
+            self.assertIn('--use-existing-app=http://127.0.0.1:12345/token=/', commands[0])
+            self.assertFalse(any(arg.startswith('--use-application-binary=') for arg in commands[0]))
+            with self.assertRaisesRegex(ValueError, 'APK SHA-256 mismatch'):
+                helper.guarded_drive(apk, 'a'*64, Path(directory)/'snapshots',
+                    'aapt2', 'flutter', 'device', **options)
+            self.assertEqual(1, len(commands))
+            for invalid in ['http://example.com:12345/', 'https://127.0.0.1:12345/',
+                'http://127.0.0.1/', 'http://user@127.0.0.1:12345/']:
+                with self.assertRaisesRegex(ValueError, 'Existing app URL'):
+                    helper.guarded_drive(apk, digest, Path(directory)/'snapshots',
+                        'aapt2', 'flutter', 'device',
+                        package_reader=lambda *_: helper.VERIFICATION_ID,
+                        launch=lambda _: self.fail('Invalid URL launched'),
+                        use_existing_app=invalid)
 
 
 if __name__ == '__main__':

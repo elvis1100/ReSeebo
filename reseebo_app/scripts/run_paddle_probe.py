@@ -13,6 +13,7 @@ import shutil
 import subprocess
 import sys
 import tempfile
+from urllib.parse import urlsplit
 
 VERIFICATION_ID = 'com.reseebo.reseebo.verification'
 ROOT = Path(__file__).resolve().parents[1]
@@ -42,8 +43,15 @@ def validate_apk(apk: Path, expected_sha256: str, aapt2: str,
 
 def guarded_drive(apk: Path, expected_sha256: str, snapshots: Path,
                   aapt2: str, flutter: str, device: str,
-                  package_reader=inspect_package, launch=None) -> int:
+                  package_reader=inspect_package, launch=None, keep_app_running=False, use_existing_app=None) -> int:
     validate_apk(apk, expected_sha256, aapt2, package_reader)
+    if use_existing_app is not None:
+        url = urlsplit(use_existing_app)
+        if (url.scheme != 'http' or url.hostname != '127.0.0.1'
+                or url.port is None or not 1 <= url.port <= 65535
+                or url.username is not None or url.password is not None
+                or url.query or url.fragment):
+            raise ValueError('Existing app URL must be an HTTP service on 127.0.0.1 with a port')
     snapshots.mkdir(parents=True, exist_ok=True)
     pinned = snapshots / f'{expected_sha256}.apk'
     if not pinned.exists():
@@ -62,9 +70,12 @@ def guarded_drive(apk: Path, expected_sha256: str, snapshots: Path,
     # Check the actual binary again immediately before invoking the installer.
     validate_apk(pinned, expected_sha256, aapt2, package_reader)
     command = [flutter, 'drive', '--no-pub', '-d', device, '--device-user=0',
-        f'--use-application-binary={pinned}',
+        (f'--use-existing-app={use_existing_app}' if use_existing_app is not None
+         else f'--use-application-binary={pinned}'),
         f'--driver={ROOT / "integration_test/paddle_engine_probe_driver.dart"}',
         f'--target={ROOT / "integration_test/paddle_engine_probe_test.dart"}']
+    if keep_app_running:
+        command.append('--keep-app-running')
     print(json.dumps({'packageId': VERIFICATION_ID, 'sha256': expected_sha256,
         'apk': str(pinned), 'command': command}), flush=True)
     if launch is None:
@@ -80,6 +91,10 @@ def main() -> int:
     parser.add_argument('--flutter', default='C:/src/flutter/bin/flutter.bat')
     parser.add_argument('--device', default='R5GL41586RA')
     parser.add_argument('--run', action='store_true')
+    parser.add_argument('--use-existing-app',
+        help='Connect to an independently verified running verification app on localhost.')
+    parser.add_argument('--keep-app-running', action='store_true',
+        help='Preserve the isolated verification package after the probe.')
     args = parser.parse_args()
     if hasattr(sys.stdout, 'reconfigure'):
         sys.stdout.reconfigure(encoding='utf-8')
@@ -90,7 +105,8 @@ def main() -> int:
                 return subprocess.run(command, cwd=ROOT).returncode
         return guarded_drive(args.apk.resolve(), args.sha256,
             ROOT / 'build/verified-paddle-apks', args.aapt2, args.flutter,
-            args.device, launch=launch)
+            args.device, launch=launch, keep_app_running=args.keep_app_running,
+            use_existing_app=args.use_existing_app)
     except (OSError, ValueError, subprocess.CalledProcessError) as error:
         print(str(error), file=sys.stderr)
         return 1

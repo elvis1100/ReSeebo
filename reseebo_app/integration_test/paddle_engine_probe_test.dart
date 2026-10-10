@@ -9,13 +9,22 @@ import 'package:image/image.dart' as img;
 import 'package:integration_test/integration_test.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:reseebo_app/core/models/models.dart';
+import 'package:reseebo_app/core/models/ocr_engine.dart';
 import 'package:reseebo_app/core/services/receipt_parser.dart';
+import 'package:reseebo_app/core/services/ocr_engine_registry.dart';
 
 import 'fixtures/paddle_receipt_truth.dart';
 
 void main() {
   IntegrationTestWidgetsFlutterBinding.ensureInitialized();
   const channel = MethodChannel('reseebo/ocr');
+  late Directory directory;
+  var restartOnly = false;
+  setUpAll(() async {
+    directory = await getTemporaryDirectory();
+    restartOnly = await File('${directory.path}/paddle-probe-restart').exists();
+    if (restartOnly) debugPrint('PADDLE_PROBE_RESTART_ONLY');
+  });
   for (final engineId in ['ppocr_v5_mobile', 'ppocr_v6_medium']) {
     testWidgets('$engineId genuine bundled inference and invalid image error', (
       tester,
@@ -30,16 +39,10 @@ void main() {
           .singleWhere((entry) => entry['id'] == engineId);
       for (final artifact
           in (engine['artifacts'] as List).cast<Map<String, dynamic>>()) {
-        final bytes = await rootBundle.load(artifact['path'] as String);
         expect(
-          sha256
-              .convert(
-                bytes.buffer.asUint8List(
-                  bytes.offsetInBytes,
-                  bytes.lengthInBytes,
-                ),
-              )
-              .toString(),
+          await channel.invokeMethod<String>('assetSha256', {
+            'path': artifact['path'],
+          }),
           artifact['sha256'],
         );
       }
@@ -140,10 +143,63 @@ void main() {
       }
     });
   }
+  testWidgets('bundled registry availability and model switching', (
+    tester,
+  ) async {
+    final manifest =
+        jsonDecode(
+              await rootBundle.loadString('assets/ocr/model_manifest.json'),
+            )
+            as Map<String, dynamic>;
+    // Candidate flags exist only in this verification test; bundled production
+    // availability remains gated until physical acceptance is complete.
+    final candidate = <String, dynamic>{
+      ...manifest,
+      'engines': [
+        for (final engine in manifest['engines'] as List)
+          <String, dynamic>{
+            ...Map<String, dynamic>.from(engine as Map),
+            'available': true,
+            'verifiedOnDevice': true,
+          },
+      ],
+    };
+    final registry = await OcrEngineRegistry.fromManifest(candidate);
+    final receipt = File('${directory.path}/paddle-registry-switch.png');
+    try {
+      final image = img.Image(width: 700, height: 150);
+      img.fill(image, color: img.ColorRgb8(255, 255, 255));
+      img.drawString(
+        image,
+        'TOTAL 168.00',
+        font: img.arial48,
+        x: 40,
+        y: 40,
+        color: img.ColorRgb8(0, 0, 0),
+      );
+      await receipt.writeAsBytes(img.encodePng(image));
+      for (final engine in [
+        OcrEngineId.ppOcrV5Mobile,
+        OcrEngineId.ppOcrV6Medium,
+        OcrEngineId.ppOcrV5Mobile,
+      ]) {
+        expect(registry.descriptorFor(engine).available, isTrue);
+        final lines = await registry.recognize(engine, receipt.path);
+        expect(
+          lines.map((line) => line.text).join('\n'),
+          contains('TOTAL 168.00'),
+        );
+      }
+    } finally {
+      await registry.close();
+      if (await receipt.exists()) await receipt.delete();
+    }
+  });
   for (final engineId in ['ppocr_v5_mobile', 'ppocr_v6_medium']) {
     testWidgets('$engineId genuine bundled inference on photographed receipts', (
       tester,
     ) async {
+      if (restartOnly) return;
       final directory = await getTemporaryDirectory();
       // Host observer supplies developer-only photographs through run-as for
       // this exact verification package. No application network/download path.
@@ -231,6 +287,8 @@ void main() {
               final top = (line['top'] as num).round();
               expect(left, greaterThanOrEqualTo(0));
               expect(top, greaterThanOrEqualTo(0));
+              expect(line['width'] as num, greaterThan(0));
+              expect(line['height'] as num, greaterThan(0));
               expect(
                 (line['left'] as num) + (line['width'] as num),
                 lessThanOrEqualTo(image.width),

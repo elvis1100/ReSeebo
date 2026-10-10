@@ -21,6 +21,7 @@ import android.content.Context
 import com.paddle.ocr.EngineConfig
 import com.paddle.ocr.model.OCRError
 import java.nio.FloatBuffer
+import java.io.File
 
 class ORTSessionManager(
     private val context: Context,
@@ -40,18 +41,20 @@ class ORTSessionManager(
         val opts = OrtSession.SessionOptions().apply {
             setOptimizationLevel(OrtSession.SessionOptions.OptLevel.ALL_OPT)
             setIntraOpNumThreads(config.numThreads)
+            // Receipt and line shapes vary. Retaining their largest allocations
+            // in an arena can exhaust device memory after repeated recognition.
+            setCPUArenaAllocator(false)
+            setMemoryPatternOptimization(false)
         }
         try {
             val ortEnv = env ?: throw OCRError.ModelLoadFailed("OCR", Exception("Environment not initialized"))
-            val detBytes = readModelAsset(detAssetPath)
-            val recBytes = readModelAsset(recAssetPath)
             try {
-                detSession = ortEnv.createSession(detBytes, opts)
+                detSession = loadAssetSession(ortEnv, detAssetPath, opts)
             } catch (t: Throwable) {
                 throw OCRError.ModelLoadFailed("detection", t)
             }
             try {
-                recSession = ortEnv.createSession(recBytes, opts)
+                recSession = loadAssetSession(ortEnv, recAssetPath, opts)
             } catch (t: Throwable) {
                 detSession?.close()
                 detSession = null
@@ -104,11 +107,27 @@ class ORTSessionManager(
         }
     }
 
-    private fun readModelAsset(assetPath: String): ByteArray {
-        return try {
-            context.assets.open(assetPath).use { it.readBytes() }
-        } catch (t: Throwable) {
-            throw OCRError.ModelNotFound(assetPath, t)
+    // Loading both assets as byte arrays duplicates large models on Android's
+    // limited Java heap. Stream each bundled model to private temporary storage;
+    // ONNX Runtime loads the complete self-contained model by path before return.
+    private fun loadAssetSession(
+        ortEnv: OrtEnvironment,
+        assetPath: String,
+        opts: OrtSession.SessionOptions,
+    ): OrtSession {
+        // The owning channel serializes model loads. Recover temporary copies
+        // left by process death before loading another bundled model.
+        context.codeCacheDir.listFiles { file ->
+            file.isFile && file.name.startsWith("reseebo-ocr-") && file.name.endsWith(".onnx")
+        }?.forEach { it.delete() }
+        val model = File.createTempFile("reseebo-ocr-", ".onnx", context.codeCacheDir)
+        try {
+            context.assets.open(assetPath).use { input ->
+                model.outputStream().use { output -> input.copyTo(output, 64 * 1024) }
+            }
+            return ortEnv.createSession(model.absolutePath, opts)
+        } finally {
+            model.delete()
         }
     }
 

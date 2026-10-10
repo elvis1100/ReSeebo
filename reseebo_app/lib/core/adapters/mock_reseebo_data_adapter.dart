@@ -246,6 +246,12 @@ class MockReseeboDataAdapter implements IReseeboDataAdapter {
   }
 
   @override
+  Future<PendingReceipt?> getPendingCorrection(String receiptId) async =>
+      _pendingReceipts.values
+          .where((pending) => pending.correctionOfReceiptId == receiptId)
+          .firstOrNull;
+
+  @override
   Future<String?> resolveConfirmedReceiptId(String pendingId) async =>
       _ledgerLinks[pendingId];
 

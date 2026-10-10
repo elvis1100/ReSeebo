@@ -70,7 +70,7 @@ void main() {
     expect(review.correctionOfReceiptId, saved.receiptId);
     expect(review.expectedConfirmedRevision, 1);
     expect(review.initialDraft.lines.single.grossAmountCents, 2400);
-    await tester.ensureVisible(find.byKey(const ValueKey('amount')));
+    await revealLedgerFinder(tester, find.byKey(const ValueKey('amount')));
     await tester.enterText(find.byKey(const ValueKey('amount')), '');
     await tester.testTextInput.receiveAction(TextInputAction.done);
     await tester.pumpAndSettle();
@@ -99,6 +99,45 @@ void main() {
     expect(entries, hasLength(1));
     expect(entries.single.pendingId, correction!.id);
     expect(adapter.directConfirmedWrites, 0);
+  });
+
+  testWidgets('older receipt resumes correction outside the ledger page', (
+    tester,
+  ) async {
+    final adapter = LedgerUiAdapter();
+    final saved = await adapter.seedConfirmed();
+    final edit = await adapter.getConfirmedReceiptEdit(saved.receiptId);
+    final correction = await adapter.savePendingReceipt(
+      edit.draft..lines.single.grossAmountCents = 1300,
+      operationId: 'older-correction',
+      correctionOfReceiptId: saved.receiptId,
+      expectedConfirmedRevision: edit.revision,
+    );
+    for (var i = 0; i < 201; i++) {
+      await adapter.savePendingReceipt(
+        ledgerDraft(photosOnly: true)..allowDuplicate = true,
+        operationId: 'newer-import-$i',
+      );
+    }
+    expect(
+      (await adapter.getLedgerEntries()).any(
+        (entry) => entry.confirmedReceiptId == saved.receiptId,
+      ),
+      isFalse,
+    );
+    await tester.pumpWidget(
+      ledgerApp(
+        ReceiptDetailScreen(adapter: adapter, receiptId: saved.receiptId),
+      ),
+    );
+    await tester.pumpAndSettle();
+    await tapLedgerText(tester, 'Edit receipt');
+    final review = tester.widget<ReviewMatchScreen>(
+      find.byType(ReviewMatchScreen),
+    );
+    expect(review.pendingId, correction.id);
+    expect(review.expectedRevision, correction.revision);
+    expect(review.initialDraft.lines.single.grossAmountCents, 1300);
   });
 
   test('confirm_routes_to_same_entry and archives prior values', () async {

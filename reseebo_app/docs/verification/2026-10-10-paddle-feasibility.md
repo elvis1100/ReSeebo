@@ -1,5 +1,7 @@
 # Paddle Android feasibility, 10 October 2026
 
+Later update, 10 October 2026: [Paddle device acceptance](2026-10-10-paddle-device-acceptance.md) supersedes the disabled-Paddle and deferred-Paddle-inference statements below. Both manifest flags are enabled after offline Samsung checks. Broader production-flow persistence checks remain separate; the original evidence below is retained as history.
+
 Status: genuine artifacts bundled and native compilation passed. A guarded
 physical-device probe exposed an OpenCV load failure; the documented packaging
 fix is pinned and awaits a new physical probe. Both

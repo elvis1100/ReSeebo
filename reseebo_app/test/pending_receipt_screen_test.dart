@@ -237,6 +237,7 @@ void main() {
     expect(find.text('Unknown supplier'), findsOneWidget);
     await tapLedgerText(tester, 'Edit receipt');
     expect(find.byType(ReviewMatchScreen), findsOneWidget);
+    await revealLedgerFinder(tester, find.text('No items found yet'));
     expect(find.text('No items found yet'), findsOneWidget);
     await tapLedgerText(tester, 'Add item');
     expect(find.byKey(const ValueKey('description')), findsOneWidget);

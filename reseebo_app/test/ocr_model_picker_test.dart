@@ -302,7 +302,8 @@ void main() {
             modelVersion: model.modelVersion,
             runtimeVersion: model.runtimeVersion,
             available: false,
-            unavailableReason: 'Device verification pending',
+            unavailableReason:
+                'Samsung API 36 OpenCV load failed (__sfp_handle_exceptions).',
           ),
       ];
     final state = await fixtureCapture(tester, adapter);
@@ -315,7 +316,12 @@ void main() {
     await tapCaptureAction(tester, find.text('PP-OCRv6 Medium'));
     expect(state.selectedEngineId, OcrEngineId.mlKit);
     expect(adapter.reads, isEmpty);
-    expect(find.text('Device verification pending'), findsNWidgets(2));
+    expect(
+      find.text('Unavailable in this version. Use ML Kit Latin.'),
+      findsNWidgets(2),
+    );
+    expect(find.textContaining('__sfp_handle_exceptions'), findsNothing);
+    expect(find.byIcon(Icons.lock_outline_rounded), findsNWidgets(2));
   });
 
   for (final width in [360.0, 412.0]) {

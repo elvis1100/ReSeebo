@@ -12,6 +12,23 @@ from scripts.prepare_bundled_ocr import prepare
 
 
 class PreparationTest(unittest.TestCase):
+    def test_local_sdk_patch_is_verified_and_never_replaced_by_upstream(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory).resolve()
+            artifact = root / 'patched.kt'
+            artifact.write_bytes(b'local-streaming-loader')
+            manifest = {'schemaVersion': 1, 'engines': [], 'sdk': {'artifacts': [{
+                'path': 'patched.kt', 'sha256': 'a' * 64,
+                'localSha256': hashlib.sha256(artifact.read_bytes()).hexdigest(),
+                'url': 'https://example.invalid/upstream.kt',
+            }]}}
+            with patch('urllib.request.urlopen') as download:
+                prepare(root, manifest, False)
+                artifact.write_bytes(b'corrupted')
+                with self.assertRaisesRegex(ValueError, 'project checkout'):
+                    prepare(root, manifest, False)
+                download.assert_not_called()
+
     def test_gitiles_base64_license_is_decoded_then_hash_checked(self):
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory).resolve()

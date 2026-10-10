@@ -51,6 +51,15 @@ class PendingReceiptRepository {
     return pendingFromRow(rows.single);
   }
 
+  Future<PendingReceipt?> getPendingCorrection(String receiptId) async {
+    final rows = await database.query(
+      'pending_receipts',
+      where: 'correction_of_receipt_id = ?',
+      whereArgs: [receiptId],
+    );
+    return rows.isEmpty ? null : pendingFromRow(rows.single);
+  }
+
   /// Confirmation verifies actual encoded bytes/dimensions for every retained
   /// coordinate space before reusing media owned by the pending save.
   Future<ReceiptDraft> verifyOwnedMedia(ReceiptDraft draft) async {

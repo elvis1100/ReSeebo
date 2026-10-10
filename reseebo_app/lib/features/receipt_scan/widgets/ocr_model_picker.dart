@@ -27,9 +27,12 @@ class OcrModelPicker extends StatelessWidget {
         borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
       ),
       builder: (context) => SafeArea(
-        child: SizedBox(
-          height: MediaQuery.sizeOf(context).height * .8,
+        child: ConstrainedBox(
+          constraints: BoxConstraints(
+            maxHeight: MediaQuery.sizeOf(context).height * .8,
+          ),
           child: Column(
+            mainAxisSize: MainAxisSize.min,
             children: [
               Padding(
                 padding: const EdgeInsets.all(AppSpacing.lg),
@@ -49,8 +52,9 @@ class OcrModelPicker extends StatelessWidget {
                   ],
                 ),
               ),
-              Expanded(
+              Flexible(
                 child: ListView(
+                  shrinkWrap: true,
                   padding: const EdgeInsets.symmetric(
                     horizontal: AppSpacing.lg,
                   ),
@@ -71,22 +75,39 @@ class OcrModelPicker extends StatelessWidget {
                             enabled: engine.available,
                             selected: engine.id == selected,
                             contentPadding: const EdgeInsets.all(AppSpacing.md),
-                            leading: const Icon(
+                            leading: Icon(
                               Icons.document_scanner_outlined,
+                              color: engine.available
+                                  ? null
+                                  : AppColors.textMuted,
                             ),
-                            title: Text(engine.label),
+                            title: Text(
+                              engine.label,
+                              style: engine.available
+                                  ? null
+                                  : const TextStyle(color: AppColors.textMuted),
+                            ),
                             subtitle: Text(
                               !engine.available
-                                  ? engine.unavailableReason ??
-                                        'Device verification pending'
+                                  ? 'Unavailable in this version. Use ML Kit Latin.'
                                   : results[engine.id]?.error != null
                                   ? 'Reading failed · retry available'
                                   : results.containsKey(engine.id)
                                   ? 'Result ready for current photos'
                                   : 'Not read yet',
+                              style: engine.available
+                                  ? null
+                                  : const TextStyle(
+                                      color: AppColors.textSecondary,
+                                    ),
                             ),
                             trailing: engine.id == selected
                                 ? const Icon(Icons.check_rounded)
+                                : !engine.available
+                                ? const Icon(
+                                    Icons.lock_outline_rounded,
+                                    color: AppColors.textMuted,
+                                  )
                                 : null,
                             onTap: engine.available
                                 ? () => Navigator.pop(context, engine.id)

@@ -1,5 +1,7 @@
 # Reviewable receipts: acceptance preparation
 
+Later update, 10 October 2026: [Paddle device acceptance](2026-10-10-paddle-device-acceptance.md) supersedes the disabled-Paddle and deferred-Paddle-inference statements below. Both manifest flags are enabled after offline Samsung checks. Broader production-flow persistence checks remain separate; the original evidence below is retained as history.
+
 The later deadline request hands broader testing to the user. See
 [the final code handoff](2026-10-10-deadline-handoff.md) for whole-project analysis,
 bounded final UI checks and the unrun full-suite/final-APK/review gates. The

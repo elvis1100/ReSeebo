@@ -520,6 +520,10 @@ class SqliteReseeboDataAdapter implements IReseeboDataAdapter {
       _pending.getPendingReceipt(id);
 
   @override
+  Future<PendingReceipt?> getPendingCorrection(String receiptId) =>
+      _pending.getPendingCorrection(receiptId);
+
+  @override
   Future<String?> resolveConfirmedReceiptId(String pendingId) =>
       _pending.resolveConfirmedReceiptId(pendingId);
 

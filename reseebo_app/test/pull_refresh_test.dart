@@ -87,6 +87,10 @@ void main() {
         final tab = empty
             ? 'dashboard-receipts-list'
             : 'dashboard-products-list';
+        if (!empty) {
+          await tester.tap(find.text('Products (1)'));
+          await tester.pumpAndSettle();
+        }
         expect(adapter.productReads, 1);
         await _pull(tester, find.byKey(PageStorageKey(tab)));
         expect(adapter.productReads, 2);
@@ -100,6 +104,8 @@ void main() {
   ) async {
     final adapter = _Adapter()..longCatalog = true;
     await tester.pumpWidget(_app(DashboardScreen(dataAdapter: adapter)));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Products (100)'));
     await tester.pumpAndSettle();
     final list = find.byKey(const PageStorageKey('dashboard-products-list'));
     await tester.drag(list, const Offset(0, -650));

@@ -65,6 +65,10 @@ abstract class IReseeboDataAdapter {
   });
   Future<PendingReceipt> getPendingReceipt(String id);
 
+  /// Finds the active correction by confirmed receipt ID, regardless of ledger
+  /// pagination. Returns null when that receipt has no pending correction.
+  Future<PendingReceipt?> getPendingCorrection(String receiptId);
+
   /// Confirms the exact pending revision. A frozen command ID returns its
   /// original result after retries, deletion or later corrections; changed
   /// commands and stale pending/confirmed revisions throw typed exceptions.

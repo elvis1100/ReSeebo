@@ -74,16 +74,11 @@ class _ReceiptDetailScreenState extends State<ReceiptDetailScreen> {
     setState(() => _editing = true);
     final editor = PendingReceiptController(widget.adapter);
     try {
-      final entries = await widget.adapter.getLedgerEntries();
-      final active = entries
-          .where(
-            (entry) =>
-                entry.confirmedReceiptId == widget.receiptId &&
-                entry.pendingId != null,
-          )
-          .firstOrNull;
+      final active = await widget.adapter.getPendingCorrection(
+        widget.receiptId,
+      );
       if (active != null) {
-        await editor.load(active.pendingId!);
+        await editor.load(active.id);
         if (editor.error != null) throw editor.error!;
       } else {
         final edit = await widget.adapter.getConfirmedReceiptEdit(
