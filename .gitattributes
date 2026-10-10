@@ -1,0 +1,3 @@
+# Preserve official OCR bytes: manifests verify configs, licenses and SDK source.
+reseebo_app/assets/ocr/** -text
+reseebo_app/android/paddle_ocr/** -text

@@ -9,6 +9,17 @@ class ValidationException extends AppException {
   const ValidationException(super.message);
 }
 
+class RevisionConflictException extends AppException {
+  const RevisionConflictException([
+    super.message =
+        'This receipt changed since it was opened. Reopen the current receipt before saving.',
+  ]);
+}
+
+class ReceiptSnapshotException extends AppException {
+  const ReceiptSnapshotException(super.message);
+}
+
 class DuplicateReceiptException extends AppException {
   const DuplicateReceiptException(this.receiptIds)
     : super(

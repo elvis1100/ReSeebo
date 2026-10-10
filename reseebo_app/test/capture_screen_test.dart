@@ -8,20 +8,26 @@ import 'package:reseebo_app/core/adapters/mock_reseebo_data_adapter.dart';
 import 'package:reseebo_app/core/theme/app_theme.dart';
 import 'package:reseebo_app/features/receipt_scan/screens/capture_screen.dart';
 import 'package:reseebo_app/core/models/models.dart';
+import 'package:reseebo_app/core/models/ocr_engine.dart';
 import 'package:reseebo_app/features/receipt_scan/models/receipt_image_quality.dart';
 import 'package:reseebo_app/features/receipt_scan/services/local_receipt_image_service.dart';
 import 'package:reseebo_app/features/receipt_scan/state/capture_state.dart';
 import 'package:reseebo_app/features/receipt_scan/widgets/receipt_image_viewer.dart';
+import 'fixtures/receipt_scan_widget_fixture.dart' show settleCaptureAction;
 
 class DelayedCaptureAdapter extends MockReseeboDataAdapter {
   final release = Completer<void>();
+  bool reading = false;
 
   @override
   Future<ReceiptDraft> processReceiptImages(
     List<String> localImagePaths, {
     List<String>? recognitionImagePaths,
     List<String>? comparisonImagePaths,
+    OcrEngineId engineId = OcrEngineId.mlKit,
+    String preprocessingRevision = '1',
   }) async {
+    reading = true;
     await release.future;
     return ReceiptDraft(imagePath: localImagePaths.first);
   }
@@ -42,7 +48,7 @@ class TestCaptureImages extends LocalReceiptImageService {
     String path, {
     bool enhance = true,
     double contrast = 1,
-  }) async => '/enhanced.jpg';
+  }) async => path;
 }
 
 void main() {
@@ -197,10 +203,25 @@ void main() {
     'reading disables competing controls and system-back navigation',
     (tester) async {
       final adapter = DelayedCaptureAdapter();
-      final state = CaptureState(
-        adapter: adapter,
-        initialImagePath: '/original.jpg',
-        imageService: TestCaptureImages(),
+      late Directory directory;
+      late CaptureState state;
+      await tester.runAsync(() async {
+        directory = await Directory.systemTemp.createTemp(
+          'reseebo-delayed-capture-',
+        );
+        final original = File('${directory.path}/receipt.png');
+        await original.writeAsBytes(
+          img.encodePng(img.Image(width: 600, height: 800)),
+        );
+        state = CaptureState(
+          adapter: adapter,
+          initialImagePath: original.path,
+          imageService: TestCaptureImages(),
+        );
+        await Future<void>.delayed(Duration.zero);
+      });
+      addTearDown(
+        () => tester.runAsync(() => directory.delete(recursive: true)),
       );
       addTearDown(state.dispose);
       await tester.pumpWidget(
@@ -231,7 +252,13 @@ void main() {
         250,
         scrollable: find.byType(Scrollable).first,
       );
-      await tester.tap(find.text('Read receipt'));
+      await tester.runAsync(() async {
+        await tester.tap(find.text('Read receipt'));
+        final watch = Stopwatch()..start();
+        while (!adapter.reading && watch.elapsed < const Duration(seconds: 5)) {
+          await Future<void>.delayed(const Duration(milliseconds: 10));
+        }
+      });
       await tester.pump();
       expect(state.busy, isTrue);
       expect(
@@ -270,7 +297,7 @@ void main() {
       await tester.pump();
       expect(find.byType(CaptureScreen), findsOneWidget);
       adapter.release.complete();
-      await tester.pumpAndSettle();
+      await settleCaptureAction(tester);
       expect(state.busy, isFalse);
       expect(tester.takeException(), isNull);
     },

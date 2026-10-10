@@ -47,13 +47,13 @@ class _ProductComparisonScreenState extends State<ProductComparisonScreen> {
     _loadComparison();
   }
 
-  void _openReceipt(String receiptId) {
+  Future<void> _openReceipt(String receiptId) async {
     final callback = widget.onReceiptTap;
     if (callback != null) {
       callback(receiptId);
       return;
     }
-    Navigator.push<void>(
+    await Navigator.push<void>(
       context,
       MaterialPageRoute(
         builder: (_) => ReceiptDetailScreen(
@@ -62,6 +62,7 @@ class _ProductComparisonScreenState extends State<ProductComparisonScreen> {
         ),
       ),
     );
+    if (mounted) await _loadComparison();
   }
 
   Future<void> _loadComparison({bool refresh = false}) async {

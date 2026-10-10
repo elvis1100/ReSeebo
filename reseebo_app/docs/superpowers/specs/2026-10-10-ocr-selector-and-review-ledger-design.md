@@ -1,8 +1,18 @@
 # OCR selection and immediate ledger saving
 
-Date: 10 October 2026. Status: design for user review; product implementation
-has not started. This extends `docs/ocr_model_selector_plan.md` with the user's
+Date: 10 October 2026. Status: approved by the user; production changes
+implemented. Broader verification is handed to the user for the deadline;
+see `docs/verification/2026-10-10-deadline-handoff.md` for actual checks and limits.
+This extends `docs/ocr_model_selector_plan.md` with the user's
 approved Needs review workflow and existing UI preservation requirement.
+
+Latest approved scope: the user explicitly skipped physical/device tests and
+will handle them separately. Complete code, host checks and an ordinary Android
+build; retained device fixtures are optional reference material. Neither Paddle
+engine is enabled without its physical acceptance evidence. The later approved
+logo design supersedes the original palette restriction: deep teal, coral and
+cream, rounded icons and an animated in-app welcome screen using the unchanged
+supplied logo and existing app layouts.
 
 ## Intended result
 
@@ -201,5 +211,5 @@ the last confirmed purchase remains active until the correction is confirmed.
 
 The original selector plan supplies engine comparison requirements; this design
 supplies the additional user-approved immediate-save behavior. Review this
-design before the detailed implementation plan is written. Work is sequential
-under AGENTS.md; a separate request is required before using parallel agents.
+design before the detailed implementation plan is written. The user approved
+parallel subagents; shared-file changes and check commands remain coordinated.

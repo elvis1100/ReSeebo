@@ -1,5 +1,4 @@
 import 'dart:convert';
-import 'dart:io';
 import 'package:printing/printing.dart';
 import 'package:reseebo_app/features/insights/services/suggested_suppliers.dart';
 import 'package:reseebo_app/features/insights/services/store_insights_pdf.dart';
@@ -179,7 +178,6 @@ void main() {
         generatedAt: DateTime(2026, 10, 10, 10),
       );
       expect(ascii.decode(sample.take(5).toList()), '%PDF-');
-      await File('/tmp/reseebo-store-insights.pdf').writeAsBytes(sample);
       final long = await StoreInsightsPdf.build(
         insights: StoreInsights(
           spentCents: 0,
@@ -193,7 +191,6 @@ void main() {
         generatedAt: DateTime(2026, 10, 10),
       );
       expect(ascii.decode(long.take(5).toList()), '%PDF-');
-      await File('/tmp/reseebo-store-insights-long.pdf').writeAsBytes(long);
       final empty = await StoreInsightsPdf.build(
         insights: const StoreInsights(
           spentCents: 0,
@@ -206,7 +203,6 @@ void main() {
         period: InsightPeriod.last30Days,
         generatedAt: DateTime(2026, 10, 10),
       );
-      await File('/tmp/reseebo-store-insights-empty.pdf').writeAsBytes(empty);
       expect(ascii.decode(empty.take(5).toList()), '%PDF-');
     });
   });

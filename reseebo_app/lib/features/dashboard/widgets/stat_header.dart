@@ -42,35 +42,32 @@ class StatHeader extends StatelessWidget {
           borderRadius: BorderRadius.circular(AppSpacing.radiusM),
           child: Padding(
             padding: const EdgeInsets.all(AppSpacing.m),
-            child: Row(
-              children: [
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
+            child: LayoutBuilder(
+              builder: (context, constraints) {
+                final identity = Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      profile.storeName,
+                      style: AppTypography.headingMedium.copyWith(
+                        fontSize: 17,
+                        color: Colors.white,
+                      ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                    if (profile.ownerName.trim().isNotEmpty)
                       Text(
-                        profile.storeName,
-                        style: AppTypography.headingMedium.copyWith(
-                          fontSize: 17,
+                        profile.ownerName,
+                        style: AppTypography.bodySmall.copyWith(
                           color: Colors.white,
                         ),
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                       ),
-                      if (profile.ownerName.trim().isNotEmpty)
-                        Text(
-                          profile.ownerName,
-                          style: AppTypography.bodySmall.copyWith(
-                            color: Colors.white,
-                          ),
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                    ],
-                  ),
-                ),
-                const SizedBox(width: AppSpacing.s),
-                Material(
+                  ],
+                );
+                final insights = Material(
                   color: Colors.white,
                   borderRadius: BorderRadius.circular(AppSpacing.radiusPill),
                   clipBehavior: Clip.antiAlias,
@@ -91,8 +88,26 @@ class StatHeader extends StatelessWidget {
                       ),
                     ),
                   ),
-                ),
-              ],
+                );
+                if (constraints.maxWidth < 360 &&
+                    MediaQuery.textScalerOf(context).scale(11) > 16) {
+                  return Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      identity,
+                      const SizedBox(height: AppSpacing.s),
+                      insights,
+                    ],
+                  );
+                }
+                return Row(
+                  children: [
+                    Expanded(child: identity),
+                    const SizedBox(width: AppSpacing.s),
+                    insights,
+                  ],
+                );
+              },
             ),
           ),
         ),

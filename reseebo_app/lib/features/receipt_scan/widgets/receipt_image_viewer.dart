@@ -217,7 +217,7 @@ class _ReceiptImageViewerState extends State<ReceiptImageViewer> {
     return Container(
       height: widget.height,
       decoration: BoxDecoration(
-        color: const Color(0xFF0F172A),
+        color: AppColors.textPrimary,
         borderRadius: BorderRadius.circular(AppSpacing.radiusM),
         border: Border.all(color: AppColors.border),
       ),

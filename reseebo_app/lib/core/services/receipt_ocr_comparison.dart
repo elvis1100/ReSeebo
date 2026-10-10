@@ -36,6 +36,10 @@ class ReceiptOcrComparison {
         final conflicts =
             _disagrees(line.quantity, other.quantity) ||
             _disagrees(line.grossAmountCents, other.grossAmountCents) ||
+            _disagrees(
+              line.extractedUnitPriceCents,
+              other.extractedUnitPriceCents,
+            ) ||
             (line.unit != null &&
                 other.unit != null &&
                 line.unit != other.unit) ||
@@ -48,12 +52,7 @@ class ReceiptOcrComparison {
         }
         // An unresolved pair of printed prices is contradictory evidence, not
         // an absent field. A different pass must not silently resolve it.
-        if (line.warnings.any(
-              (warning) => warning.startsWith('Multiple prices'),
-            ) ||
-            other.warnings.any(
-              (warning) => warning.startsWith('Multiple prices'),
-            )) {
+        if (_ambiguousPrice(line) || _ambiguousPrice(other)) {
           continue;
         }
         var filled = false;
@@ -72,6 +71,17 @@ class ReceiptOcrComparison {
           line.extractedAmountCents = other.grossAmountCents;
           filled = true;
         }
+        if (!line.amountEdited &&
+            line.provenance[ReceiptSuggestionField.amount]?.origin !=
+                ReceiptFieldOrigin.ownerEdited &&
+            line.extractedUnitPriceCents == null &&
+            other.extractedUnitPriceCents != null &&
+            line.quantity == other.quantity &&
+            line.unit == other.unit &&
+            line.discountCents == other.discountCents) {
+          line.extractedUnitPriceCents = other.extractedUnitPriceCents;
+          filled = true;
+        }
         if (filled) {
           line.warnings.add(
             'A missing field was read from the original photo. Check it against the receipt.',
@@ -80,6 +90,13 @@ class ReceiptOcrComparison {
       }
     }
   }
+
+  static bool _ambiguousPrice(ParsedLineItem line) => line.warnings.any(
+    (warning) => RegExp(
+      r'multiple prices|contradict|conflict.*price|ambiguous.*amount|readings disagree',
+      caseSensitive: false,
+    ).hasMatch(warning),
+  );
 
   static bool _disagrees(int? first, int? second) =>
       first != null && second != null && first != second;

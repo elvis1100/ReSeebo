@@ -1,6 +1,8 @@
 # Receipt OCR model selector
 
-Status: proposed implementation; the accompanying mockup is illustrative, not an accuracy benchmark or working OCR integration.
+Status on 10 October 2026: selector, engine routing and reviewable-ledger work are in progress under the approved [design](superpowers/specs/2026-10-10-ocr-selector-and-review-ledger-design.md). The accompanying mockup remains illustrative. ML Kit Latin is the real bundled default; both Paddle options remain unavailable without physical proof. The user explicitly skipped device checks because device testing is unavailable; those checks are outside the remaining host work. No three-engine or offline-device acceptance is claimed.
+
+The approved flow also permits immediate **Needs review** saving and **Save photos for later** after unreadable OCR. Pending suggestions retain provenance and raw evidence and stay outside confirmed comparisons, restock and profit inputs. Later confirmation validates whole-piece fields; corrections update the original purchase and retain immutable prior revisions. See [acceptance preparation and user-run lifecycle handoff](verification/2026-10-10-reviewable-receipts.md) for authored tests, the retained-data APK guard and explicit evidence limits.
 
 ## Goal
 
@@ -10,18 +12,18 @@ Compare ML Kit, PP-OCRv5 Mobile (English recognition), and PP-OCRv6 Medium on th
 
 ## UI reference and direction
 
-Inspected MPC Garden's `app/lib/widgets/ai_provider_selector.dart`: a compact rounded model button with an icon, selected model name, and downward chevron opens a “Choose model” bottom sheet. The sheet has a close control, rounded option rows, a tinted selected row, and a checkmark. Adapt this interaction using Reseebo's existing Inter typography, deep green `#0F5132`, pale green selection surfaces, spacing, and shared controls. Use local engine icons; no external provider disclosure is needed for bundled offline engines.
+Inspected MPC Garden's `app/lib/widgets/ai_provider_selector.dart`: a compact rounded model button with an icon, selected model name, and downward chevron opens a “Choose model” bottom sheet. The sheet has a close control, rounded option rows, a tinted selected row, and a checkmark. This historical reference supplies the interaction pattern. Current Reseebo styling uses the approved Inter typography, deep teal `#003D43`, coral `#FF654F`, cream `#FFF7EB`, and shared `AppColors` selection surfaces, spacing and controls. Use local engine icons; no external provider disclosure is needed for bundled offline engines.
 
 Place the selector directly above the photo preview in the Photos step. Keep photo editing and page selection available. The selector opens three rows, each with its precise model label and whether that model has a result for the current photos. Avoid “most accurate” claims and percentages that are not grounded in this receipt's truth.
 
-After recognition, show a compact result preview with raw text available separately from parsed fields, detected items and total, and elapsed time. Timing describes this run, not accuracy. Provide “Recognize” for an untested selection, “Run again” for a completed selection, and “Continue to review” only when the selected model has a current successful result. Allow direct return to the selector to compare another model.
+Recognition stays on Photos and shows a compact result preview with raw text separate from parsed fields, detected items and total, and elapsed time. Timing describes this run, not accuracy. **Review details** explicitly opens the selected current draft in Review; **Save Needs review** persists that selected draft directly to the ledger with suggestions still provisional. **Save photos for later** preserves the originals when recognition fails or remains unreadable. Returning from Review retains edits and current results; choosing another engine does not run OCR automatically.
 
 ## Current integration points
 
 - `lib/core/services/ocr_service.dart`: existing `OcrService` boundary returns lines and token geometry; ML Kit implements it.
 - `lib/features/receipt_scan/state/capture_state.dart`: capture, edits, recognition, and draft orchestration.
-- `lib/features/receipt_scan/screens/capture_screen.dart`: currently hands a successful draft immediately to review. Separate recognition from continuing to Step 2.
-- `lib/features/receipt_scan/widgets/`: add `ocr_model_selector.dart` and a feature-specific recognition preview; reuse `ReceiptScanSteps`, the image viewer, recognized-text presentation, and shared buttons.
+- `lib/features/receipt_scan/screens/capture_screen.dart`: recognition prepares the current result preview without navigating. Explicit Review details opens Step 2; Save Needs review writes a pending ledger entry directly, and Save photos for later preserves a photos-only pending entry.
+- `lib/features/receipt_scan/widgets/`: `ocr_model_picker.dart`, `ocr_result_summary.dart` and `receipt_suggestion_label.dart` supply the focused controls; reuse `ReceiptScanSteps`, the image viewer, recognized-text presentation, and shared buttons.
 - Local data adapter: inspect recognition and multi-photo merging contracts before changing model routing.
 
 ## Implementation sequence
@@ -39,7 +41,7 @@ An engine failure remains attached to that engine and offers retry or selecting 
 
 ## Acceptance checks
 
-- All three engines perform real bundled inference on the target phone, including first launch with internet disabled; no runtime model downloads, account, API key, or cloud inference.
+- The original target acceptance requires all three engines to perform real bundled inference on the target phone, including first launch with internet disabled; no runtime model downloads, account, API key, or cloud inference. The user explicitly skipped this physical check. Paddle availability and verifiedOnDevice flags remain false; host checks do not establish this acceptance claim.
 - Same photo bytes and editing settings feed every engine. Record engine-specific resize/normalization settings so comparisons are reproducible.
 - Switching restores the correct cached result. A stale result cannot enable Continue after photo changes. Engine errors, rapid interaction, backgrounding, and disposal do not corrupt the active draft.
 - Multi-photo ordering and overlap handling work consistently; only the explicitly selected model's result reaches Review.
@@ -49,4 +51,4 @@ An engine failure remains attached to that engine and offers retry or selecting 
 
 ## Deliverables and scope
 
-This proposal supplies the plan and interactive mockup first. Subsequent implementation supplies three on-device engines, the selector, cached comparison previews, explicit continuation, focused tests, and measured device evidence. Production model switching has not been implemented by this document. Package-size and performance tradeoffs will be recorded from the feasibility run before finalizing integration.
+The plan/mockup describe the target, while the approved design supplies immediate pending saves, later review and durable corrections. Real routing and selector work must honor registry availability: packaged Paddle names do not become selectable accepted engines merely because artifacts compiled. Current host artifact identity and the corrected OpenCV runtime are documented in [Paddle feasibility](verification/2026-10-10-paddle-feasibility.md); its earlier probe APK cannot be reused as evidence for later ledger-feature code. Package size, per-engine memory/timings, real-photo accuracy and offline lifecycle results remain unmeasured until the separate user-run physical checks complete.

@@ -63,3 +63,29 @@ bool receiptAmountsAgree(String quantity, String price, String amount) {
       total != null &&
       count * unit == total;
 }
+
+/// Only a terminal explicit @ price with no competing monetary evidence is a
+/// unit-price baseline. It never supplies a printed line total or repairs OCR.
+({bool isTerminal, int? cents}) receiptExplicitUnitPrice(String text) {
+  final matches = RegExp(
+    r'@\s*(\d[\d,]*(?:\.\d{1,2})?)\s*(?:VE|V|E|Z|\*)?\s*$',
+    caseSensitive: false,
+  ).allMatches(text).toList();
+  if (matches.length != 1) return (isTerminal: false, cents: null);
+  final match = matches.single;
+  final prefix = text
+      .substring(0, match.start)
+      .replaceAll(
+        RegExp(
+          r'(?<![\d.])\b\d+\.0+\s*(?:pcs?|pieces?|packs?|pk|[x×])\b',
+          caseSensitive: false,
+        ),
+        '',
+      );
+  if (prefix.contains('@') ||
+      RegExp(r'(?<![\w.])\d[\d,.]*[.,][\d,.]+(?![\w.])').hasMatch(prefix)) {
+    return (isTerminal: true, cents: null);
+  }
+  final cents = parsePesos(match[1]!);
+  return (isTerminal: true, cents: cents != null && cents > 0 ? cents : null);
+}

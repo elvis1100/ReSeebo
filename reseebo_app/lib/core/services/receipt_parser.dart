@@ -1,5 +1,6 @@
 import '../constants/formatters.dart';
 import '../models/models.dart';
+import '../models/ocr_engine.dart';
 import '../errors/app_exception.dart';
 import 'receipt_layout.dart';
 import 'receipt_purchase_datetime.dart';
@@ -8,15 +9,19 @@ import 'receipt_numeric_row.dart';
 /// Layout heuristics provide editable suggestions, never confirmed purchases.
 /// Unlabeled pack conversion and ambiguous dates stay owner decisions.
 class ReceiptParser {
+  /// Bump whenever interpretation or overlap semantics change.
+  static const version = '2';
   final _purchaseDateTime = ReceiptPurchaseDateTime();
   ReceiptDraft parse({
     required String imagePath,
     required List<OcrTextLine> textLines,
     String? recognitionImagePath,
+    OcrRunMetadata? ocrRun,
   }) {
     final rows = prepareReceiptLayout(textLines);
     final draft = ReceiptDraft(
       imagePath: imagePath,
+      ocrRun: ocrRun,
       recognitionImagePath: recognitionImagePath,
       textLines: List.of(textLines),
       rawText: recognizedReceiptText(textLines),
@@ -85,7 +90,8 @@ class ReceiptParser {
         reachedTotal = true;
       }
       final amountMatch = amountPattern.firstMatch(text);
-      if (amountMatch == null) {
+      final explicitPrice = receiptExplicitUnitPrice(text);
+      if (amountMatch == null || explicitPrice.isTerminal) {
         if (!reachedTotal &&
             !_metadata(text) &&
             text != draft.supplierName &&
@@ -128,12 +134,15 @@ class ReceiptParser {
               ),
               quantity: quantity,
               extractedQuantity: quantity,
+              extractedUnitPriceCents: explicitPrice.cents,
               unit: unit,
               piecesPerPack: unit == PurchaseUnit.piece ? 1 : null,
               warnings: [
                 'This item row is incomplete. Check the original receipt and enter the missing fields.',
                 'Confirm the exact brand, variant and size.',
                 'Confirm the quantity, pieces or packs, and line amount.',
+                if (text.contains('@') && explicitPrice.cents == null)
+                  'Ambiguous printed amount or unit price. Check competing prices and damaged totals.',
               ],
             ),
           );
@@ -358,7 +367,7 @@ class ReceiptParser {
   // cost. Counts inside a product identity and its size remain visible.
   String _descriptionText(String text, Iterable<RegExpMatch> counts) {
     const priceSuffix =
-        r'(?:\s+(?:@\d[\d.,]*|\d[\d.,]*[.,]\d+))+(?:\s+(?:VE|V|E|Z|\*))?\s*$';
+        r'(?:\s+(?:@\s*\d[\d.,]*|\d[\d.,]*[.,]\d+))+(?:\s+(?:VE|V|E|Z|\*))?\s*$';
     final removals =
         counts
             .where(
@@ -401,7 +410,10 @@ class ReceiptParser {
   /// Combine ordered photos as one draft. Matching suffix/prefix rows remain
   /// visible and unresolved: identical purchases can be legitimate, so only
   /// the owner can decide whether a row is an overlapping photo duplicate.
-  ReceiptDraft parsePages({required List<ReceiptOcrPage> pages}) {
+  ReceiptDraft parsePages({
+    required List<ReceiptOcrPage> pages,
+    OcrRunMetadata? ocrRun,
+  }) {
     if (pages.isEmpty || pages.length > maxReceiptPages) {
       throw const ValidationException('Choose 1 to 20 ordered receipt photos.');
     }
@@ -411,12 +423,14 @@ class ReceiptParser {
             imagePath: page.imagePath,
             recognitionImagePath: page.recognitionImagePath,
             textLines: page.textLines,
+            ocrRun: ocrRun,
           ),
         )
         .toList();
     if (pages.length == 1) return drafts.single;
     final result = ReceiptDraft(
       imagePath: pages.first.imagePath,
+      ocrRun: ocrRun,
       imagePaths: pages.map((page) => page.imagePath).toList(),
       textLines: pages.expand((page) => page.textLines).toList(),
       rawText: drafts.indexed

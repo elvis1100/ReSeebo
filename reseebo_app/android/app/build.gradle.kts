@@ -24,10 +24,15 @@ android {
         applicationId = "com.reseebo.reseebo"
         // Opt-in isolated device tests must never install over the owner's app.
         // Set ORG_GRADLE_PROJECT_reseeboVerification=true for Flutter tests.
-        applicationIdSuffix = if (providers.gradleProperty("reseeboVerification").orNull == "true") ".verification" else ""
+        // Python normalizes Windows environment keys to uppercase. Accept that
+        // spelling too; the host probe still verifies the actual prebuilt APK ID.
+        val verificationBuild = providers.gradleProperty("reseeboVerification").orNull == "true" ||
+            providers.environmentVariable("ORG_GRADLE_PROJECT_RESEEBOVERIFICATION").orNull == "true"
+        applicationIdSuffix = if (verificationBuild) ".verification" else ""
         // You can update the following values to match your application needs.
         // For more information, see: https://flutter.dev/to/review-gradle-config.
-        minSdk = flutter.minSdkVersion
+        // Pinned official Paddle SDK requires Android 8.0; see feasibility report.
+        minSdk = maxOf(flutter.minSdkVersion, 26)
         targetSdk = flutter.targetSdkVersion
         versionCode = flutter.versionCode
         versionName = flutter.versionName
@@ -44,4 +49,10 @@ android {
 
 flutter {
     source = "../.."
+}
+
+dependencies {
+    implementation(project(":paddle_ocr"))
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.9.0")
+    testImplementation("junit:junit:4.13.2")
 }

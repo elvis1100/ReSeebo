@@ -65,7 +65,13 @@ class ReseeboBottomNavigation extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => SizedBox(
-    height: 96 + MediaQuery.paddingOf(context).bottom,
+    // The scan label wraps to two lines when text is enlarged. Keep its full
+    // hit target inside the bar rather than letting it overflow below it.
+    height:
+        96 +
+        (MediaQuery.textScalerOf(context).scale(12) - 12).clamp(0.0, 36.0) *
+            3.5 +
+        MediaQuery.paddingOf(context).bottom,
     child: Stack(
       children: [
         Positioned.fill(
@@ -88,7 +94,7 @@ class ReseeboBottomNavigation extends StatelessWidget {
                   context,
                   0,
                   'Home',
-                  Icons.storefront_outlined,
+                  Icons.storefront_rounded,
                   Icons.storefront_rounded,
                 ),
                 Expanded(
@@ -104,9 +110,9 @@ class ReseeboBottomNavigation extends StatelessWidget {
                             message: 'Scan Receipt',
                             child: Material(
                               key: const ValueKey('bottom-scan-action'),
-                              color: AppColors.primary,
+                              color: AppColors.accent,
                               elevation: 4,
-                              shadowColor: AppColors.primary.withValues(
+                              shadowColor: AppColors.accent.withValues(
                                 alpha: .3,
                               ),
                               shape: const CircleBorder(
@@ -121,7 +127,7 @@ class ReseeboBottomNavigation extends StatelessWidget {
                                   height: 60,
                                   child: Icon(
                                     Icons.document_scanner_rounded,
-                                    color: Colors.white,
+                                    color: AppColors.onAccent,
                                     size: 28,
                                   ),
                                 ),
@@ -146,7 +152,7 @@ class ReseeboBottomNavigation extends StatelessWidget {
                   context,
                   1,
                   'Settings',
-                  Icons.settings_outlined,
+                  Icons.settings_rounded,
                   Icons.settings_rounded,
                 ),
               ],

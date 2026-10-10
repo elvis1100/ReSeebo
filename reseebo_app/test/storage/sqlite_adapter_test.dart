@@ -104,6 +104,19 @@ void main() {
   Future<List<File>> persistentFiles() async =>
       (await media.list(recursive: true).toList()).whereType<File>().toList();
 
+  Future<void> dropReviewTables() async {
+    for (final table in [
+      'pending_receipt_images',
+      'ledger_entry_links',
+      'receipt_revisions',
+      'receipt_evidence',
+      'receipt_write_operations',
+      'pending_receipts',
+    ]) {
+      await db.execute('DROP TABLE $table');
+    }
+  }
+
   setUp(() async {
     root = await Directory.systemTemp.createTemp('reseebo-sqlite-test-');
     media = Directory(p.join(root.path, 'persistent-media'));
@@ -170,11 +183,12 @@ void main() {
       );
       await db.execute('DROP TABLE supplier_product_aliases');
       await db.execute('DROP TABLE product_categories');
+      await dropReviewTables();
       await db.setVersion(5);
       await adapter.close();
       adapter = await openAdapter();
       db = await databaseFactoryFfi.openDatabase(databasePath);
-      expect(await db.getVersion(), 7);
+      expect(await db.getVersion(), 8);
       expect(await adapter.getProductCategories(), ['Beverages']);
       final product = (await adapter.getProductById(coffee.id))!;
       expect(product.brand, coffee.brand);
@@ -225,7 +239,7 @@ void main() {
   );
 
   test(
-    'fresh local database has nine versioned tables and no sample receipts',
+    'fresh local database has versioned tables and no sample receipts',
     () async {
       final tables = await db.rawQuery(
         "SELECT name FROM sqlite_master WHERE type = 'table' AND name NOT LIKE 'sqlite_%'",
@@ -241,8 +255,14 @@ void main() {
         'catalog_seed_entries',
         'product_categories',
         'supplier_product_aliases',
+        'pending_receipts',
+        'pending_receipt_images',
+        'receipt_write_operations',
+        'receipt_evidence',
+        'receipt_revisions',
+        'ledger_entry_links',
       });
-      expect(await db.getVersion(), 7);
+      expect(await db.getVersion(), 8);
       expect(
         (await db.rawQuery('PRAGMA foreign_keys')).single.values.single,
         1,
@@ -262,11 +282,12 @@ void main() {
       await db.execute('ALTER TABLE suppliers DROP COLUMN date_order');
       await db.execute('DROP TABLE supplier_product_aliases');
       await db.execute('DROP TABLE product_categories');
+      await dropReviewTables();
       await db.setVersion(4);
       await adapter.close();
       adapter = await openAdapter();
       db = await databaseFactoryFfi.openDatabase(databasePath);
-      expect(await db.getVersion(), 7);
+      expect(await db.getVersion(), 8);
       final supplier = (await adapter.getSuppliers()).single;
       expect(supplier.dateOrder, isNull);
       await adapter.saveSupplier(
@@ -585,7 +606,7 @@ void main() {
       );
       try {
         final connection = await databaseFactoryFfi.openDatabase(legacyPath);
-        expect(await connection.getVersion(), 7);
+        expect(await connection.getVersion(), 8);
         expect(await connection.rawQuery('PRAGMA foreign_key_check'), isEmpty);
         expect(
           (await connection.rawQuery(
@@ -621,6 +642,7 @@ void main() {
       await db.execute('ALTER TABLE suppliers DROP COLUMN date_order');
       await db.execute('DROP TABLE supplier_product_aliases');
       await db.execute('DROP TABLE product_categories');
+      await dropReviewTables();
       await db.setVersion(2);
       await adapter.close();
       adapter = await SqliteReseeboDataAdapter.open(
@@ -630,7 +652,7 @@ void main() {
         ocrService: FakeOcr(),
       );
       db = await databaseFactoryFfi.openDatabase(databasePath);
-      expect(await db.getVersion(), 7);
+      expect(await db.getVersion(), 8);
       expect((await adapter.getProducts()).length, greaterThan(200));
       expect((await adapter.getStoreProfile()).name, 'My existing shop');
       expect((await adapter.getStoreProfile()).defaultMarkupPercent, 17);
@@ -964,11 +986,12 @@ void main() {
         'updated_at': '2026-10-09',
       });
       await db.execute('DROP TABLE supplier_product_aliases');
+      await dropReviewTables();
       await db.setVersion(6);
       await adapter.close();
       adapter = await openAdapter();
       db = await databaseFactoryFfi.openDatabase(databasePath);
-      expect(await db.getVersion(), 7);
+      expect(await db.getVersion(), 8);
       final after = await adapter.getReceipt(saved.receiptId);
       expect(after.receipt.imagePath, before.receipt.imagePath);
       expect(

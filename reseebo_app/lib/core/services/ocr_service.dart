@@ -4,6 +4,8 @@ import '../errors/app_exception.dart';
 import '../models/models.dart';
 
 abstract class OcrService {
+  /// Returns line/word bounds in [imagePath]'s exact pixel coordinate system.
+  /// Implementations must not manufacture word locations from line bounds.
   Future<List<OcrTextLine>> recognize(String imagePath);
   Future<void> close();
 }

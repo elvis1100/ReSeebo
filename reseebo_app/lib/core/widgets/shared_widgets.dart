@@ -15,7 +15,7 @@ class LocalPhoto extends StatelessWidget {
     super.key,
     this.path,
     this.size = 56,
-    this.icon = Icons.inventory_2_outlined,
+    this.icon = Icons.inventory_2_rounded,
     this.fit = BoxFit.cover,
   });
   final String? path;

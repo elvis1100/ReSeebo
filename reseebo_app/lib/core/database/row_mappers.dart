@@ -74,6 +74,7 @@ PurchaseRecord purchaseFromRow(Map<String, Object?> row) => PurchaseRecord(
   imagePath: row['image_path'] as String,
   receiptNumber: row['receipt_number'] as String,
   sequence: row['sequence'] as int,
+  recordedOrder: row['recorded_order'] as int,
   sourcePage: row['source_page'] as int,
 );
 
@@ -84,7 +85,7 @@ const receiptSelect = '''SELECT r.*,
   FROM receipts r JOIN suppliers s ON s.id = r.supplier_id''';
 
 const purchaseSelect = '''SELECT l.*,
-  r.purchased_at, r.has_purchase_time, r.created_at AS recorded_at,
+  r.purchased_at, r.has_purchase_time, r.created_at AS recorded_at, r.recorded_order,
   COALESCE((SELECT i.image_path FROM receipt_images i
     WHERE i.receipt_id = r.id AND i.page_index = l.source_page), r.image_path) AS image_path,
   r.receipt_number,

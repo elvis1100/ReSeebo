@@ -3,6 +3,8 @@ import '../models/models.dart';
 
 /// Applies the dashboard ordering to already-selected supplier latest prices.
 /// Storage adapters can implement the same contract directly in their query.
+/// Across suppliers, initial recorded time precedes receipt order and line
+/// sequence; corrections cannot make new rows appear to be newly saved receipts.
 LatestProductCost? latestProductCost(List<PurchaseRecord> supplierLatest) {
   if (supplierLatest.isEmpty) return null;
   DateTime day(DateTime date) => DateTime(date.year, date.month, date.day);
@@ -20,7 +22,12 @@ LatestProductCost? latestProductCost(List<PurchaseRecord> supplierLatest) {
         if (byTime != 0) return byTime;
       }
       final byRecorded = b.recordedAt.compareTo(a.recordedAt);
-      return byRecorded != 0 ? byRecorded : b.sequence.compareTo(a.sequence);
+      if (byRecorded != 0) return byRecorded;
+      if (a.recordedOrder > 0 && b.recordedOrder > 0) {
+        final byReceipt = b.recordedOrder.compareTo(a.recordedOrder);
+        if (byReceipt != 0) return byReceipt;
+      }
+      return b.sequence.compareTo(a.sequence);
     });
   return LatestProductCost(
     costPerPieceCents: sorted.first.costPerPieceCents,

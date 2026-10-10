@@ -49,13 +49,12 @@ class CurrencyText extends StatelessWidget {
       return Text(formatted, style: effectiveStyle);
     }
 
-    return Row(
-      mainAxisSize: MainAxisSize.min,
-      crossAxisAlignment: CrossAxisAlignment.baseline,
-      textBaseline: TextBaseline.alphabetic,
+    return Wrap(
+      spacing: 2,
+      runSpacing: 2,
+      crossAxisAlignment: WrapCrossAlignment.center,
       children: [
         Text(formatted, style: effectiveStyle),
-        const SizedBox(width: 2),
         Text(
           suffix!,
           style: effectiveStyle.copyWith(

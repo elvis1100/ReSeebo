@@ -6,6 +6,8 @@ class ReceiptDetailController extends ChangeNotifier {
   final IReseeboDataAdapter adapter;
   final String receiptId;
   ReceiptDetail? detail;
+  List<ReceiptRevision> revisions = [];
+  Object? historyError;
   final Map<String, Product> products = {};
   Object? error;
   bool loading = true;
@@ -15,6 +17,7 @@ class ReceiptDetailController extends ChangeNotifier {
     final request = ++_request;
     loading = true;
     error = null;
+    historyError = null;
     notifyListeners();
     try {
       final result = await adapter.getReceipt(receiptId);
@@ -23,8 +26,17 @@ class ReceiptDetailController extends ChangeNotifier {
         final product = await adapter.getProductById(id);
         if (product != null) referenced[id] = product;
       }
+      List<ReceiptRevision> history = [];
+      Object? historyFailure;
+      try {
+        history = await adapter.getReceiptRevisions(receiptId);
+      } catch (failure) {
+        historyFailure = failure;
+      }
       if (_disposed || request != _request) return;
       detail = result;
+      revisions = history;
+      historyError = historyFailure;
       products
         ..clear()
         ..addAll(referenced);

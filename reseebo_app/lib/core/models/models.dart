@@ -1,5 +1,10 @@
 import 'package:uuid/uuid.dart';
 
+import 'ocr_engine.dart';
+import 'receipt_field_provenance.dart';
+import 'pending_receipt.dart';
+export 'receipt_field_provenance.dart';
+
 const maxAmountCents = 100000000000;
 const maxQuantity = 1000000;
 
@@ -241,6 +246,7 @@ class ParsedLineItem {
     this.printedItemCode,
     this.extractedQuantity,
     this.extractedAmountCents,
+    this.extractedUnitPriceCents,
     this.quantityEdited = false,
     this.amountEdited = false,
     this.quantity,
@@ -249,12 +255,15 @@ class ParsedLineItem {
     int? grossAmountCents,
     double? netAmount,
     this.discountCents = 0,
+    this.normalizedDiscountCents = 0,
     this.confirmed = false,
     this.sourcePage = 0,
     this.possibleDuplicateOf,
+    Map<ReceiptSuggestionField, ReceiptFieldProvenance>? provenance,
     List<String>? warnings,
   }) : id = tempId ?? id ?? const Uuid().v4(),
        description = rawDescription ?? description,
+       provenance = Map.of(provenance ?? {}),
        grossAmountCents = netAmount != null
            ? (netAmount * 100).round()
            : grossAmountCents,
@@ -269,6 +278,10 @@ class ParsedLineItem {
   // OCR comparison completes this baseline before owner editing starts.
   int? extractedQuantity;
   int? extractedAmountCents;
+
+  /// Unambiguous explicit receipt unit price in centavos per purchased unit.
+  /// This is evidence, not a printed line total or an owner-edited amount.
+  int? extractedUnitPriceCents;
   bool quantityEdited;
   bool amountEdited;
   int? quantity;
@@ -276,9 +289,15 @@ class ParsedLineItem {
   int? piecesPerPack;
   int? grossAmountCents;
   int discountCents;
+
+  /// Receipt discount in centavos already folded into the editable payable
+  /// amount by review preparation. Retained for explicit-unit-price arithmetic;
+  /// netAmountCents must not deduct it again. Defaults to zero for older drafts.
+  int normalizedDiscountCents;
   bool confirmed;
   int sourcePage;
   String? possibleDuplicateOf;
+  final Map<ReceiptSuggestionField, ReceiptFieldProvenance> provenance;
   final List<String> warnings;
   int? get netAmountCents =>
       grossAmountCents == null ? null : grossAmountCents! - discountCents;
@@ -330,6 +349,7 @@ class ParsedLineItem {
     printedItemCode: printedItemCode,
     extractedQuantity: extractedQuantity,
     extractedAmountCents: extractedAmountCents,
+    extractedUnitPriceCents: extractedUnitPriceCents,
     quantityEdited: quantityEdited,
     amountEdited: amountEdited,
     quantity: quantity,
@@ -337,9 +357,11 @@ class ParsedLineItem {
     piecesPerPack: piecesPerPack,
     grossAmountCents: grossAmountCents,
     discountCents: discountCents,
+    normalizedDiscountCents: normalizedDiscountCents,
     confirmed: confirmed,
     sourcePage: sourcePage,
     possibleDuplicateOf: possibleDuplicateOf,
+    provenance: provenance,
     warnings: List.of(warnings),
   );
 }
@@ -367,13 +389,19 @@ class ReceiptDraft {
     this.notes = '',
     this.rawText = '',
     this.detectedTotalCents,
+    this.totalIsPartial = false,
+    this.ocrRun,
+    List<ReceiptPageMedia> mediaEvidence = const [],
+    Map<ReceiptMetadataField, ReceiptFieldProvenance>? provenance,
     this.totalDifferenceConfirmed = false,
     this.allowDuplicate = false,
     List<OcrTextLine>? textLines,
     List<ReceiptOcrPage>? ocrPages,
     List<ParsedLineItem>? lines,
     List<String>? warnings,
-  }) : imagePath = localImagePath ?? imagePath ?? '',
+  }) : mediaEvidence = List.unmodifiable(mediaEvidence),
+       provenance = Map.of(provenance ?? {}),
+       imagePath = localImagePath ?? imagePath ?? '',
        supplierBranch = branchLocation ?? supplierBranch ?? '',
        purchasedAt = purchaseDate ?? purchasedAt,
        imagePaths = List.unmodifiable(
@@ -402,6 +430,12 @@ class ReceiptDraft {
   String notes;
   String rawText;
   int? detectedTotalCents;
+
+  /// Calculated sums omit unresolved amounts and must be displayed as partial.
+  bool totalIsPartial;
+  final OcrRunMetadata? ocrRun;
+  final List<ReceiptPageMedia> mediaEvidence;
+  final Map<ReceiptMetadataField, ReceiptFieldProvenance> provenance;
   bool totalDifferenceConfirmed;
   bool allowDuplicate;
   final List<OcrTextLine> textLines;
@@ -432,6 +466,10 @@ class ReceiptDraft {
     notes: notes,
     rawText: rawText,
     detectedTotalCents: detectedTotalCents,
+    totalIsPartial: totalIsPartial,
+    ocrRun: ocrRun,
+    mediaEvidence: mediaEvidence,
+    provenance: provenance,
     totalDifferenceConfirmed: totalDifferenceConfirmed,
     allowDuplicate: allowDuplicate,
     textLines: textLines.map((line) => line.snapshot()).toList(),
@@ -500,6 +538,7 @@ class PurchaseRecord {
     this.discountCents = 0,
     this.receiptNumber = '',
     this.sequence = 0,
+    this.recordedOrder = 0,
     this.sourcePage = 0,
   });
   final String id;
@@ -518,6 +557,10 @@ class PurchaseRecord {
   final String imagePath;
   final String receiptNumber;
   final int sequence;
+
+  /// Initial receipt order survives corrections that add new purchase lines.
+  /// Zero denotes legacy/in-memory callers without a known receipt order.
+  final int recordedOrder;
   final int sourcePage;
   int get totalPieces => quantity * piecesPerPack;
   double get costPerPieceCents => netAmountCents / totalPieces;

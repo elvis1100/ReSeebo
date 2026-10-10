@@ -16,9 +16,9 @@ abstract final class AppSpacing {
 
   // Corner radii
   static const double radiusXs = 4.0;
-  static const double radiusS = 8.0;
-  static const double radiusM = 12.0;
-  static const double radiusL = 16.0;
+  static const double radiusS = 12.0;
+  static const double radiusM = 16.0;
+  static const double radiusL = 20.0;
   static const double radiusPill = 999.0;
 
   // Standard EdgeInsets
@@ -26,10 +26,14 @@ abstract final class AppSpacing {
   static const EdgeInsets screenPadding = EdgeInsets.all(16.0);
   static const EdgeInsets cardPadding = EdgeInsets.all(16.0);
   static const EdgeInsets compactCardPadding = EdgeInsets.all(12.0);
-  static const EdgeInsets buttonPadding =
-      EdgeInsets.symmetric(horizontal: 20.0, vertical: 14.0);
-  static const EdgeInsets inputPadding =
-      EdgeInsets.symmetric(horizontal: 14.0, vertical: 12.0);
+  static const EdgeInsets buttonPadding = EdgeInsets.symmetric(
+    horizontal: 20.0,
+    vertical: 14.0,
+  );
+  static const EdgeInsets inputPadding = EdgeInsets.symmetric(
+    horizontal: 14.0,
+    vertical: 12.0,
+  );
 }
 
 abstract final class AppRadii {

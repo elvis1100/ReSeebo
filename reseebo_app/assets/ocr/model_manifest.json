@@ -1,0 +1,550 @@
+{
+  "schemaVersion": 1,
+  "engines": [
+    {
+      "id": "ppocr_v5_mobile",
+      "label": "PP-OCRv5 Mobile",
+      "modelVersion": "PP-OCRv5_mobile_det_onnx@e6f4fa85f00e168c862bc462aebca69eef9b3d3d;en_PP-OCRv5_mobile_rec_onnx@3fafbc3b5dcf93dd72add9f48368be8a3a2cd33b",
+      "runtimeVersion": "onnxruntime-android-1.21.1/sdk-dab3fe35379033fdcb2d0e9572fac0b36c9a9ebf/opencv-4.5.3.0",
+      "available": false,
+      "verifiedOnDevice": false,
+      "unavailableReason": "Samsung API 36 OpenCV 4.5.3 load failed (__sfp_handle_exceptions); corrected 4.5.3.0 runtime awaits physical acceptance.",
+      "artifacts": [
+        {
+          "path": "assets/ocr/LICENSE-PaddleOCR.txt",
+          "url": "https://raw.githubusercontent.com/PaddlePaddle/PaddleOCR/dab3fe35379033fdcb2d0e9572fac0b36c9a9ebf/LICENSE",
+          "sha256": "3840c5c0c61c294264d2dd77b8777be6ddd90121ef4e0e64abcd22edea581d6e",
+          "bytes": 11376,
+          "license": "Apache-2.0"
+        },
+        {
+          "path": "assets/ocr/ppocr_v5_mobile/det/inference.onnx",
+          "url": "https://huggingface.co/PaddlePaddle/PP-OCRv5_mobile_det_onnx/resolve/e6f4fa85f00e168c862bc462aebca69eef9b3d3d/inference.onnx",
+          "sha256": "a431985659dc921974177a95adcfbb90fd9e51989a5e04d70d0b75f597b6e61d",
+          "bytes": 4826518,
+          "license": "Apache-2.0",
+          "role": "det",
+          "repository": "PaddlePaddle/PP-OCRv5_mobile_det_onnx",
+          "revision": "e6f4fa85f00e168c862bc462aebca69eef9b3d3d"
+        },
+        {
+          "path": "assets/ocr/ppocr_v5_mobile/det/inference.yml",
+          "url": "https://huggingface.co/PaddlePaddle/PP-OCRv5_mobile_det_onnx/resolve/e6f4fa85f00e168c862bc462aebca69eef9b3d3d/inference.yml",
+          "sha256": "98069072e1b6b37d727fd9d9f11725faa46d6ea0de012f2ed26caea011c37699",
+          "bytes": 903,
+          "license": "Apache-2.0",
+          "role": "det",
+          "repository": "PaddlePaddle/PP-OCRv5_mobile_det_onnx",
+          "revision": "e6f4fa85f00e168c862bc462aebca69eef9b3d3d"
+        },
+        {
+          "path": "assets/ocr/ppocr_v5_mobile/det/README.md",
+          "url": "https://huggingface.co/PaddlePaddle/PP-OCRv5_mobile_det_onnx/resolve/e6f4fa85f00e168c862bc462aebca69eef9b3d3d/README.md",
+          "sha256": "951c155673ac6c15feb85857c9024a62266e5956d15319ce578a8f508f399d66",
+          "bytes": 1828,
+          "license": "Apache-2.0",
+          "role": "det",
+          "repository": "PaddlePaddle/PP-OCRv5_mobile_det_onnx",
+          "revision": "e6f4fa85f00e168c862bc462aebca69eef9b3d3d"
+        },
+        {
+          "path": "assets/ocr/ppocr_v5_mobile/rec/inference.onnx",
+          "url": "https://huggingface.co/PaddlePaddle/en_PP-OCRv5_mobile_rec_onnx/resolve/3fafbc3b5dcf93dd72add9f48368be8a3a2cd33b/inference.onnx",
+          "sha256": "b5f833dfc5d0eb71da397b4efa06ebeee9b431b690a47d6af40d77d8eabc557f",
+          "bytes": 7848423,
+          "license": "Apache-2.0",
+          "role": "rec",
+          "repository": "PaddlePaddle/en_PP-OCRv5_mobile_rec_onnx",
+          "revision": "3fafbc3b5dcf93dd72add9f48368be8a3a2cd33b"
+        },
+        {
+          "path": "assets/ocr/ppocr_v5_mobile/rec/inference.yml",
+          "url": "https://huggingface.co/PaddlePaddle/en_PP-OCRv5_mobile_rec_onnx/resolve/3fafbc3b5dcf93dd72add9f48368be8a3a2cd33b/inference.yml",
+          "sha256": "27e91d0582f40168aa218303c76e184bc78fa7a5d105aad0cfbad8458b441067",
+          "bytes": 3964,
+          "license": "Apache-2.0",
+          "role": "rec",
+          "repository": "PaddlePaddle/en_PP-OCRv5_mobile_rec_onnx",
+          "revision": "3fafbc3b5dcf93dd72add9f48368be8a3a2cd33b"
+        },
+        {
+          "path": "assets/ocr/ppocr_v5_mobile/rec/README.md",
+          "url": "https://huggingface.co/PaddlePaddle/en_PP-OCRv5_mobile_rec_onnx/resolve/3fafbc3b5dcf93dd72add9f48368be8a3a2cd33b/README.md",
+          "sha256": "98b45ea81164d1e1a1dd82255207053b15cd6c69d922a1c5cf3387ce604d4b74",
+          "bytes": 28,
+          "license": "Apache-2.0",
+          "role": "rec",
+          "repository": "PaddlePaddle/en_PP-OCRv5_mobile_rec_onnx",
+          "revision": "3fafbc3b5dcf93dd72add9f48368be8a3a2cd33b"
+        }
+      ],
+      "dictionaryLocation": "assets/ocr/ppocr_v5_mobile/rec/inference.yml#PostProcess.character_dict",
+      "conversion": null,
+      "preprocessingRevision": "paddle-sdk-dab3fe35379033fdcb2d0e9572fac0b36c9a9ebf"
+    },
+    {
+      "id": "ppocr_v6_medium",
+      "label": "PP-OCRv6 Medium",
+      "modelVersion": "PP-OCRv6_medium_det_onnx@61323801669c338b7891481ec7bac61ce31b576a;PP-OCRv6_medium_rec_onnx@50c7eacafc52fa7bcf4194e8cd08e46f8558504b",
+      "runtimeVersion": "onnxruntime-android-1.21.1/sdk-dab3fe35379033fdcb2d0e9572fac0b36c9a9ebf/opencv-4.5.3.0",
+      "available": false,
+      "verifiedOnDevice": false,
+      "unavailableReason": "Samsung API 36 OpenCV 4.5.3 load failed (__sfp_handle_exceptions); corrected 4.5.3.0 runtime awaits physical acceptance.",
+      "artifacts": [
+        {
+          "path": "assets/ocr/LICENSE-PaddleOCR.txt",
+          "url": "https://raw.githubusercontent.com/PaddlePaddle/PaddleOCR/dab3fe35379033fdcb2d0e9572fac0b36c9a9ebf/LICENSE",
+          "sha256": "3840c5c0c61c294264d2dd77b8777be6ddd90121ef4e0e64abcd22edea581d6e",
+          "bytes": 11376,
+          "license": "Apache-2.0"
+        },
+        {
+          "path": "assets/ocr/ppocr_v6_medium/det/inference.onnx",
+          "url": "https://huggingface.co/PaddlePaddle/PP-OCRv6_medium_det_onnx/resolve/61323801669c338b7891481ec7bac61ce31b576a/inference.onnx",
+          "sha256": "eb13b44b25bb36f89528b68720af8a61d9cf381176107f465db1757b65d086e1",
+          "bytes": 62032837,
+          "license": "Apache-2.0",
+          "role": "det",
+          "repository": "PaddlePaddle/PP-OCRv6_medium_det_onnx",
+          "revision": "61323801669c338b7891481ec7bac61ce31b576a"
+        },
+        {
+          "path": "assets/ocr/ppocr_v6_medium/det/inference.yml",
+          "url": "https://huggingface.co/PaddlePaddle/PP-OCRv6_medium_det_onnx/resolve/61323801669c338b7891481ec7bac61ce31b576a/inference.yml",
+          "sha256": "7298d5ead546584af2504d03355f881ac7a7bc0eb1e282d3e159277c1d0af871",
+          "bytes": 886,
+          "license": "Apache-2.0",
+          "role": "det",
+          "repository": "PaddlePaddle/PP-OCRv6_medium_det_onnx",
+          "revision": "61323801669c338b7891481ec7bac61ce31b576a"
+        },
+        {
+          "path": "assets/ocr/ppocr_v6_medium/det/README.md",
+          "url": "https://huggingface.co/PaddlePaddle/PP-OCRv6_medium_det_onnx/resolve/61323801669c338b7891481ec7bac61ce31b576a/README.md",
+          "sha256": "3046e3aab0194a2291bb3941c93b980c2b3a938a24a5be88354968f6d6187ac8",
+          "bytes": 16089,
+          "license": "Apache-2.0",
+          "role": "det",
+          "repository": "PaddlePaddle/PP-OCRv6_medium_det_onnx",
+          "revision": "61323801669c338b7891481ec7bac61ce31b576a"
+        },
+        {
+          "path": "assets/ocr/ppocr_v6_medium/rec/inference.onnx",
+          "url": "https://huggingface.co/PaddlePaddle/PP-OCRv6_medium_rec_onnx/resolve/50c7eacafc52fa7bcf4194e8cd08e46f8558504b/inference.onnx",
+          "sha256": "9c09abf0957f7968c7586464b7397b84ad2387a0497a351af40e9acc71b673ba",
+          "bytes": 76554979,
+          "license": "Apache-2.0",
+          "role": "rec",
+          "repository": "PaddlePaddle/PP-OCRv6_medium_rec_onnx",
+          "revision": "50c7eacafc52fa7bcf4194e8cd08e46f8558504b"
+        },
+        {
+          "path": "assets/ocr/ppocr_v6_medium/rec/inference.yml",
+          "url": "https://huggingface.co/PaddlePaddle/PP-OCRv6_medium_rec_onnx/resolve/50c7eacafc52fa7bcf4194e8cd08e46f8558504b/inference.yml",
+          "sha256": "991b700facf5b50a7de193468207d5f4255b538dde0d312ae3b7c7a9b6873129",
+          "bytes": 150580,
+          "license": "Apache-2.0",
+          "role": "rec",
+          "repository": "PaddlePaddle/PP-OCRv6_medium_rec_onnx",
+          "revision": "50c7eacafc52fa7bcf4194e8cd08e46f8558504b"
+        },
+        {
+          "path": "assets/ocr/ppocr_v6_medium/rec/README.md",
+          "url": "https://huggingface.co/PaddlePaddle/PP-OCRv6_medium_rec_onnx/resolve/50c7eacafc52fa7bcf4194e8cd08e46f8558504b/README.md",
+          "sha256": "ebce8d28436623ecab4952e24935aed86b3f8ecaf8f8736b92d5544f60fae1e9",
+          "bytes": 16587,
+          "license": "Apache-2.0",
+          "role": "rec",
+          "repository": "PaddlePaddle/PP-OCRv6_medium_rec_onnx",
+          "revision": "50c7eacafc52fa7bcf4194e8cd08e46f8558504b"
+        }
+      ],
+      "dictionaryLocation": "assets/ocr/ppocr_v6_medium/rec/inference.yml#PostProcess.character_dict",
+      "conversion": null,
+      "preprocessingRevision": "paddle-sdk-dab3fe35379033fdcb2d0e9572fac0b36c9a9ebf"
+    }
+  ],
+  "sdk": {
+    "repository": "https://github.com/PaddlePaddle/PaddleOCR",
+    "commit": "dab3fe35379033fdcb2d0e9572fac0b36c9a9ebf",
+    "license": "Apache-2.0",
+    "artifacts": [
+      {
+        "path": "android/paddle_ocr/proguard-rules.pro",
+        "url": "https://raw.githubusercontent.com/PaddlePaddle/PaddleOCR/dab3fe35379033fdcb2d0e9572fac0b36c9a9ebf/deploy/ppocr-android/ppocr-sdk/proguard-rules.pro",
+        "sha256": "be3c0a028538d32dcac1700f722c151768e5f48aaafe1c01142447ff377debee",
+        "bytes": 74,
+        "license": "Apache-2.0"
+      },
+      {
+        "path": "android/paddle_ocr/src/main/AndroidManifest.xml",
+        "url": "https://raw.githubusercontent.com/PaddlePaddle/PaddleOCR/dab3fe35379033fdcb2d0e9572fac0b36c9a9ebf/deploy/ppocr-android/ppocr-sdk/src/main/AndroidManifest.xml",
+        "sha256": "8ef94a6aec2218c5fd02408d018f6d52602c0ef4473dd1c115c5c6964f1e63e1",
+        "bytes": 121,
+        "license": "Apache-2.0"
+      },
+      {
+        "path": "android/paddle_ocr/src/main/java/com/paddle/ocr/EngineConfig.kt",
+        "url": "https://raw.githubusercontent.com/PaddlePaddle/PaddleOCR/dab3fe35379033fdcb2d0e9572fac0b36c9a9ebf/deploy/ppocr-android/ppocr-sdk/src/main/java/com/paddle/ocr/EngineConfig.kt",
+        "sha256": "886b7ef3dd4600ff92ff77c44643ce800e3f0da2d74de43112dbd79648ecdcda",
+        "bytes": 704,
+        "license": "Apache-2.0"
+      },
+      {
+        "path": "android/paddle_ocr/src/main/java/com/paddle/ocr/PaddleOCR.kt",
+        "url": "https://raw.githubusercontent.com/PaddlePaddle/PaddleOCR/dab3fe35379033fdcb2d0e9572fac0b36c9a9ebf/deploy/ppocr-android/ppocr-sdk/src/main/java/com/paddle/ocr/PaddleOCR.kt",
+        "sha256": "961945f4532b6339d20afa8415f8e6e289eeef20d2e142f67d37cc35b9310ede",
+        "bytes": 4286,
+        "license": "Apache-2.0"
+      },
+      {
+        "path": "android/paddle_ocr/src/main/java/com/paddle/ocr/PaddleOCRConfig.kt",
+        "url": "https://raw.githubusercontent.com/PaddlePaddle/PaddleOCR/dab3fe35379033fdcb2d0e9572fac0b36c9a9ebf/deploy/ppocr-android/ppocr-sdk/src/main/java/com/paddle/ocr/PaddleOCRConfig.kt",
+        "sha256": "ebe53f5f21e127857b7b947995a19b5baa966d996104daa5c36ac5c07affa7d5",
+        "bytes": 1155,
+        "license": "Apache-2.0"
+      },
+      {
+        "path": "android/paddle_ocr/src/main/java/com/paddle/ocr/engine/DetectionEngine.kt",
+        "url": "https://raw.githubusercontent.com/PaddlePaddle/PaddleOCR/dab3fe35379033fdcb2d0e9572fac0b36c9a9ebf/deploy/ppocr-android/ppocr-sdk/src/main/java/com/paddle/ocr/engine/DetectionEngine.kt",
+        "sha256": "b99dfce96cc2819e28a068e535fd096185b4abf41d1038079bf6836c8a1a985a",
+        "bytes": 3385,
+        "license": "Apache-2.0"
+      },
+      {
+        "path": "android/paddle_ocr/src/main/java/com/paddle/ocr/engine/OCREngine.kt",
+        "url": "https://raw.githubusercontent.com/PaddlePaddle/PaddleOCR/dab3fe35379033fdcb2d0e9572fac0b36c9a9ebf/deploy/ppocr-android/ppocr-sdk/src/main/java/com/paddle/ocr/engine/OCREngine.kt",
+        "sha256": "ad235c1c01522fa41729d58d5a9405ffaff3ad6f391e920cb6a942ef78256446",
+        "bytes": 6905,
+        "license": "Apache-2.0"
+      },
+      {
+        "path": "android/paddle_ocr/src/main/java/com/paddle/ocr/engine/OCREngineResult.kt",
+        "url": "https://raw.githubusercontent.com/PaddlePaddle/PaddleOCR/dab3fe35379033fdcb2d0e9572fac0b36c9a9ebf/deploy/ppocr-android/ppocr-sdk/src/main/java/com/paddle/ocr/engine/OCREngineResult.kt",
+        "sha256": "6f1b7853dfc5b2ba1a70cb1d77518a10bbff45d71f3a689105f675c4d3be9a7a",
+        "bytes": 1429,
+        "license": "Apache-2.0"
+      },
+      {
+        "path": "android/paddle_ocr/src/main/java/com/paddle/ocr/engine/ORTSessionManager.kt",
+        "url": "https://raw.githubusercontent.com/PaddlePaddle/PaddleOCR/dab3fe35379033fdcb2d0e9572fac0b36c9a9ebf/deploy/ppocr-android/ppocr-sdk/src/main/java/com/paddle/ocr/engine/ORTSessionManager.kt",
+        "sha256": "edc1b780d5277bcef93d052f3f1bddcad49830dcfa0a3b13ae63e18300e6f394",
+        "bytes": 5886,
+        "license": "Apache-2.0"
+      },
+      {
+        "path": "android/paddle_ocr/src/main/java/com/paddle/ocr/engine/RecognitionEngine.kt",
+        "url": "https://raw.githubusercontent.com/PaddlePaddle/PaddleOCR/dab3fe35379033fdcb2d0e9572fac0b36c9a9ebf/deploy/ppocr-android/ppocr-sdk/src/main/java/com/paddle/ocr/engine/RecognitionEngine.kt",
+        "sha256": "00e683a56ec2741a0daca0ff8f2ceb001ae690f30e03dc6118cd49828b747396",
+        "bytes": 2270,
+        "license": "Apache-2.0"
+      },
+      {
+        "path": "android/paddle_ocr/src/main/java/com/paddle/ocr/model/ModelConfig.kt",
+        "url": "https://raw.githubusercontent.com/PaddlePaddle/PaddleOCR/dab3fe35379033fdcb2d0e9572fac0b36c9a9ebf/deploy/ppocr-android/ppocr-sdk/src/main/java/com/paddle/ocr/model/ModelConfig.kt",
+        "sha256": "e64e9262839b9e4da57d00a5cfef7ab3f81dcb5be1b96f47c4067449f306ddf0",
+        "bytes": 4890,
+        "license": "Apache-2.0"
+      },
+      {
+        "path": "android/paddle_ocr/src/main/java/com/paddle/ocr/model/OCRBox.kt",
+        "url": "https://raw.githubusercontent.com/PaddlePaddle/PaddleOCR/dab3fe35379033fdcb2d0e9572fac0b36c9a9ebf/deploy/ppocr-android/ppocr-sdk/src/main/java/com/paddle/ocr/model/OCRBox.kt",
+        "sha256": "4db761a2e541db9145ba9512c4a5e8719ee70b09e241616525afcbf61abbcbc9",
+        "bytes": 852,
+        "license": "Apache-2.0"
+      },
+      {
+        "path": "android/paddle_ocr/src/main/java/com/paddle/ocr/model/OCRError.kt",
+        "url": "https://raw.githubusercontent.com/PaddlePaddle/PaddleOCR/dab3fe35379033fdcb2d0e9572fac0b36c9a9ebf/deploy/ppocr-android/ppocr-sdk/src/main/java/com/paddle/ocr/model/OCRError.kt",
+        "sha256": "e360a2aa3580692d6ef8d98c9a740260566d5731f5f20f3633feadd55337fe6e",
+        "bytes": 1380,
+        "license": "Apache-2.0"
+      },
+      {
+        "path": "android/paddle_ocr/src/main/java/com/paddle/ocr/model/OCRResult.kt",
+        "url": "https://raw.githubusercontent.com/PaddlePaddle/PaddleOCR/dab3fe35379033fdcb2d0e9572fac0b36c9a9ebf/deploy/ppocr-android/ppocr-sdk/src/main/java/com/paddle/ocr/model/OCRResult.kt",
+        "sha256": "0f492da6f396886ad68c5d0dc09a853715e50e1c23cd9f4c1fbbde7eedbb5264",
+        "bytes": 789,
+        "license": "Apache-2.0"
+      },
+      {
+        "path": "android/paddle_ocr/src/main/java/com/paddle/ocr/model/OCRRunResult.kt",
+        "url": "https://raw.githubusercontent.com/PaddlePaddle/PaddleOCR/dab3fe35379033fdcb2d0e9572fac0b36c9a9ebf/deploy/ppocr-android/ppocr-sdk/src/main/java/com/paddle/ocr/model/OCRRunResult.kt",
+        "sha256": "ba90ee5a89fa3bba36e4325dd1ed1b18e90e6c10401eb00df29937bfadccbed4",
+        "bytes": 1386,
+        "license": "Apache-2.0"
+      },
+      {
+        "path": "android/paddle_ocr/src/main/java/com/paddle/ocr/postprocess/BoxSorter.kt",
+        "url": "https://raw.githubusercontent.com/PaddlePaddle/PaddleOCR/dab3fe35379033fdcb2d0e9572fac0b36c9a9ebf/deploy/ppocr-android/ppocr-sdk/src/main/java/com/paddle/ocr/postprocess/BoxSorter.kt",
+        "sha256": "d298db1421a7a0250db3c76627f640c13cccd66e4c6960116286a3b2399f7ccc",
+        "bytes": 1629,
+        "license": "Apache-2.0"
+      },
+      {
+        "path": "android/paddle_ocr/src/main/java/com/paddle/ocr/postprocess/CTCDecoder.kt",
+        "url": "https://raw.githubusercontent.com/PaddlePaddle/PaddleOCR/dab3fe35379033fdcb2d0e9572fac0b36c9a9ebf/deploy/ppocr-android/ppocr-sdk/src/main/java/com/paddle/ocr/postprocess/CTCDecoder.kt",
+        "sha256": "ae5ee6c3bd3e5993e80f20f2e35e90c7b50801d0b84fd9caff74966af4337a1f",
+        "bytes": 2456,
+        "license": "Apache-2.0"
+      },
+      {
+        "path": "android/paddle_ocr/src/main/java/com/paddle/ocr/postprocess/DBPostProcessor.kt",
+        "url": "https://raw.githubusercontent.com/PaddlePaddle/PaddleOCR/dab3fe35379033fdcb2d0e9572fac0b36c9a9ebf/deploy/ppocr-android/ppocr-sdk/src/main/java/com/paddle/ocr/postprocess/DBPostProcessor.kt",
+        "sha256": "53923f88a025a4810d009223a79d15e9e27200673f40722ff0f9e105d2b12276",
+        "bytes": 7115,
+        "license": "Apache-2.0"
+      },
+      {
+        "path": "android/paddle_ocr/src/main/java/com/paddle/ocr/postprocess/PolygonUnclip.kt",
+        "url": "https://raw.githubusercontent.com/PaddlePaddle/PaddleOCR/dab3fe35379033fdcb2d0e9572fac0b36c9a9ebf/deploy/ppocr-android/ppocr-sdk/src/main/java/com/paddle/ocr/postprocess/PolygonUnclip.kt",
+        "sha256": "bc575aba1d0f7618473b87c64ca0a7d0219d3bbfe57f356fd2a51d1cc2703cdd",
+        "bytes": 4631,
+        "license": "Apache-2.0"
+      },
+      {
+        "path": "android/paddle_ocr/src/main/java/com/paddle/ocr/postprocess/QuadGeometry.kt",
+        "url": "https://raw.githubusercontent.com/PaddlePaddle/PaddleOCR/dab3fe35379033fdcb2d0e9572fac0b36c9a9ebf/deploy/ppocr-android/ppocr-sdk/src/main/java/com/paddle/ocr/postprocess/QuadGeometry.kt",
+        "sha256": "936674693f20b2120663fb33576a6ee9264c44b28e2a1e3a01dbab0d6023ded5",
+        "bytes": 1434,
+        "license": "Apache-2.0"
+      },
+      {
+        "path": "android/paddle_ocr/src/main/java/com/paddle/ocr/postprocess/QuadTextCrop.kt",
+        "url": "https://raw.githubusercontent.com/PaddlePaddle/PaddleOCR/dab3fe35379033fdcb2d0e9572fac0b36c9a9ebf/deploy/ppocr-android/ppocr-sdk/src/main/java/com/paddle/ocr/postprocess/QuadTextCrop.kt",
+        "sha256": "49f8889430ca8aeda4ef5e90f8de4b0e695696de64fdd97d8ed7421d21198109",
+        "bytes": 3142,
+        "license": "Apache-2.0"
+      },
+      {
+        "path": "android/paddle_ocr/src/main/java/com/paddle/ocr/preprocess/DetPreprocessor.kt",
+        "url": "https://raw.githubusercontent.com/PaddlePaddle/PaddleOCR/dab3fe35379033fdcb2d0e9572fac0b36c9a9ebf/deploy/ppocr-android/ppocr-sdk/src/main/java/com/paddle/ocr/preprocess/DetPreprocessor.kt",
+        "sha256": "9e16244a57d8d8be5aba3eff85c676d0b08282f396868fa244bf35dd572dcff8",
+        "bytes": 3300,
+        "license": "Apache-2.0"
+      },
+      {
+        "path": "android/paddle_ocr/src/main/java/com/paddle/ocr/preprocess/RecPreprocessor.kt",
+        "url": "https://raw.githubusercontent.com/PaddlePaddle/PaddleOCR/dab3fe35379033fdcb2d0e9572fac0b36c9a9ebf/deploy/ppocr-android/ppocr-sdk/src/main/java/com/paddle/ocr/preprocess/RecPreprocessor.kt",
+        "sha256": "edf40bd7e4cec5411a92dda05291cff524794f00bf63615f82e184b54dee9fab",
+        "bytes": 3947,
+        "license": "Apache-2.0"
+      },
+      {
+        "path": "android/paddle_ocr/src/main/java/com/paddle/ocr/util/BitmapUtils.kt",
+        "url": "https://raw.githubusercontent.com/PaddlePaddle/PaddleOCR/dab3fe35379033fdcb2d0e9572fac0b36c9a9ebf/deploy/ppocr-android/ppocr-sdk/src/main/java/com/paddle/ocr/util/BitmapUtils.kt",
+        "sha256": "66b5771266ad5166453b428d01ea707efcc56e076c7d4813347d672629e2330c",
+        "bytes": 2285,
+        "license": "Apache-2.0"
+      },
+      {
+        "path": "android/paddle_ocr/src/main/java/com/paddle/ocr/util/ImageUtils.kt",
+        "url": "https://raw.githubusercontent.com/PaddlePaddle/PaddleOCR/dab3fe35379033fdcb2d0e9572fac0b36c9a9ebf/deploy/ppocr-android/ppocr-sdk/src/main/java/com/paddle/ocr/util/ImageUtils.kt",
+        "sha256": "205fd17a1dcfacdbbc8f5bb76e059aba7c0fffecfaff443812a1960272ecfbbe",
+        "bytes": 1963,
+        "license": "Apache-2.0"
+      },
+      {
+        "path": "android/paddle_ocr/src/main/java/com/paddle/ocr/util/MathUtils.kt",
+        "url": "https://raw.githubusercontent.com/PaddlePaddle/PaddleOCR/dab3fe35379033fdcb2d0e9572fac0b36c9a9ebf/deploy/ppocr-android/ppocr-sdk/src/main/java/com/paddle/ocr/util/MathUtils.kt",
+        "sha256": "7465d79388376ccbbd4c575d1c03fe4524877db79cf92e74d3c35d1b7e22efd8",
+        "bytes": 1039,
+        "license": "Apache-2.0"
+      },
+      {
+        "path": "android/paddle_ocr/src/main/java/com/paddle/ocr/util/OpenCVUtils.kt",
+        "url": "https://raw.githubusercontent.com/PaddlePaddle/PaddleOCR/dab3fe35379033fdcb2d0e9572fac0b36c9a9ebf/deploy/ppocr-android/ppocr-sdk/src/main/java/com/paddle/ocr/util/OpenCVUtils.kt",
+        "sha256": "ed3fd0918df9ccff85c6f2da3ea22a1cabe31d1cd68f11a3a3c1915a758bb5f5",
+        "bytes": 1106,
+        "license": "Apache-2.0"
+      },
+      {
+        "path": "android/paddle_ocr/src/main/java/com/paddle/ocr/util/YamlUtils.kt",
+        "url": "https://raw.githubusercontent.com/PaddlePaddle/PaddleOCR/dab3fe35379033fdcb2d0e9572fac0b36c9a9ebf/deploy/ppocr-android/ppocr-sdk/src/main/java/com/paddle/ocr/util/YamlUtils.kt",
+        "sha256": "d61f540ed2420dea704dc381d91eb5e154191817745a8ecb2f1e712d58938f1a",
+        "bytes": 811,
+        "license": "Apache-2.0"
+      },
+      {
+        "path": "android/paddle_ocr/LICENSE",
+        "url": "https://raw.githubusercontent.com/PaddlePaddle/PaddleOCR/dab3fe35379033fdcb2d0e9572fac0b36c9a9ebf/LICENSE",
+        "sha256": "3840c5c0c61c294264d2dd77b8777be6ddd90121ef4e0e64abcd22edea581d6e",
+        "bytes": 11376,
+        "license": "Apache-2.0"
+      },
+      {
+        "path": "android/paddle_ocr/upstream/build.gradle.kts",
+        "url": "https://raw.githubusercontent.com/PaddlePaddle/PaddleOCR/dab3fe35379033fdcb2d0e9572fac0b36c9a9ebf/deploy/ppocr-android/ppocr-sdk/build.gradle.kts",
+        "sha256": "adc4c4369baf5b275b23ba3291ecfc1f0ce5cb60007307a6b3a6bcafff989514",
+        "bytes": 1110,
+        "license": "Apache-2.0"
+      },
+      {
+        "path": "android/paddle_ocr/upstream/libs.versions.toml",
+        "url": "https://raw.githubusercontent.com/PaddlePaddle/PaddleOCR/dab3fe35379033fdcb2d0e9572fac0b36c9a9ebf/deploy/ppocr-android/gradle/libs.versions.toml",
+        "sha256": "9af829fef4ea71498efcbe90a5cf1160510e7f46e94938af1fdee5c98fd015a7",
+        "bytes": 2429,
+        "license": "Apache-2.0"
+      },
+      {
+        "path": "assets/ocr/LICENSE-ONNXRuntime.txt",
+        "url": "https://raw.githubusercontent.com/microsoft/onnxruntime/8f7cce3a49fdbdac96e0868b75b7d0159db7ac7f/LICENSE",
+        "sha256": "2f07c72751aed99790b8a4869cf2311df85a860b22ded05fa22803587a48922c",
+        "bytes": 1073,
+        "repository": "microsoft/onnxruntime",
+        "revision": "8f7cce3a49fdbdac96e0868b75b7d0159db7ac7f"
+      },
+      {
+        "path": "assets/ocr/NOTICE-ONNXRuntime.txt",
+        "url": "https://raw.githubusercontent.com/microsoft/onnxruntime/8f7cce3a49fdbdac96e0868b75b7d0159db7ac7f/ThirdPartyNotices.txt",
+        "sha256": "8c06e8cff286a4a117b3b246a4c7da68428a144af757823db50e3d6520941ec6",
+        "bytes": 316114,
+        "repository": "microsoft/onnxruntime",
+        "revision": "8f7cce3a49fdbdac96e0868b75b7d0159db7ac7f"
+      },
+      {
+        "path": "assets/ocr/LICENSE-QuickBird-OpenCV.txt",
+        "url": "https://raw.githubusercontent.com/QuickBirdEng/opencv-android/6fe95060f9b09b062d20e8d7a71a673233bb6ec4/LICENSE",
+        "sha256": "dedf8bb62e68b977e765bdeabaea029bd055dfc527f8a1f51b5cd4bacd6ba212",
+        "bytes": 3019,
+        "repository": "QuickBirdEng/opencv-android",
+        "revision": "6fe95060f9b09b062d20e8d7a71a673233bb6ec4"
+      },
+      {
+        "path": "assets/ocr/LICENSE-OpenCV.txt",
+        "url": "https://raw.githubusercontent.com/opencv/opencv/ad6e82942b37be8ee2c71c1d9bc7fe79cd16f7ab/LICENSE",
+        "sha256": "cfc7749b96f63bd31c3c42b5c471bf756814053e847c10f3eb003417bc523d30",
+        "bytes": 11358,
+        "repository": "opencv/opencv",
+        "revision": "ad6e82942b37be8ee2c71c1d9bc7fe79cd16f7ab"
+      },
+      {
+        "path": "assets/ocr/LICENSE-Coroutines.txt",
+        "url": "https://raw.githubusercontent.com/Kotlin/kotlinx.coroutines/d8d6f8f37978b8e202d93b34f23f101df9c5724d/LICENSE.txt",
+        "sha256": "b1febe6399dffb10d19d35e7663ab16300c93cb0476a94115df1cc0097a8ffd8",
+        "bytes": 11398,
+        "repository": "Kotlin/kotlinx.coroutines",
+        "revision": "d8d6f8f37978b8e202d93b34f23f101df9c5724d"
+      },
+      {
+        "path": "assets/ocr/LICENSE-libcxx.txt",
+        "url": "https://android.googlesource.com/toolchain/llvm-project/+/a2a1e703c0edb03ba29944e529ccbf457742737b/libcxx/LICENSE.TXT?format=TEXT",
+        "encoding": "base64",
+        "sha256": "539dd7aed86e8a4f12cbdd0e6c50c189c7d74847e4fecc64ce2c6ee3a01da38b",
+        "bytes": 16703,
+        "repository": "android/toolchain/llvm-project",
+        "revision": "a2a1e703c0edb03ba29944e529ccbf457742737b",
+        "license": "Apache-2.0 WITH LLVM-exception; legacy MIT/NCSA",
+        "evidence": "OpenCV4.5.3.0 arm64 libc++_shared.so .comment embeds this compiler source revision"
+      }
+    ],
+    "dependencies": [
+      {
+        "coordinate": "com.microsoft.onnxruntime:onnxruntime-android:1.21.1",
+        "license": "MIT",
+        "url": "https://repo.maven.apache.org/maven2/com/microsoft/onnxruntime/onnxruntime-android/1.21.1/onnxruntime-android-1.21.1.aar",
+        "sha256": "30e594a4b9246fe3ca25768570e90f71e6d33ceb7b7dd72f92dcd7c267611d3f",
+        "bytes": 27944395,
+        "nativeLibraries": [
+          {
+            "path": "jni/arm64-v8a/libonnxruntime.so",
+            "bytes": 17908496,
+            "sha256": "11ef853b751532dc827bd7799f557f9495e2ee7523b9b355753fc0344576bd5e"
+          },
+          {
+            "path": "jni/arm64-v8a/libonnxruntime4j_jni.so",
+            "bytes": 100632,
+            "sha256": "f657216254a2f88fcbd89c5e73a2f7ae5a8145d092f8700951aedba8e4a60ef2"
+          },
+          {
+            "path": "jni/armeabi-v7a/libonnxruntime.so",
+            "bytes": 13039136,
+            "sha256": "2e55ddb9df17bba226a2b3eb4ccd7029010c7631cee93a69a00f928c0e955972"
+          },
+          {
+            "path": "jni/armeabi-v7a/libonnxruntime4j_jni.so",
+            "bytes": 73676,
+            "sha256": "8b53e40fc127190b18e69a524371cd4ce9b52e059354d8fe8f228a345bb8355d"
+          },
+          {
+            "path": "jni/x86/libonnxruntime.so",
+            "bytes": 21195040,
+            "sha256": "6b829b3634e13c76b38e35a82ae97d24ef991caa21de400e6f2a0dd6b6d7845e"
+          },
+          {
+            "path": "jni/x86/libonnxruntime4j_jni.so",
+            "bytes": 84684,
+            "sha256": "1e2ded4a31b09c9138d826a36fc36dfda800ddfcfea6c92890b961b6004ddcf7"
+          },
+          {
+            "path": "jni/x86_64/libonnxruntime.so",
+            "bytes": 21420512,
+            "sha256": "66032672c3f62a42c6345e5cf3931c88e3cf9443ba104fee5370e8e3f6640ca8"
+          },
+          {
+            "path": "jni/x86_64/libonnxruntime4j_jni.so",
+            "bytes": 90712,
+            "sha256": "cc9fc0591222fc5c90a07ef055d7bacde08e62c49a5ec9e629be2c6b535cf94b"
+          }
+        ]
+      },
+      {
+        "coordinate": "com.quickbirdstudios:opencv:4.5.3.0",
+        "license": "BSD-3-Clause wrapper; Apache-2.0 OpenCV",
+        "url": "https://repo.maven.apache.org/maven2/com/quickbirdstudios/opencv/4.5.3.0/opencv-4.5.3.0.aar",
+        "sha256": "5736e3c7a23153478b62c60937fd5224eee267c59e077c053957d90c6736469e",
+        "bytes": 53990420,
+        "nativeLibraries": [
+          {
+            "path": "jni/arm64-v8a/libc++_shared.so",
+            "bytes": 6238016,
+            "sha256": "546b32b0e19e6872f42238d751ad9a6f0f73ee55562ce1ffb394df9892ddcb4a"
+          },
+          {
+            "path": "jni/arm64-v8a/libopencv_java4.so",
+            "bytes": 17189512,
+            "sha256": "82ac6774835e26fbaba896bf2f6f61e81200dfdb5fe55a53e43b54241de41a0a"
+          },
+          {
+            "path": "jni/armeabi-v7a/libc++_shared.so",
+            "bytes": 4173552,
+            "sha256": "737d3b160f68bb499fd50c661b7d98b828f525da961188daac72a65cf518de44"
+          },
+          {
+            "path": "jni/armeabi-v7a/libopencv_java4.so",
+            "bytes": 10438812,
+            "sha256": "d018a025126bc15015b54d045bfce54ce6fff35e6556d30007da89ef36d79f96"
+          },
+          {
+            "path": "jni/x86/libc++_shared.so",
+            "bytes": 5538104,
+            "sha256": "0d9bb9fada250f33957d0dff0ea2081db253e9e9b8d0b88943fbf2ff6d909c38"
+          },
+          {
+            "path": "jni/x86/libopencv_java4.so",
+            "bytes": 36709820,
+            "sha256": "d0c34130d2ab87b3c79c870b2cea4db75c74fee97f5bf5b8daaa1687e9500384"
+          },
+          {
+            "path": "jni/x86_64/libc++_shared.so",
+            "bytes": 6377448,
+            "sha256": "92ca966d5969b25ff7e263dce5f981c4f92d0343cde94f4a9d5d16f60c839e20"
+          },
+          {
+            "path": "jni/x86_64/libopencv_java4.so",
+            "bytes": 52183584,
+            "sha256": "9584be69ba3b0d85800dc49b8a28de23a8f1917df5d022a597a0fd5e314deccd"
+          }
+        ]
+      },
+      {
+        "coordinate": "org.jetbrains.kotlinx:kotlinx-coroutines-android:1.9.0",
+        "license": "Apache-2.0"
+      },
+      {
+        "coordinate": "androidx.core:core-ktx:1.15.0",
+        "license": "Apache-2.0"
+      }
+    ]
+  }
+}

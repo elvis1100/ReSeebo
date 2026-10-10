@@ -23,6 +23,14 @@ class _ReviewAdapter extends MockReseeboDataAdapter {
   @override
   Future<List<Supplier>> getSuppliers() async => [];
   @override
+  Future<ProductComparisonData> getProductComparison(String productId) async =>
+      const ProductComparisonData(
+        product: _product,
+        profile: StoreProfile(),
+        latestPrices: [],
+        history: [],
+      );
+  @override
   Future<SaveReceiptResult> saveConfirmedReceipt(ReceiptDraft draft) async {
     ReceiptValidator.validate(draft);
     if (duplicate && !draft.allowDuplicate) {
@@ -225,7 +233,7 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.text('Continue to save'), findsOneWidget);
     expect(returnedToPhotos, isFalse);
-    await tester.tap(find.byIcon(Icons.arrow_back));
+    await tester.tap(find.byIcon(Icons.arrow_back_rounded));
     await tester.pumpAndSettle();
     expect(returnedToPhotos, isTrue);
   });

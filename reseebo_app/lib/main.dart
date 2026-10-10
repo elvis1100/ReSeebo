@@ -11,6 +11,8 @@ import 'features/profile/screens/profile_screen.dart';
 import 'features/receipt_scan/screens/capture_screen.dart';
 import 'features/receipt_scan/screens/review_match_screen.dart';
 import 'features/receipts/screens/receipt_detail_screen.dart';
+import 'features/receipts/screens/pending_receipt_screen.dart';
+import 'features/welcome/screens/welcome_screen.dart';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
@@ -106,6 +108,7 @@ class ReseeboApp extends StatefulWidget {
 
 class _ReseeboAppState extends State<ReseeboApp> {
   late final IReseeboDataAdapter _adapter;
+  bool _enteredStore = false;
 
   @override
   void initState() {
@@ -119,7 +122,11 @@ class _ReseeboAppState extends State<ReseeboApp> {
       title: 'Reseebo',
       debugShowCheckedModeBanner: false,
       theme: AppTheme.lightTheme,
-      home: ReseeboRootNavigation(dataAdapter: _adapter),
+      home: _enteredStore
+          ? ReseeboRootNavigation(dataAdapter: _adapter)
+          : WelcomeScreen(
+              onContinue: () => setState(() => _enteredStore = true),
+            ),
       builder: widget.demoMode
           ? (context, child) => Column(
               children: [
@@ -172,25 +179,52 @@ class _ReseeboRootNavigationState extends State<ReseeboRootNavigation> {
       MaterialPageRoute(
         builder: (context) => CaptureScreen(
           dataAdapter: widget.dataAdapter,
-          onDraftReady: (draft) async {
+          onOpenPendingReceipt: _openPendingReceipt,
+          onPendingSaved: (result) {
+            Navigator.of(context).pop();
+            if (mounted) {
+              setState(() {
+                _currentIndex = 0;
+                _dataRevision++;
+              });
+            }
+          },
+          onReviewRequested: (draft) async {
+            ReceiptDraft? returned;
             final saved = await Navigator.of(context).push<bool>(
               MaterialPageRoute(
                 builder: (context) => ReviewMatchScreen(
                   dataAdapter: widget.dataAdapter,
                   initialDraft: draft,
+                  preserveSuggestions: true,
+                  onOpenPendingReceipt: _openPendingReceipt,
+                  onDraftChanged: (snapshot) => returned = snapshot,
+                  onPendingSaved: (result) {
+                    Navigator.of(context).pop(true);
+                    if (mounted) {
+                      setState(() {
+                        _currentIndex = 0;
+                        _dataRevision++;
+                      });
+                    }
+                  },
                   onSaved: (result) {
                     Navigator.of(context).pop(true);
-                    setState(() {
-                      _currentIndex = 0;
-                      _dataRevision++;
-                    });
+                    if (mounted) {
+                      setState(() {
+                        _currentIndex = 0;
+                        _dataRevision++;
+                      });
+                    }
                   },
                 ),
               ),
             );
             if (saved == true && context.mounted) {
               Navigator.of(context).pop();
+              return null;
             }
+            return returned;
           },
         ),
       ),
@@ -209,15 +243,41 @@ class _ReseeboRootNavigationState extends State<ReseeboRootNavigation> {
     if (mounted) setState(() => _dataRevision++);
   }
 
-  void _openReceiptDetail(Receipt receipt) {
-    Navigator.of(context).push(
+  Future<void> _openPendingReceipt(String pendingId) async {
+    await Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (_) => PendingReceiptScreen(
+          adapter: widget.dataAdapter,
+          pendingId: pendingId,
+          onConfirmed: (_) {
+            if (mounted) setState(() => _dataRevision++);
+          },
+          onPendingSaved: (_) {
+            if (mounted) setState(() => _dataRevision++);
+          },
+        ),
+      ),
+    );
+    if (mounted) setState(() => _dataRevision++);
+  }
+
+  void _openReceiptDetail(Receipt receipt) async {
+    await Navigator.of(context).push(
       MaterialPageRoute(
         builder: (_) => ReceiptDetailScreen(
           adapter: widget.dataAdapter,
           receiptId: receipt.id,
+          onOpenPendingReceipt: _openPendingReceipt,
+          onPendingReceiptSaved: (_) {
+            if (mounted) setState(() => _dataRevision++);
+          },
+          onReceiptChanged: () {
+            if (mounted) setState(() => _dataRevision++);
+          },
         ),
       ),
     );
+    if (mounted) setState(() => _dataRevision++);
   }
 
   @override
@@ -232,6 +292,7 @@ class _ReseeboRootNavigationState extends State<ReseeboRootNavigation> {
             onSettingsPressed: () => _navigateToTab(1),
             onProductSelected: _openProductComparison,
             onReceiptSelected: _openReceiptDetail,
+            onPendingReceiptSelected: _openPendingReceipt,
           ),
           ProfileScreen(
             dataAdapter: widget.dataAdapter,

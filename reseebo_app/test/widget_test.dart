@@ -36,30 +36,39 @@ class _LongCatalogAdapter extends MockReseeboDataAdapter {
   ) async => {};
 }
 
+Future<void> _enterStore(WidgetTester tester) async {
+  await tester.pumpAndSettle();
+  await tester.ensureVisible(find.text('Get started'));
+  await tester.pumpAndSettle();
+  await tester.tap(find.text('Get started'));
+  await tester.pumpAndSettle();
+}
+
 void main() {
   testWidgets('ReseeboApp boots and renders offline dashboard', (
     WidgetTester tester,
   ) async {
     // Build Reseebo and trigger a frame.
     await tester.pumpWidget(const ReseeboApp());
-    await tester.pumpAndSettle();
+    await _enterStore(tester);
 
     // Verify that the title and core dashboard controls are rendered.
-    expect(find.text('Reseebo'), findsOneWidget);
+    expect(
+      find.image(const AssetImage('assets/brand/reseebo_logo.png')),
+      findsOneWidget,
+    );
     expect(find.text('Scan Receipt'), findsOneWidget);
     expect(find.text('Home'), findsOneWidget);
     expect(find.text('Settings'), findsOneWidget);
     expect(find.byType(FloatingActionButton), findsNothing);
     expect(find.byKey(const ValueKey('bottom-scan-action')), findsOneWidget);
-    final headerText = tester
-        .widgetList<Text>(
-          find.descendant(
-            of: find.byType(StoreHeader),
-            matching: find.byType(Text),
-          ),
-        )
-        .map((text) => text.data);
-    expect(headerText, ['Reseebo']);
+    expect(
+      find.descendant(
+        of: find.byType(StoreHeader),
+        matching: find.image(const AssetImage('assets/brand/reseebo_logo.png')),
+      ),
+      findsOneWidget,
+    );
     expect(find.byTooltip('Refresh data'), findsNothing);
     expect(find.byTooltip('Add product').hitTestable(), findsNothing);
     await tester.tap(find.text('Products (4)'));
@@ -71,15 +80,11 @@ void main() {
     await tester.tap(find.text('Settings'));
     await tester.pumpAndSettle();
     expect(
-      tester
-          .widgetList<Text>(
-            find.descendant(
-              of: find.byType(StoreHeader),
-              matching: find.byType(Text),
-            ),
-          )
-          .map((text) => text.data),
-      ['Reseebo'],
+      find.descendant(
+        of: find.byType(StoreHeader),
+        matching: find.image(const AssetImage('assets/brand/reseebo_logo.png')),
+      ),
+      findsOneWidget,
     );
     expect(find.byTooltip('Refresh settings'), findsNothing);
   });
@@ -95,7 +100,7 @@ void main() {
         ),
       );
       await tester.pumpWidget(ReseeboApp(dataAdapter: adapter));
-      await tester.pumpAndSettle();
+      await _enterStore(tester);
       await tester.tap(find.text('Settings'));
       await tester.pumpAndSettle();
       expect(find.text('Store logo (optional)'), findsNothing);
@@ -141,7 +146,7 @@ void main() {
       addTearDown(tester.view.resetPhysicalSize);
       addTearDown(tester.view.resetDevicePixelRatio);
       await tester.pumpWidget(const ReseeboApp());
-      await tester.pumpAndSettle();
+      await _enterStore(tester);
       expect(find.text('Tracked Items'), findsNothing);
       final storeName = tester.renderObject<RenderParagraph>(
         find.descendant(
@@ -201,7 +206,7 @@ void main() {
       addTearDown(tester.view.resetPhysicalSize);
       addTearDown(tester.view.resetDevicePixelRatio);
       await tester.pumpWidget(ReseeboApp(dataAdapter: _LongCatalogAdapter()));
-      await tester.pumpAndSettle();
+      await _enterStore(tester);
       final list = find.byKey(const PageStorageKey('dashboard-products-list'));
       final search = find.byKey(const ValueKey('dashboard-search'));
       expect(search.hitTestable(), findsOneWidget);
@@ -234,7 +239,7 @@ void main() {
     'rounded pill tabs and gradient store tile contain their press surfaces',
     (tester) async {
       await tester.pumpWidget(const ReseeboApp());
-      await tester.pumpAndSettle();
+      await _enterStore(tester);
       final surface = tester.widget<Material>(
         find.byKey(const ValueKey('dashboard-tabs-surface')),
       );
@@ -283,14 +288,14 @@ void main() {
       addTearDown(tester.view.resetPhysicalSize);
       addTearDown(tester.view.resetDevicePixelRatio);
       await tester.pumpWidget(const ReseeboApp());
-      await tester.pumpAndSettle();
+      await _enterStore(tester);
       final scan = tester.getRect(
         find.byKey(const ValueKey('bottom-scan-action')),
       );
       expect(scan.center.dx, 180);
       expect(scan.width, 60);
       final homeIcon = tester.getRect(find.byIcon(Icons.storefront_rounded));
-      final settingsIcon = tester.getRect(find.byIcon(Icons.settings_outlined));
+      final settingsIcon = tester.getRect(find.byIcon(Icons.settings_rounded));
       expect(scan.top, lessThan(homeIcon.top));
       expect(scan.top, lessThan(settingsIcon.top));
       expect(find.text('Scan Receipt').hitTestable(), findsOneWidget);

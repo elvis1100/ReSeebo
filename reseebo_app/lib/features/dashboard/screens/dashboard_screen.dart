@@ -9,6 +9,8 @@ import '../../../core/widgets/store_header.dart';
 import '../../../core/widgets/shared_widgets.dart' show ErrorState;
 import '../../catalog/screens/product_editor_screen.dart';
 import '../widgets/receipt_list_item.dart';
+import '../widgets/pending_receipt_list_item.dart';
+import '../../receipts/screens/pending_receipt_screen.dart';
 import '../widgets/stat_header.dart';
 import '../../insights/screens/insights_screen.dart';
 
@@ -18,6 +20,7 @@ class DashboardScreen extends StatefulWidget {
   final IReseeboDataAdapter dataAdapter;
   final VoidCallback? onSettingsPressed;
   final ValueChanged<Receipt>? onReceiptSelected;
+  final ValueChanged<String>? onPendingReceiptSelected;
   final ValueChanged<Product>? onProductSelected;
   final int refreshRevision;
 
@@ -26,6 +29,7 @@ class DashboardScreen extends StatefulWidget {
     required this.dataAdapter,
     this.onSettingsPressed,
     this.onReceiptSelected,
+    this.onPendingReceiptSelected,
     this.onProductSelected,
     this.refreshRevision = 0,
   });
@@ -41,8 +45,9 @@ class _DashboardScreenState extends State<DashboardScreen>
 
   StoreProfile? _storeProfile;
   List<Receipt> _receipts = [];
+  List<LedgerEntry> _ledgerEntries = [];
+  List<LedgerEntry>? _searchedEntries;
   List<Product> _products = [];
-  Map<String, Supplier> _suppliersMap = {};
   bool _isLoading = true;
   String _searchQuery = '';
   Map<String, LatestProductCost> _costs = {};
@@ -50,6 +55,7 @@ class _DashboardScreenState extends State<DashboardScreen>
   bool _loadedOnce = false;
   int _request = 0;
   Future<void>? _refreshing;
+  int _searchRequest = 0;
 
   @override
   void initState() {
@@ -69,6 +75,7 @@ class _DashboardScreenState extends State<DashboardScreen>
   @override
   void dispose() {
     _request++;
+    _searchRequest++;
     _tabController.removeListener(_onTabChanged);
     _tabController.dispose();
     _searchController.removeListener(_onSearchChanged);
@@ -83,7 +90,44 @@ class _DashboardScreenState extends State<DashboardScreen>
   void _onSearchChanged() {
     setState(() {
       _searchQuery = _searchController.text.trim().toLowerCase();
+      _searchedEntries = null;
     });
+    _searchLedger();
+  }
+
+  Future<void> _searchLedger() async {
+    final request = ++_searchRequest;
+    final query = _searchQuery;
+    if (query.isEmpty) return;
+    try {
+      final entries = await widget.dataAdapter.getLedgerEntries(query: query);
+      final receipts = await _receiptsForEntries(entries, _receipts);
+      if (!mounted || request != _searchRequest || query != _searchQuery) {
+        return;
+      }
+      setState(() {
+        _searchedEntries = entries;
+        _receipts = receipts;
+      });
+    } catch (failure) {
+      if (mounted && request == _searchRequest) {
+        setState(() => _error = failure);
+      }
+    }
+  }
+
+  Future<List<Receipt>> _receiptsForEntries(
+    List<LedgerEntry> entries,
+    List<Receipt> existing,
+  ) async {
+    final receipts = {for (final receipt in existing) receipt.id: receipt};
+    for (final entry in entries) {
+      final id = entry.confirmedReceiptId;
+      if (entry.pendingId == null && id != null && !receipts.containsKey(id)) {
+        receipts[id] = (await widget.dataAdapter.getReceipt(id)).receipt;
+      }
+    }
+    return receipts.values.toList();
   }
 
   Future<void> _refreshData() => _refreshing ??= _loadData(
@@ -98,26 +142,28 @@ class _DashboardScreenState extends State<DashboardScreen>
     });
     try {
       final profile = await widget.dataAdapter.getStoreProfile();
-      final receipts = await widget.dataAdapter.getRecentReceipts();
+      final entries = await widget.dataAdapter.getLedgerEntries();
+      final receipts = await _receiptsForEntries(
+        entries,
+        await widget.dataAdapter.getRecentReceipts(),
+      );
       final products = await widget.dataAdapter.getProducts();
       final costs = await widget.dataAdapter.getLatestProductCosts(
         products.map((p) => p.id),
       );
       if (!mounted || request != _request) return;
       if (!_loadedOnce) {
-        _tabController.index = receipts.isEmpty && products.isNotEmpty ? 1 : 0;
+        _tabController.index = entries.isEmpty && products.isNotEmpty ? 1 : 0;
         _loadedOnce = true;
       }
-      final suppliers = {
-        for (final receipt in receipts) receipt.supplierId: receipt.supplier,
-      };
       setState(() {
         _storeProfile = profile;
         _receipts = receipts;
+        _ledgerEntries = entries;
         _products = products;
         _costs = costs;
-        _suppliersMap = suppliers;
       });
+      if (_searchQuery.isNotEmpty) await _searchLedger();
     } catch (error) {
       if (mounted && request == _request) setState(() => _error = error);
     } finally {
@@ -141,14 +187,16 @@ class _DashboardScreenState extends State<DashboardScreen>
     );
   }
 
-  List<Receipt> get _filteredReceipts {
-    if (_searchQuery.isEmpty) return _receipts;
-    return _receipts.where((r) {
-      final supplier =
-          _suppliersMap[r.supplierId]?.displayName.toLowerCase() ?? '';
-      final receiptNum = r.receiptNumber.toLowerCase();
-      return supplier.contains(_searchQuery) ||
-          receiptNum.contains(_searchQuery);
+  List<LedgerEntry> get _visibleEntries {
+    if (_searchQuery.isEmpty) return _ledgerEntries;
+    if (_searchedEntries != null) return _searchedEntries!;
+    return _ledgerEntries.where((entry) {
+      final receipt = _receipts
+          .where((r) => r.id == entry.confirmedReceiptId)
+          .firstOrNull;
+      return entry.supplierDisplay.toLowerCase().contains(_searchQuery) ||
+          (receipt?.receiptNumber.toLowerCase().contains(_searchQuery) ??
+              false);
     }).toList();
   }
 
@@ -213,6 +261,21 @@ class _DashboardScreenState extends State<DashboardScreen>
                               ),
                             ),
                           const SizedBox(height: AppSpacing.m),
+                          if (_tabController.index == 0) ...[
+                            Wrap(
+                              spacing: 16,
+                              runSpacing: 4,
+                              children: [
+                                Text(
+                                  '${_ledgerEntries.where((entry) => entry.confirmedReceiptId != null).length} confirmed',
+                                ),
+                                Text(
+                                  '${_ledgerEntries.where((entry) => entry.status == LedgerEntryStatus.needsReview).length} needs review',
+                                ),
+                              ],
+                            ),
+                            const SizedBox(height: AppSpacing.s),
+                          ],
                           Row(
                             children: [
                               Expanded(
@@ -282,7 +345,11 @@ class _DashboardScreenState extends State<DashboardScreen>
                             ),
                             clipBehavior: Clip.antiAlias,
                             child: SizedBox(
-                              height: 40,
+                              height:
+                                  40 *
+                                  MediaQuery.textScalerOf(
+                                    context,
+                                  ).scale(1).clamp(1.0, 2.0),
                               child: Padding(
                                 padding: const EdgeInsets.all(3),
                                 child: TabBar(
@@ -325,7 +392,7 @@ class _DashboardScreenState extends State<DashboardScreen>
                                   tabs: [
                                     Tab(
                                       text:
-                                          'Receipts (${_filteredReceipts.length})',
+                                          'Receipts (${_visibleEntries.length})',
                                     ),
                                     Tab(
                                       text:
@@ -360,7 +427,7 @@ class _DashboardScreenState extends State<DashboardScreen>
   );
 
   Widget _buildReceiptsTab() {
-    if (_filteredReceipts.isEmpty) {
+    if (_visibleEntries.isEmpty) {
       return _scrollableEmpty(
         'dashboard-receipts-list',
         Center(
@@ -402,15 +469,38 @@ class _DashboardScreenState extends State<DashboardScreen>
         horizontal: AppSpacing.m,
         vertical: AppSpacing.s,
       ),
-      itemCount: _filteredReceipts.length,
+      itemCount: _visibleEntries.length,
       separatorBuilder: (context, index) =>
           const SizedBox(height: AppSpacing.s),
       itemBuilder: (context, index) {
-        final receipt = _filteredReceipts[index];
-        final supplier = _suppliersMap[receipt.supplierId];
+        final entry = _visibleEntries[index];
+        if (entry.pendingId != null) {
+          return PendingReceiptListItem(
+            entry: entry,
+            onTap: () async {
+              final callback = widget.onPendingReceiptSelected;
+              if (callback != null) {
+                callback(entry.pendingId!);
+                return;
+              }
+              await Navigator.of(context).push<void>(
+                MaterialPageRoute(
+                  builder: (_) => PendingReceiptScreen(
+                    adapter: widget.dataAdapter,
+                    pendingId: entry.pendingId!,
+                  ),
+                ),
+              );
+              if (mounted) await _loadData();
+            },
+          );
+        }
+        final receipt = _receipts
+            .where((r) => r.id == entry.confirmedReceiptId)
+            .first;
         return ReceiptListItem(
           receipt: receipt,
-          supplier: supplier,
+          supplier: receipt.supplier,
           onTap: () => widget.onReceiptSelected?.call(receipt),
         );
       },

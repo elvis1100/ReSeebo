@@ -125,7 +125,12 @@ class PricingService {
         dayPurchases.sort((a, b) {
           final byTime = ambiguous ? 0 : a.purchasedAt.compareTo(b.purchasedAt);
           if (byTime != 0) return byTime;
-          // SQLite sequence is stable even when the device clock is corrected.
+          // Initial receipt order is stable even when the clock is corrected
+          // or a correction adds lines with later SQLite sequences.
+          if (a.recordedOrder > 0 && b.recordedOrder > 0) {
+            final byReceipt = a.recordedOrder.compareTo(b.recordedOrder);
+            if (byReceipt != 0) return byReceipt;
+          }
           final bySequence = a.sequence.compareTo(b.sequence);
           return bySequence != 0
               ? bySequence

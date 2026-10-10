@@ -46,7 +46,220 @@ ReceiptDraft sample() => ReceiptParser().parse(
   ],
 );
 
+class HistoryAdapter extends CatalogAdapter {
+  final pending = Completer<ProductComparisonData>();
+  @override
+  Future<ProductComparisonData> getProductComparison(String productId) =>
+      pending.future;
+}
+
+ProductComparisonData historyData() => ProductComparisonData(
+  product: const Product(
+    id: 'oil',
+    name: 'Oil',
+    brand: 'UFC',
+    variant: 'Golden Fiesta Canola Oil',
+    size: '1L',
+  ),
+  profile: const StoreProfile(),
+  latestPrices: [],
+  lowestHistorical: null,
+  history: [
+    PriceHistoryRecord(
+      purchase: PurchaseRecord(
+        id: 'price',
+        receiptId: 'receipt',
+        productId: 'oil',
+        supplier: const Supplier(id: 'store', name: 'Store'),
+        purchasedAt: DateTime(2026, 10, 8),
+        hasPurchaseTime: false,
+        recordedAt: DateTime(2026, 10, 9),
+        originalDescription: 'Oil',
+        quantity: 1,
+        unit: PurchaseUnit.piece,
+        piecesPerPack: 1,
+        netAmountCents: 1200,
+        imagePath: 'photo',
+      ),
+    ),
+  ],
+);
+
 void main() {
+  test(
+    'explicitly confirmed history estimate survives unchanged reload',
+    () async {
+      final adapter = HistoryAdapter()..pending.complete(historyData());
+      final state = ReceiptReviewState(
+        adapter: adapter,
+        draft: ReceiptDraft(
+          lines: [
+            ParsedLineItem(
+              description: 'UFC Golden Fiesta Canola Oil 1L',
+              quantity: 2,
+            ),
+          ],
+        ),
+      );
+      await state.load();
+      final line = state.draft.lines.single;
+      state.confirmLine(line);
+      expect(line.confirmed, isTrue);
+      await state.load();
+      expect(line.confirmed, isTrue);
+      expect(
+        line.provenance[ReceiptSuggestionField.amount]!.origin,
+        ReceiptFieldOrigin.history,
+      );
+      state.dispose();
+    },
+  );
+  test('late alias response preserves explicit cleared product', () async {
+    final adapter = DelayedAliasAdapter();
+    final state = ReceiptReviewState(adapter: adapter, draft: sample());
+    final loading = state.load();
+    await Future<void>.delayed(Duration.zero);
+    final line = state.draft.lines.single;
+    state.setProduct(line, null);
+    adapter.pending.complete([
+      ProductMatchSuggestion(
+        product: (await adapter.getProducts()).single,
+        reason: 'Confirmed alias',
+        exactAlias: true,
+      ),
+    ]);
+    await loading;
+    expect(line.productId, isNull);
+    expect(
+      line.provenance[ReceiptSuggestionField.product]!.origin,
+      ReceiptFieldOrigin.ownerEdited,
+    );
+    state.dispose();
+  });
+  test(
+    'corrected description refreshes newly matched product history',
+    () async {
+      final adapter = HistoryAdapter()..pending.complete(historyData());
+      final state = ReceiptReviewState(
+        adapter: adapter,
+        draft: ReceiptDraft(
+          lines: [ParsedLineItem(description: 'Unknown oil', quantity: 2)],
+        ),
+      );
+      await state.load();
+      final line = state.draft.lines.single;
+      expect(line.grossAmountCents, isNull);
+      state.editText(
+        line,
+        ReceiptLineField.description,
+        'UFC Golden Fiesta Canola Oil 1L',
+      );
+      await Future<void>.delayed(Duration.zero);
+      expect(line.grossAmountCents, 2400);
+      state.dispose();
+    },
+  );
+  test(
+    'changing unresolved supplier name invalidates learned aliases',
+    () async {
+      final adapter = HistoryAdapter()..pending.complete(historyData());
+      final state = ReceiptReviewState(
+        adapter: adapter,
+        draft: ReceiptDraft(
+          lines: [
+            ParsedLineItem(description: 'UFC Golden Fiesta Canola Oil 1L'),
+          ],
+        ),
+      );
+      await state.load();
+      final line = state.draft.lines.single;
+      line.description = 'OIL';
+      line.matchOrigin = 'Previously matched';
+      line.confirmed = true;
+      state.draft.supplierName = 'Other unresolved store';
+      state.changed();
+      expect(line.productId, isNull);
+      expect(line.grossAmountCents, isNull);
+      expect(line.confirmed, isFalse);
+      await Future<void>.delayed(Duration.zero);
+      state.dispose();
+    },
+  );
+  test('owner_amount_survives_quantity_and_history_refresh', () async {
+    final adapter = HistoryAdapter()..pending.complete(historyData());
+    final state = ReceiptReviewState(
+      adapter: adapter,
+      draft: ReceiptDraft(
+        lines: [
+          ParsedLineItem(
+            description: 'UFC Golden Fiesta Canola Oil 1L',
+            quantity: 2,
+          ),
+        ],
+      ),
+    );
+    await state.load();
+    final line = state.draft.lines.single;
+    expect(line.grossAmountCents, 2400);
+    state.editText(line, ReceiptLineField.quantity, '3');
+    expect(line.grossAmountCents, 3600);
+    state.editText(line, ReceiptLineField.amount, '13.00');
+    state.editText(line, ReceiptLineField.quantity, '10');
+    await state.load();
+    expect(line.grossAmountCents, 1300);
+    expect(
+      line.provenance[ReceiptSuggestionField.amount]!.origin,
+      ReceiptFieldOrigin.ownerEdited,
+    );
+    state.editText(line, ReceiptLineField.amount, '');
+    await state.load();
+    expect(line.grossAmountCents, isNull);
+    state.dispose();
+  });
+  test(
+    'late history response preserves owner amount and cleared quantity',
+    () async {
+      final adapter = HistoryAdapter();
+      final state = ReceiptReviewState(
+        adapter: adapter,
+        draft: ReceiptDraft(
+          lines: [
+            ParsedLineItem(description: 'UFC Golden Fiesta Canola Oil 1L'),
+          ],
+        ),
+      );
+      final loading = state.load();
+      await Future<void>.delayed(Duration.zero);
+      final line = state.draft.lines.single;
+      state.editText(line, ReceiptLineField.amount, '13.00');
+      state.editText(line, ReceiptLineField.quantity, '');
+      adapter.pending.complete(historyData());
+      await loading;
+      expect(line.grossAmountCents, 1300);
+      expect(line.quantity, isNull);
+      expect(
+        line.provenance[ReceiptSuggestionField.amount]!.origin,
+        ReceiptFieldOrigin.ownerEdited,
+      );
+      expect(line.confirmed, isFalse);
+      state.dispose();
+    },
+  );
+  test('disposed review rejects late history suggestions', () async {
+    final adapter = HistoryAdapter();
+    final state = ReceiptReviewState(
+      adapter: adapter,
+      draft: ReceiptDraft(
+        lines: [ParsedLineItem(description: 'UFC Golden Fiesta Canola Oil 1L')],
+      ),
+    );
+    final loading = state.load();
+    await Future<void>.delayed(Duration.zero);
+    state.dispose();
+    adapter.pending.complete(historyData());
+    await loading;
+    expect(state.draft.lines.single.grossAmountCents, isNull);
+  });
   test(
     'changing supplier invalidates even confirmed supplier-learned matches',
     () async {
@@ -120,6 +333,10 @@ void main() {
       final line = state.draft.lines.single;
       expect(line.productId, 'oil');
       expect(line.matchOrigin, 'Matched from receipt');
+      expect(
+        line.provenance[ReceiptSuggestionField.product]?.origin,
+        ReceiptFieldOrigin.calculated,
+      );
       expect(line.confirmed, isFalse);
       state.editText(line, ReceiptLineField.description, 'UFC Oil 500ml');
       state.editText(line, ReceiptLineField.amount, '130');

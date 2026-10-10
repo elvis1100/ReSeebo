@@ -1,9 +1,237 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:reseebo_app/core/adapters/mock_reseebo_data_adapter.dart';
 import 'package:reseebo_app/core/models/models.dart';
+import 'package:reseebo_app/core/services/receipt_parser.dart';
+import 'package:reseebo_app/core/services/receipt_suggestion_service.dart';
 import 'package:reseebo_app/features/receipt_scan/state/receipt_review_state.dart';
 
 void main() {
+  test(
+    'invalid raw discounts stay unresolved through net review preparation',
+    () async {
+      for (final discount in [-1, 4200, maxAmountCents + 1]) {
+        final original = ReceiptParser().parse(
+          imagePath: 'photo',
+          textLines: const [
+            OcrTextLine(text: 'Store'),
+            OcrTextLine(text: '2 Coffee 26G @21'),
+          ],
+        );
+        original.lines.single.discountCents = discount;
+        final state = ReceiptReviewState(
+          adapter: MockReseeboDataAdapter(),
+          draft: original,
+        );
+        await state.load();
+        expect(
+          state.draft.lines.single.grossAmountCents,
+          isNull,
+          reason: 'discount $discount',
+        );
+        expect(
+          state.draft.lines.single.costPerPieceCents,
+          isNull,
+          reason: 'discount $discount',
+        );
+        state.dispose();
+      }
+    },
+  );
+  test(
+    'discounted explicit price stays net through load quantity changes and reopening',
+    () async {
+      final original = ReceiptParser().parse(
+        imagePath: 'photo',
+        textLines: const [
+          OcrTextLine(text: 'Store'),
+          OcrTextLine(text: '2 Coffee 26G @21'),
+        ],
+      );
+      original.lines.single.discountCents = 1000;
+      final proposed = ReceiptSuggestionService().suggest(
+        original,
+        products: const [],
+        confirmedHistory: const [],
+        importedAt: DateTime(2026, 10, 10),
+      );
+      expect(proposed.lines.single.grossAmountCents, 4200);
+      expect(proposed.lines.single.netAmountCents, 3200);
+      final state = ReceiptReviewState(
+        adapter: MockReseeboDataAdapter(),
+        draft: proposed,
+      );
+      final line = state.draft.lines.single;
+      expect(line.grossAmountCents, 3200);
+      expect(line.discountCents, 0);
+      expect(line.normalizedDiscountCents, 1000);
+      expect(state.draft.snapshot().lines.single.normalizedDiscountCents, 1000);
+      await state.load();
+      expect(line.netAmountCents, 3200);
+      expect(state.draft.detectedTotalCents, 3200);
+      expect(line.extractedUnitPriceCents, 2100);
+      expect(line.amountEdited, isFalse);
+      expect(
+        line.provenance[ReceiptSuggestionField.amount]!.origin,
+        ReceiptFieldOrigin.calculated,
+      );
+      expect(
+        line.provenance[ReceiptSuggestionField.amount]!.explanation,
+        contains('1000'),
+      );
+      state.confirmLine(line);
+      await state.load();
+      expect(line.confirmed, isTrue);
+      state.editText(line, ReceiptLineField.quantity, '3');
+      expect(line.netAmountCents, 5300);
+      expect(state.draft.detectedTotalCents, 5300);
+      expect(line.confirmed, isFalse);
+      final reopened = ReceiptReviewState(
+        adapter: MockReseeboDataAdapter(),
+        draft: state.draft.snapshot(),
+      );
+      await reopened.load();
+      final reopenedLine = reopened.draft.lines.single;
+      expect(reopenedLine.netAmountCents, 5300);
+      expect(reopenedLine.discountCents, 0);
+      expect(reopenedLine.normalizedDiscountCents, 1000);
+      reopened.editText(reopenedLine, ReceiptLineField.quantity, '4');
+      expect(reopenedLine.netAmountCents, 7400);
+      reopened.editText(reopenedLine, ReceiptLineField.amount, '13.00');
+      reopened.editText(reopenedLine, ReceiptLineField.quantity, '5');
+      expect(reopenedLine.netAmountCents, 1300);
+      reopened.editText(reopenedLine, ReceiptLineField.amount, '');
+      await reopened.load();
+      expect(reopenedLine.netAmountCents, isNull);
+      expect(reopenedLine.extractedUnitPriceCents, 2100);
+      expect(reopened.draft.rawText, original.rawText);
+      expect(original.lines.single.discountCents, 1000);
+      reopened.dispose();
+      state.dispose();
+    },
+  );
+  test(
+    'opening before explicit price calculation retains unapplied discount',
+    () async {
+      final original = ReceiptParser().parse(
+        imagePath: 'photo',
+        textLines: const [
+          OcrTextLine(text: 'Store'),
+          OcrTextLine(text: '2 Coffee 26G @21'),
+        ],
+      );
+      original.lines.single.discountCents = 1000;
+      final state = ReceiptReviewState(
+        adapter: MockReseeboDataAdapter(),
+        draft: original,
+      );
+      expect(state.draft.lines.single.grossAmountCents, isNull);
+      await state.load();
+      expect(state.draft.lines.single.netAmountCents, 3200);
+      await state.load();
+      expect(state.draft.lines.single.netAmountCents, 3200);
+      state.dispose();
+    },
+  );
+  test(
+    'review quantity edits recompute explicit receipt arithmetic and preserve owner clears',
+    () async {
+      final draft = ReceiptParser().parse(
+        imagePath: 'photo',
+        textLines: const [
+          OcrTextLine(text: 'Store'),
+          OcrTextLine(text: '2 Coffee 26G @21'),
+        ],
+      );
+      final state = ReceiptReviewState(
+        adapter: MockReseeboDataAdapter(),
+        draft: draft,
+      );
+      await state.load();
+      final line = state.draft.lines.single;
+      expect(line.grossAmountCents, 4200);
+      state.confirmLine(line);
+      await state.load();
+      expect(line.confirmed, isTrue);
+      state.editText(line, ReceiptLineField.quantity, '3');
+      expect(line.grossAmountCents, 6300);
+      expect(line.confirmed, isFalse);
+      state.editText(line, ReceiptLineField.amount, '13.00');
+      state.editText(line, ReceiptLineField.quantity, '4');
+      expect(line.grossAmountCents, 1300);
+      state.editText(line, ReceiptLineField.amount, '');
+      await state.load();
+      expect(line.grossAmountCents, isNull);
+      state.dispose();
+    },
+  );
+  test(
+    'structural edits refresh calculated totals and partial coverage',
+    () async {
+      final state = ReceiptReviewState(
+        adapter: MockReseeboDataAdapter(),
+        draft: ReceiptDraft(
+          lines: [
+            ParsedLineItem(
+              description: 'Unknown priced item',
+              quantity: 1,
+              unit: PurchaseUnit.piece,
+              grossAmountCents: 1200,
+            ),
+            ParsedLineItem(description: 'Unresolved item'),
+          ],
+        ),
+      );
+      await state.load();
+      expect(state.draft.detectedTotalCents, 1200);
+      expect(state.draft.totalIsPartial, isTrue);
+      state.removeLine(state.draft.lines.last);
+      expect(state.draft.detectedTotalCents, 1200);
+      expect(state.draft.totalIsPartial, isFalse);
+      state.addLine();
+      expect(state.draft.detectedTotalCents, 1200);
+      expect(state.draft.totalIsPartial, isTrue);
+      state.removeLine(state.draft.lines.first);
+      expect(state.draft.detectedTotalCents, isNull);
+      expect(state.draft.totalIsPartial, isTrue);
+      state.dispose();
+    },
+  );
+  test('structural edits preserve printed and owner-edited totals', () async {
+    for (final ownerEdited in [false, true]) {
+      final draft = ReceiptDraft(
+        detectedTotalCents: 9999,
+        lines: [
+          ParsedLineItem(description: 'Unknown item', grossAmountCents: 1200),
+        ],
+      );
+      if (ownerEdited) {
+        draft.provenance[ReceiptMetadataField.total] =
+            const ReceiptFieldProvenance(
+              origin: ReceiptFieldOrigin.ownerEdited,
+              explanation: 'Owner total.',
+            );
+      }
+      final state = ReceiptReviewState(
+        adapter: MockReseeboDataAdapter(),
+        draft: draft,
+      );
+      await state.load();
+      state.addLine();
+      state.removeLine(state.draft.lines.first);
+      expect(state.draft.detectedTotalCents, 9999);
+      expect(state.draft.totalIsPartial, isFalse);
+      state.dispose();
+    }
+  });
+  test('weight stays unresolved on opening review', () {
+    final state = ReceiptReviewState(
+      adapter: MockReseeboDataAdapter(),
+      draft: ReceiptDraft(lines: [ParsedLineItem(description: 'Rice 0.50 KG')]),
+    );
+    expect(state.draft.lines.single.unit, isNull);
+    expect(state.draft.lines.single.quantity, isNull);
+    state.dispose();
+  });
   test(
     'unique saved supplier and alias prefill without confirming purchases',
     () async {

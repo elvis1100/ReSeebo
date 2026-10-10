@@ -6,6 +6,7 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:image/image.dart' as img;
 import 'package:reseebo_app/features/receipt_scan/widgets/receipt_photo_comparison.dart';
+import 'package:reseebo_app/core/theme/app_colors.dart';
 
 void main() {
   testWidgets(
@@ -85,7 +86,10 @@ void main() {
       expect(before.getPixel(300, 190).b, greaterThan(200));
       // Different aspect ratios must not leak the enhanced image through the
       // preserved original's letterbox margin on the left of the divider.
-      expect(before.getPixel(100, 40).r, 15);
+      expect(
+        before.getPixel(100, 40).r,
+        (AppColors.textPrimary.toARGB32() >> 16) & 0xff,
+      );
       expect(before.getPixel(300, 40).b, greaterThan(200));
       final views = tester
           .widgetList<InteractiveViewer>(find.byType(InteractiveViewer))

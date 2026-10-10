@@ -13,6 +13,8 @@ import '../widgets/overlap_review_card.dart';
 import '../widgets/product_match_picker.dart';
 import '../widgets/receipt_photo_review_panel.dart';
 import '../widgets/receipt_metadata_editor.dart';
+import '../widgets/receipt_suggestion_label.dart';
+import '../widgets/ocr_result_summary.dart';
 
 class ReviewMatchScreen extends StatefulWidget {
   const ReviewMatchScreen({
@@ -20,11 +22,43 @@ class ReviewMatchScreen extends StatefulWidget {
     required this.dataAdapter,
     required this.initialDraft,
     this.onSaved,
+    this.onPendingSaved,
+    this.onDraftChanged,
+    this.pendingId,
+    this.expectedRevision,
+    this.correctionOfReceiptId,
+    this.expectedConfirmedRevision,
+    this.onConfirmPending,
+    this.onOpenPendingReceipt,
+    this.preserveSuggestions,
+    this.onPendingSaveError,
+    this.importedAt,
     this.onBack,
   });
   final IReseeboDataAdapter dataAdapter;
   final ReceiptDraft initialDraft;
   final ValueChanged<SaveReceiptResult>? onSaved;
+  final ValueChanged<PendingSaveResult>? onPendingSaved;
+
+  /// Called once on returning to Photos, with a private editable snapshot.
+  final ValueChanged<ReceiptDraft>? onDraftChanged;
+  final String? pendingId;
+  final int? expectedRevision;
+  final String? correctionOfReceiptId;
+  final int? expectedConfirmedRevision;
+
+  /// Pending/correction confirmation must persist the current owner snapshot,
+  /// then confirm that saved revision with its own frozen confirmation command.
+  /// The screen holds competing edits/actions disabled until this hook finishes.
+  final Future<SaveReceiptResult> Function(ReceiptReviewState)?
+  onConfirmPending;
+  final ValueChanged<String>? onOpenPendingReceipt;
+  final bool? preserveSuggestions;
+
+  /// Return true after handling a pending-save error to suppress the default
+  /// notice. The screen remains busy while conflict resolution is open.
+  final Future<bool> Function(Object, ReceiptReviewState)? onPendingSaveError;
+  final DateTime? importedAt;
   final VoidCallback? onBack;
   @override
   State<ReviewMatchScreen> createState() => _ReviewMatchScreenState();
@@ -35,12 +69,27 @@ class _ReviewMatchScreenState extends State<ReviewMatchScreen> {
   final ScrollController _scroll = ScrollController();
   bool _photosExpanded = false;
   bool _confirming = false;
+  bool _returnedSnapshot = false;
+  bool _savedComplete = false;
+  bool _savingConfirmed = false;
+  bool _savingPending = false;
+  bool get _isSaving => _review.saving || _savingConfirmed || _savingPending;
+
+  bool get _requiresPendingConfirmation =>
+      widget.pendingId != null || widget.correctionOfReceiptId != null;
+
+  void _returnSnapshot() {
+    if (_returnedSnapshot || _savedComplete) return;
+    _returnedSnapshot = true;
+    widget.onDraftChanged?.call(_review.draft.snapshot());
+  }
 
   void _back() {
-    if (_review.saving) return;
+    if (_isSaving) return;
     if (_confirming) {
       setState(() => _confirming = false);
     } else {
+      _returnSnapshot();
       (widget.onBack ?? () => Navigator.maybePop(context))();
     }
   }
@@ -61,6 +110,12 @@ class _ReviewMatchScreenState extends State<ReviewMatchScreen> {
     _review = ReceiptReviewState(
       adapter: widget.dataAdapter,
       draft: widget.initialDraft,
+      pendingId: widget.pendingId,
+      expectedRevision: widget.expectedRevision,
+      correctionOfReceiptId: widget.correctionOfReceiptId,
+      expectedConfirmedRevision: widget.expectedConfirmedRevision,
+      preserveSuggestions: widget.preserveSuggestions,
+      importedAt: widget.importedAt,
     )..addListener(_refresh);
     _review.load();
   }
@@ -97,9 +152,7 @@ class _ReviewMatchScreenState extends State<ReviewMatchScreen> {
     if (product == null || !mounted) return;
     await _review.load();
     if (!mounted) return;
-    line.productId = product.id;
-    line.matchOrigin = null;
-    _review.changed(line: line);
+    _review.setProduct(line, product);
   }
 
   Future<void> _editSupplier(Supplier? supplier) async {
@@ -116,16 +169,24 @@ class _ReviewMatchScreenState extends State<ReviewMatchScreen> {
   }
 
   Future<void> _save() async {
-    if (_review.saving) return;
+    if (_isSaving) return;
+    if (_requiresPendingConfirmation && widget.onConfirmPending == null) {
+      _message('Save Needs review, then confirm from the saved receipt.');
+      return;
+    }
+    setState(() => _savingConfirmed = true);
     FocusScope.of(context).unfocus();
     try {
-      final result = await _review.save();
+      final result = _requiresPendingConfirmation
+          ? await widget.onConfirmPending!(_review)
+          : await _review.save();
       if (!mounted) return;
       _message(
         result.alreadySaved
             ? 'Receipt already saved.'
             : 'Receipt saved to your ledger.',
       );
+      _savedComplete = true;
       widget.onSaved?.call(result);
     } on DuplicateReceiptException catch (duplicate) {
       if (!mounted) return;
@@ -134,14 +195,58 @@ class _ReviewMatchScreenState extends State<ReviewMatchScreen> {
         builder: (_) => DuplicateReviewDialog(
           adapter: widget.dataAdapter,
           receiptIds: duplicate.receiptIds,
+          onOpenPendingReceipt: widget.onOpenPendingReceipt,
         ),
       );
       if (separate == true && mounted) {
-        _review.draft.allowDuplicate = true;
+        _review.allowPendingDuplicate();
+        setState(() => _savingConfirmed = false);
         await _save();
       }
     } catch (error) {
       if (mounted) _message(userMessage(error));
+    } finally {
+      if (mounted) setState(() => _savingConfirmed = false);
+    }
+  }
+
+  Future<void> _savePending() async {
+    if (_isSaving || _review.loading) return;
+    setState(() => _savingPending = true);
+    FocusScope.of(context).unfocus();
+    try {
+      final result = await _review.savePending();
+      if (mounted) _message('Receipt saved · Needs review');
+      if (mounted) {
+        _savedComplete = true;
+        widget.onPendingSaved?.call(result);
+      }
+    } on DuplicateReceiptException catch (duplicate) {
+      if (!mounted) return;
+      final separate = await showDialog<bool>(
+        context: context,
+        builder: (_) => DuplicateReviewDialog(
+          adapter: widget.dataAdapter,
+          receiptIds: duplicate.receiptIds,
+          onOpenPendingReceipt: widget.onOpenPendingReceipt,
+        ),
+      );
+      if (separate == true && mounted) {
+        _review.allowPendingDuplicate();
+        setState(() => _savingPending = false);
+        await _savePending();
+      }
+    } catch (failure) {
+      if (!mounted) return;
+      try {
+        final handled =
+            await widget.onPendingSaveError?.call(failure, _review) ?? false;
+        if (mounted && !handled) _message(userMessage(failure));
+      } catch (hookFailure) {
+        if (mounted) _message(userMessage(hookFailure));
+      }
+    } finally {
+      if (mounted) setState(() => _savingPending = false);
     }
   }
 
@@ -161,7 +266,7 @@ class _ReviewMatchScreenState extends State<ReviewMatchScreen> {
             OverlapReviewCard(
               line: line,
               earlier: earlier,
-              enabled: !_review.saving,
+              enabled: !_isSaving,
               onKeepBoth: () {
                 line.possibleDuplicateOf = null;
                 _review.changed(line: line);
@@ -174,7 +279,7 @@ class _ReviewMatchScreenState extends State<ReviewMatchScreen> {
             index: index,
             matchedProduct: _review.productFor(line.productId),
             problem: problem,
-            enabled: !_review.saving,
+            enabled: !_isSaving,
             onSelectProduct: () => _match(line),
             onQuantityChanged: (quantity) => _review.editText(
               line,
@@ -212,6 +317,34 @@ class _ReviewMatchScreenState extends State<ReviewMatchScreen> {
               }
             },
           ),
+          ReceiptSuggestionLabel(
+            provenance: line.provenance[ReceiptSuggestionField.product],
+            fieldLabel: 'Product',
+          ),
+          ReceiptSuggestionLabel(
+            provenance: line.provenance[ReceiptSuggestionField.quantity],
+            fieldLabel: 'Quantity',
+          ),
+          ReceiptSuggestionLabel(
+            provenance: line.provenance[ReceiptSuggestionField.unit],
+            fieldLabel: 'Unit',
+          ),
+          ReceiptSuggestionLabel(
+            provenance: line.provenance[ReceiptSuggestionField.piecesPerPack],
+            fieldLabel: 'Pack contents',
+          ),
+          ReceiptSuggestionLabel(
+            provenance: line.provenance[ReceiptSuggestionField.amount],
+            fieldLabel: 'Amount',
+            detail:
+                line.extractedUnitPriceCents != null && line.quantity != null
+                ? '${pesos(line.extractedUnitPriceCents!)} × ${line.quantity}'
+                : null,
+          ),
+          if (!line.confirmed && line.costPerPieceCents != null)
+            Text(
+              'Provisional cost per piece: ${pesos(line.costPerPieceCents!)}',
+            ),
         ],
       ),
     );
@@ -226,15 +359,18 @@ class _ReviewMatchScreenState extends State<ReviewMatchScreen> {
       ),
       if (_review.draft.detectedTotalCents != null)
         Text(
-          'Printed receipt total: ${pesos(_review.draft.detectedTotalCents!)}',
+          '${receiptTotalLabel(_review.draft)}: ${pesos(_review.draft.detectedTotalCents!)}',
         ),
+      ReceiptSuggestionLabel(
+        provenance: _review.draft.provenance[ReceiptMetadataField.total],
+      ),
       if (_review.hasTotalDifference)
         CheckboxListTile(
           contentPadding: EdgeInsets.zero,
           controlAffinity: ListTileControlAffinity.leading,
           title: const Text('I checked the difference from the receipt total'),
           value: _review.draft.totalDifferenceConfirmed,
-          onChanged: _review.saving
+          onChanged: _isSaving
               ? null
               : (value) {
                   _review.draft.totalDifferenceConfirmed = value ?? false;
@@ -248,16 +384,20 @@ class _ReviewMatchScreenState extends State<ReviewMatchScreen> {
   Widget build(BuildContext context) {
     final draft = _review.draft;
     return PopScope(
-      canPop: !_confirming && !_review.saving,
+      canPop: !_confirming && !_isSaving,
       onPopInvokedWithResult: (didPop, result) {
-        if (!didPop && !_review.saving) _back();
+        if (didPop) {
+          _returnSnapshot();
+        } else if (!_isSaving) {
+          _back();
+        }
       },
       child: Scaffold(
         appBar: AppBar(
           title: Text(_confirming ? 'Confirm receipt' : 'Review receipt'),
           leading: IconButton(
-            icon: const Icon(Icons.arrow_back),
-            onPressed: _review.saving ? null : _back,
+            icon: const Icon(Icons.arrow_back_rounded),
+            onPressed: _isSaving ? null : _back,
           ),
         ),
         body: _review.loading
@@ -355,10 +495,19 @@ class _ReviewMatchScreenState extends State<ReviewMatchScreen> {
                       onDateCandidate: (candidate, remember) => _review
                           .chooseDateCandidate(candidate, remember: remember),
                       suppliers: _review.suppliers,
-                      enabled: !_review.saving,
+                      enabled: !_isSaving,
                       onChanged: () => _review.changed(),
                       onEditSupplier: _editSupplier,
                     ),
+                  ),
+                  ReceiptSuggestionLabel(
+                    provenance: draft.provenance[ReceiptMetadataField.supplier],
+                    fieldLabel: 'Supplier',
+                  ),
+                  ReceiptSuggestionLabel(
+                    provenance:
+                        draft.provenance[ReceiptMetadataField.purchasedAt],
+                    fieldLabel: 'Purchase date',
                   ),
                   const SizedBox(height: 20),
                   Row(
@@ -370,7 +519,7 @@ class _ReviewMatchScreenState extends State<ReviewMatchScreen> {
                         ),
                       ),
                       TextButton.icon(
-                        onPressed: _review.saving ? null : _review.addLine,
+                        onPressed: _isSaving ? null : _review.addLine,
                         icon: const Icon(Icons.add),
                         label: const Text('Add item'),
                       ),
@@ -438,7 +587,12 @@ class _ReviewMatchScreenState extends State<ReviewMatchScreen> {
                   ),
                 FilledButton.icon(
                   onPressed:
-                      _review.saving || _review.loading || _review.error != null
+                      _isSaving ||
+                          _review.loading ||
+                          _review.error != null ||
+                          (_confirming &&
+                              _requiresPendingConfirmation &&
+                              widget.onConfirmPending == null)
                       ? null
                       : _confirming
                       ? _save
@@ -447,13 +601,33 @@ class _ReviewMatchScreenState extends State<ReviewMatchScreen> {
                     _confirming ? Icons.save_alt : Icons.arrow_forward,
                   ),
                   label: Text(
-                    _review.saving
+                    _isSaving
                         ? 'Saving...'
                         : _confirming
                         ? 'Save receipt'
                         : 'Continue to save',
                   ),
                 ),
+                if (_confirming &&
+                    _requiresPendingConfirmation &&
+                    widget.onConfirmPending == null)
+                  const Padding(
+                    padding: EdgeInsets.only(top: 8),
+                    child: Text(
+                      'Save Needs review, then confirm from the saved receipt.',
+                    ),
+                  ),
+                if (!_confirming) ...[
+                  const SizedBox(height: 8),
+                  OutlinedButton.icon(
+                    onPressed:
+                        _isSaving || _review.loading || _review.error != null
+                        ? null
+                        : _savePending,
+                    icon: const Icon(Icons.save_alt_rounded),
+                    label: const Text('Save Needs review'),
+                  ),
+                ],
               ],
             ),
           ),

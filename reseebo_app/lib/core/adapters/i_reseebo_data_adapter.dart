@@ -1,16 +1,30 @@
 import '../models/models.dart';
+import '../models/ocr_engine.dart';
+import '../models/pending_receipt.dart';
+import '../models/confirmed_receipt.dart';
 import '../errors/app_exception.dart';
 import '../models/latest_product_cost.dart';
 import '../services/latest_product_cost_service.dart';
 import '../services/pricing_service.dart';
+import '../services/ocr_engine_registry.dart';
 
 export '../models/models.dart';
+export '../models/ocr_engine.dart';
+export '../models/pending_receipt.dart';
+export '../models/confirmed_receipt.dart';
 export '../errors/app_exception.dart';
 export '../models/latest_product_cost.dart';
 
 /// Every operation is local. Save methods validate at the storage boundary.
 /// Image paths may be picker cache paths on input and become persistent on save.
 abstract class IReseeboDataAdapter {
+  Future<List<OcrEngineDescriptor>> getOcrEngines() async => const [
+    OcrEngineRegistry.mlKitDescriptor,
+  ];
+
+  /// Frees capture inference resources without closing the shared database.
+  Future<void> releaseOcrSession() async {}
+
   Future<StoreProfile> getStoreProfile();
   Future<void> updateStoreProfile(StoreProfile profile);
   Future<List<Product>> getProducts({String? query});
@@ -37,10 +51,39 @@ abstract class IReseeboDataAdapter {
   Future<void> deleteAlias(String aliasId);
   Future<List<Receipt>> getRecentReceipts({int limit = 200, String? query});
   Future<ReceiptDetail> getReceipt(String receiptId);
+
+  /// Stores nullable evidence without creating confirmed catalog/history rows.
+  /// Insert omits expectedRevision; edits require it. Freeze the payload and
+  /// command operation ID across retries; changed details need a fresh ID.
+  Future<PendingSaveResult> savePendingReceipt(
+    ReceiptDraft draft, {
+    required String operationId,
+    String? pendingId,
+    int? expectedRevision,
+    String? correctionOfReceiptId,
+    int? expectedConfirmedRevision,
+  });
+  Future<PendingReceipt> getPendingReceipt(String id);
+
+  /// Confirms the exact pending revision. A frozen command ID returns its
+  /// original result after retries, deletion or later corrections; changed
+  /// commands and stale pending/confirmed revisions throw typed exceptions.
+  Future<SaveReceiptResult> confirmPendingReceipt(
+    String id, {
+    required int expectedRevision,
+    required String operationId,
+  });
+  Future<ConfirmedReceiptEdit> getConfirmedReceiptEdit(String receiptId);
+  Future<List<ReceiptRevision>> getReceiptRevisions(String receiptId);
+
+  /// Resolves a retained import route after confirmation removed its pending row.
+  Future<String?> resolveConfirmedReceiptId(String pendingId);
+  Future<List<LedgerEntry>> getLedgerEntries({int limit = 200, String? query});
   Future<ReceiptDraft> processReceiptImage(
     String localImagePath, {
     String? recognitionImagePath,
     String? comparisonImagePath,
+    OcrEngineId engineId = OcrEngineId.mlKit,
   });
 
   /// Recognize ordered pages of one receipt, retaining every original. Adjusted
@@ -50,6 +93,8 @@ abstract class IReseeboDataAdapter {
     List<String> localImagePaths, {
     List<String>? recognitionImagePaths,
     List<String>? comparisonImagePaths,
+    OcrEngineId engineId = OcrEngineId.mlKit,
+    String preprocessingRevision = '1',
   }) {
     if (localImagePaths.length != 1) {
       throw const ValidationException(
@@ -60,6 +105,7 @@ abstract class IReseeboDataAdapter {
       localImagePaths.single,
       recognitionImagePath: recognitionImagePaths?.single,
       comparisonImagePath: comparisonImagePaths?.single,
+      engineId: engineId,
     );
   }
 

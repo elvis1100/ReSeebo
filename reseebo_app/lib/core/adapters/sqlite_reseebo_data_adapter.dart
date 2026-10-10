@@ -6,26 +6,40 @@ import 'package:crypto/crypto.dart';
 import 'package:path/path.dart' as p;
 import 'package:path_provider/path_provider.dart';
 import 'package:sqflite/sqflite.dart' as sqlite;
-import 'package:uuid/uuid.dart';
 
 import '../database/reseebo_database.dart';
+import '../database/pending_receipt_repository.dart';
+import '../database/confirmed_receipt_writer.dart';
 import '../database/row_mappers.dart';
 import '../services/local_file_store.dart';
 import '../services/ocr_service.dart';
+import '../services/ocr_engine_registry.dart';
 import '../services/pricing_service.dart';
 import '../services/receipt_parser.dart';
 import '../services/receipt_ocr_comparison.dart';
 import '../services/receipt_validator.dart';
+import '../services/receipt_snapshot_codec.dart';
 import '../services/starter_catalog_service.dart';
 import 'i_reseebo_data_adapter.dart';
 
 class SqliteReseeboDataAdapter implements IReseeboDataAdapter {
+  @override
+  Future<List<OcrEngineDescriptor>> getOcrEngines() async => _ocr.descriptors;
+  @override
+  Future<void> releaseOcrSession() => _ocr.releaseLoadedEngine();
+
   SqliteReseeboDataAdapter._(this._db, this._files, this._ocr, this._clock);
   final sqlite.Database _db;
   final LocalFileStore _files;
-  final OcrService _ocr;
+  final OcrEngineRegistry _ocr;
   final DateTime Function() _clock;
   final ReceiptParser _parser = ReceiptParser();
+  final ReceiptSnapshotCodec _codec = ReceiptSnapshotCodec();
+  late final PendingReceiptRepository _pending = PendingReceiptRepository(
+    _db,
+    _files,
+    clock: _clock,
+  );
   Future<void> _pendingWrites = Future.value();
   bool _closed = false;
 
@@ -36,9 +50,13 @@ class SqliteReseeboDataAdapter implements IReseeboDataAdapter {
     String? databasePath,
     Directory? mediaDirectory,
     OcrService? ocrService,
+    OcrEngineRegistry? ocrRegistry,
     DateTime Function()? clock,
     List<Product>? starterProducts,
   }) async {
+    if (ocrService != null && ocrRegistry != null) {
+      throw ArgumentError('Supply an OCR service or registry, not both.');
+    }
     final String dbPath;
     if (databasePath == null) {
       final support = await getApplicationSupportDirectory();
@@ -70,7 +88,10 @@ class SqliteReseeboDataAdapter implements IReseeboDataAdapter {
     return SqliteReseeboDataAdapter._(
       db,
       LocalFileStore(mediaDirectory),
-      ocrService ?? MlKitOcrService(),
+      ocrRegistry ??
+          (ocrService == null
+              ? await OcrEngineRegistry.loadBundled()
+              : OcrEngineRegistry(mlKitService: ocrService)),
       clock ?? DateTime.now,
     );
   }
@@ -276,11 +297,9 @@ class SqliteReseeboDataAdapter implements IReseeboDataAdapter {
       };
       await _db.transaction((txn) async {
         if (product.category.trim().isNotEmpty) {
-          await txn.insert(
-            'product_categories',
-            {'name': product.category.trim()},
-            conflictAlgorithm: sqlite.ConflictAlgorithm.ignore,
-          );
+          await txn.insert('product_categories', {
+            'name': product.category.trim(),
+          }, conflictAlgorithm: sqlite.ConflictAlgorithm.ignore);
         }
         if (old == null) {
           await txn.insert('products', {
@@ -475,6 +494,432 @@ class SqliteReseeboDataAdapter implements IReseeboDataAdapter {
   }
 
   @override
+  Future<PendingSaveResult> savePendingReceipt(
+    ReceiptDraft draft, {
+    required String operationId,
+    String? pendingId,
+    int? expectedRevision,
+    String? correctionOfReceiptId,
+    int? expectedConfirmedRevision,
+  }) {
+    final snapshot = draft.snapshot();
+    return _write(
+      () => _pending.savePendingReceipt(
+        snapshot,
+        operationId: operationId,
+        pendingId: pendingId,
+        expectedRevision: expectedRevision,
+        correctionOfReceiptId: correctionOfReceiptId,
+        expectedConfirmedRevision: expectedConfirmedRevision,
+      ),
+    );
+  }
+
+  @override
+  Future<PendingReceipt> getPendingReceipt(String id) =>
+      _pending.getPendingReceipt(id);
+
+  @override
+  Future<String?> resolveConfirmedReceiptId(String pendingId) =>
+      _pending.resolveConfirmedReceiptId(pendingId);
+
+  @override
+  Future<ConfirmedReceiptEdit> getConfirmedReceiptEdit(String receiptId) =>
+      _confirmedEdit(_db, receiptId);
+
+  Future<ConfirmedReceiptEdit> _confirmedEdit(
+    sqlite.DatabaseExecutor executor,
+    String receiptId,
+  ) async {
+    final rows = await executor.rawQuery('$receiptSelect WHERE r.id = ?', [
+      receiptId,
+    ]);
+    if (rows.isEmpty) {
+      throw const ValidationException('This receipt was not found.');
+    }
+    final evidence = await executor.query(
+      'receipt_evidence',
+      where: 'receipt_id = ?',
+      whereArgs: [receiptId],
+    );
+    if (evidence.isNotEmpty) {
+      if (evidence.single['snapshot_version'] != ReceiptSnapshotCodec.version) {
+        throw const ReceiptSnapshotException(
+          'This receipt snapshot version is not supported.',
+        );
+      }
+      return ConfirmedReceiptEdit(
+        receiptId: receiptId,
+        revision: evidence.single['revision'] as int,
+        draft: _codec.decode(evidence.single['snapshot_payload'] as String),
+      );
+    }
+    final row = rows.single;
+    final photos = await executor.query(
+      'receipt_images',
+      where: 'receipt_id = ?',
+      whereArgs: [receiptId],
+      orderBy: 'page_index',
+    );
+    final lines = await executor.query(
+      'purchase_lines',
+      where: 'receipt_id = ?',
+      whereArgs: [receiptId],
+      orderBy: 'sequence',
+    );
+    // Legacy purchase rows retain owner-confirmed values, but cannot establish
+    // extraction provenance or recognition coordinate spaces retroactively.
+    // Review edits the payable amount. Fold the old active discount once and
+    // retain its original value separately so reopening cannot subtract it again.
+    final draft = ReceiptDraft(
+      operationId: row['operation_id'] as String,
+      imagePath: row['image_path'] as String,
+      imagePaths: photos.map((p) => p['image_path'] as String).toList(),
+      supplierId: row['supplier_id'] as String,
+      supplierName: row['supplier_name'] as String,
+      supplierBranch: row['supplier_branch'] as String,
+      supplierNotes: row['supplier_notes'] as String,
+      purchasedAt: DateTime.parse(row['purchased_at'] as String),
+      hasPurchaseTime: row['has_purchase_time'] == 1,
+      dateConfirmed: true,
+      receiptNumber: row['receipt_number'] as String,
+      notes: row['notes'] as String,
+      rawText: row['raw_text'] as String,
+      lines: lines
+          .map(
+            (l) => ParsedLineItem(
+              id: l['id'] as String,
+              productId: l['product_id'] as String,
+              description: l['original_description'] as String,
+              quantity: l['quantity'] as int,
+              unit: PurchaseUnit.values.byName(l['unit'] as String),
+              piecesPerPack: l['pieces_per_pack'] as int,
+              grossAmountCents: l['net_amount_cents'] as int,
+              normalizedDiscountCents: l['discount_cents'] as int,
+              sourcePage: l['source_page'] as int,
+              confirmed: true,
+            ),
+          )
+          .toList(),
+    );
+    return ConfirmedReceiptEdit(
+      receiptId: receiptId,
+      revision: 1,
+      draft: draft,
+    );
+  }
+
+  @override
+  Future<List<ReceiptRevision>> getReceiptRevisions(String receiptId) async {
+    await _pending.confirmedRevision(_db, receiptId);
+    final rows = await _db.query(
+      'receipt_revisions',
+      where: 'receipt_id = ?',
+      whereArgs: [receiptId],
+      orderBy: 'revision DESC',
+    );
+    return rows.map((r) {
+      if (r['snapshot_version'] != ReceiptSnapshotCodec.version) {
+        throw const ReceiptSnapshotException(
+          'This receipt snapshot version is not supported.',
+        );
+      }
+      return ReceiptRevision(
+        revision: r['revision'] as int,
+        recordedAt: DateTime.fromMillisecondsSinceEpoch(
+          r['recorded_at'] as int,
+          isUtc: true,
+        ),
+        draft: _codec.decode(r['snapshot_payload'] as String),
+      );
+    }).toList();
+  }
+
+  static Map<String, Object?> _resultPayload(SaveReceiptResult result) => {
+    'receiptId': result.receiptId,
+    'lineIds': result.lineIds,
+    'unitCostsCents': result.unitCostsCents,
+  };
+
+  static SaveReceiptResult _operationResult(Map<String, Object?> row) {
+    final result =
+        jsonDecode(row['result_payload'] as String) as Map<String, dynamic>;
+    return SaveReceiptResult(
+      receiptId: result['receiptId'] as String,
+      lineIds: List<String>.from(result['lineIds'] as List),
+      unitCostsCents: (result['unitCostsCents'] as List)
+          .map((n) => (n as num).toDouble())
+          .toList(),
+      alreadySaved: true,
+    );
+  }
+
+  Future<void> _recordOperation(
+    sqlite.DatabaseExecutor executor, {
+    required String operationId,
+    required String kind,
+    required String digest,
+    required String targetId,
+    required int revision,
+    required SaveReceiptResult result,
+    List<Map<String, Object?>> media = const [],
+  }) => executor
+      .insert('receipt_write_operations', {
+        'operation_id': operationId,
+        'kind': kind,
+        'canonical_digest': digest,
+        'target_id': targetId,
+        'result_revision': revision,
+        'result_payload': jsonEncode(_resultPayload(result)),
+        'request_media_payload': jsonEncode(media),
+        'created_at': _now,
+      })
+      .then((_) {});
+
+  @override
+  Future<SaveReceiptResult> confirmPendingReceipt(
+    String id, {
+    required int expectedRevision,
+    required String operationId,
+  }) {
+    if (id.trim().isEmpty ||
+        operationId.trim().isEmpty ||
+        expectedRevision < 1) {
+      return Future.error(
+        const ValidationException(
+          'Choose a pending receipt revision and confirmation operation ID.',
+        ),
+      );
+    }
+    final digest = sha256
+        .convert(
+          utf8.encode(
+            jsonEncode({'pendingId': id, 'expectedRevision': expectedRevision}),
+          ),
+        )
+        .toString();
+    return _write(
+      () => _db.transaction((txn) async {
+        final prior = await txn.query(
+          'receipt_write_operations',
+          where: 'operation_id = ?',
+          whereArgs: [operationId],
+        );
+        if (prior.isNotEmpty) {
+          final row = prior.single;
+          if ((row['kind'] != 'pending_confirm' &&
+                  row['kind'] != 'confirmed_correction') ||
+              row['canonical_digest'] != digest) {
+            throw const ValidationException(
+              'This operation ID was used for a different action or receipt revision. Use a new operation ID.',
+            );
+          }
+          return _operationResult(row);
+        }
+        if ((await txn.query(
+          'receipts',
+          columns: ['id'],
+          where: 'operation_id = ?',
+          whereArgs: [operationId],
+        )).isNotEmpty) {
+          throw const ValidationException(
+            'This operation ID was used for a different confirmed save. Use a new operation ID.',
+          );
+        }
+        // Another confirmation command may already have consumed this import.
+        // The original result survives deletion and subsequent receipt revisions.
+        final consumed = await txn.query(
+          'receipt_write_operations',
+          where:
+              "target_id = ? AND kind IN ('pending_confirm', 'confirmed_correction')",
+          whereArgs: [id],
+          orderBy: 'created_at, operation_id',
+          limit: 1,
+        );
+        if (consumed.isNotEmpty) {
+          final row = consumed.single;
+          if (row['canonical_digest'] != digest) {
+            throw const RevisionConflictException();
+          }
+          final result = _operationResult(row);
+          await _recordOperation(
+            txn,
+            operationId: operationId,
+            kind: row['kind'] as String,
+            digest: digest,
+            targetId: id,
+            revision: row['result_revision'] as int,
+            result: result,
+          );
+          return result;
+        }
+        final pending = await _pending.getPendingReceipt(id, executor: txn);
+        if (pending.revision != expectedRevision) {
+          throw const RevisionConflictException();
+        }
+        final source = pending.correctionOfReceiptId;
+        ConfirmedReceiptEdit? old;
+        if (source != null) {
+          old = await _confirmedEdit(txn, source);
+          if (old.revision != pending.baseConfirmedRevision) {
+            throw const RevisionConflictException();
+          }
+          final initial = (await txn.query(
+            'receipts',
+            where: 'id = ?',
+            whereArgs: [source],
+          )).single;
+          // Receipts saved before operation-result storage still need their first
+          // result frozen before a correction changes the active purchase rows.
+          if ((await txn.query(
+            'receipt_write_operations',
+            columns: ['operation_id'],
+            where: 'operation_id = ?',
+            whereArgs: [initial['operation_id']],
+          )).isEmpty) {
+            final original = await _savedResult(
+              txn,
+              source,
+              alreadySaved: false,
+            );
+            final images = await txn.query(
+              'receipt_images',
+              where: 'receipt_id = ?',
+              whereArgs: [source],
+              orderBy: 'page_index',
+            );
+            await _recordOperation(
+              txn,
+              operationId: initial['operation_id'] as String,
+              kind: 'confirmed_save',
+              digest: initial['content_digest'] as String,
+              targetId: source,
+              revision: 1,
+              result: original,
+              media: images
+                  .map(
+                    (p) => <String, Object?>{
+                      'path': p['image_path'],
+                      'hash': p['image_hash'],
+                    },
+                  )
+                  .toList(),
+            );
+          }
+        }
+        final draft = await _pending.verifyOwnedMedia(pending.draft);
+        ReceiptValidator.validate(draft);
+        final images = draft.mediaEvidence
+            .map(
+              (p) => StoredLocalFile(
+                path: p.original.path,
+                hash: p.original.sha256,
+                created: false,
+              ),
+            )
+            .toList();
+        final result = await ConfirmedReceiptWriter(
+          images: images,
+          operationId: operationId,
+          digest: digest,
+          clock: _clock,
+          pendingId: id,
+          recordedAt: source == null
+              ? pending.createdAt.millisecondsSinceEpoch
+              : null,
+        ).write(txn, draft, replacingReceiptId: source);
+        final revision = (old?.revision ?? 0) + 1;
+        if (old != null) {
+          await txn.insert('receipt_revisions', {
+            'receipt_id': source,
+            'revision': old.revision,
+            'snapshot_version': ReceiptSnapshotCodec.version,
+            'snapshot_payload': _codec.encode(old.draft),
+            'recorded_at': _now,
+          });
+        }
+        final evidence = await _savedEvidence(txn, draft, result);
+        final evidenceValues = {
+          'receipt_id': result.receiptId,
+          'revision': revision,
+          'snapshot_version': ReceiptSnapshotCodec.version,
+          'snapshot_payload': _codec.encode(evidence),
+          'updated_at': _now,
+        };
+        if ((await txn.query(
+          'receipt_evidence',
+          columns: ['receipt_id'],
+          where: 'receipt_id = ?',
+          whereArgs: [result.receiptId],
+        )).isEmpty) {
+          await txn.insert('receipt_evidence', evidenceValues);
+        } else {
+          await txn.update(
+            'receipt_evidence',
+            evidenceValues,
+            where: 'receipt_id = ?',
+            whereArgs: [result.receiptId],
+          );
+        }
+        await txn.insert('ledger_entry_links', {
+          'pending_id': id,
+          'confirmed_receipt_id': result.receiptId,
+          'created_at': _now,
+        }, conflictAlgorithm: sqlite.ConflictAlgorithm.ignore);
+        await _recordOperation(
+          txn,
+          operationId: operationId,
+          kind: source == null ? 'pending_confirm' : 'confirmed_correction',
+          digest: digest,
+          targetId: id,
+          revision: revision,
+          result: result,
+        );
+        await txn.delete(
+          'pending_receipts',
+          where: 'id = ? AND revision = ?',
+          whereArgs: [id, expectedRevision],
+        );
+        return result;
+      }),
+    );
+  }
+
+  Future<ReceiptDraft> _savedEvidence(
+    sqlite.DatabaseExecutor executor,
+    ReceiptDraft draft,
+    SaveReceiptResult result,
+  ) async {
+    final payload = _codec.toMap(draft);
+    final data = payload['draft'] as Map<String, Object?>;
+    final lines = data['lines'] as List<Map<String, Object?>>;
+    for (var i = 0; i < lines.length; i++) {
+      final saved = (await executor.query(
+        'purchase_lines',
+        columns: ['product_id'],
+        where: 'id = ?',
+        whereArgs: [result.lineIds[i]],
+      )).single;
+      lines[i]['id'] = result.lineIds[i];
+      lines[i]['productId'] = saved['product_id'];
+    }
+    final receipt = (await executor.query(
+      'receipts',
+      columns: ['supplier_id'],
+      where: 'id = ?',
+      whereArgs: [result.receiptId],
+    )).single;
+    data['supplierId'] = receipt['supplier_id'];
+    return _codec.fromMap(payload);
+  }
+
+  @override
+  Future<List<LedgerEntry>> getLedgerEntries({
+    int limit = 200,
+    String? query,
+  }) => _pending.getLedgerEntries(limit: limit, query: query);
+
+  @override
   Future<ReceiptDetail> getReceipt(String receiptId) async {
     final rows = await _db.rawQuery('$receiptSelect WHERE r.id = ?', [
       receiptId,
@@ -507,10 +952,12 @@ class SqliteReseeboDataAdapter implements IReseeboDataAdapter {
     String localImagePath, {
     String? recognitionImagePath,
     String? comparisonImagePath,
+    OcrEngineId engineId = OcrEngineId.mlKit,
   }) => processReceiptImages(
     [localImagePath],
     recognitionImagePaths: [recognitionImagePath ?? localImagePath],
     comparisonImagePaths: [comparisonImagePath ?? localImagePath],
+    engineId: engineId,
   );
 
   @override
@@ -518,10 +965,17 @@ class SqliteReseeboDataAdapter implements IReseeboDataAdapter {
     List<String> localImagePaths, {
     List<String>? recognitionImagePaths,
     List<String>? comparisonImagePaths,
+    OcrEngineId engineId = OcrEngineId.mlKit,
+    String preprocessingRevision = '1',
   }) async {
     final originals = List<String>.of(localImagePaths);
     final adjusted = List<String>.of(recognitionImagePaths ?? originals);
     final comparison = List<String>.of(comparisonImagePaths ?? originals);
+    if (preprocessingRevision.trim().isEmpty) {
+      throw const ValidationException(
+        'Provide the image preprocessing revision.',
+      );
+    }
     if (originals.isEmpty ||
         originals.length > maxReceiptPages ||
         adjusted.length != originals.length ||
@@ -531,22 +985,35 @@ class SqliteReseeboDataAdapter implements IReseeboDataAdapter {
       );
     }
     final hashes = <String>{};
+    final orderedHashes = <Map<String, String>>[];
     for (final path in originals) {
-      if (!hashes.add(await _files.hash(path))) {
+      final digest = await _files.hash(path);
+      if (!hashes.add(digest)) {
         throw const ValidationException(
           'The same receipt photo was added twice. Remove the repeated page.',
         );
       }
+      final index = orderedHashes.length;
+      orderedHashes.add({
+        'original': digest,
+        'recognition': adjusted[index] == path
+            ? digest
+            : await _files.hash(adjusted[index]),
+        'comparison': comparison[index] == path
+            ? digest
+            : await _files.hash(comparison[index]),
+      });
     }
+    final watch = Stopwatch()..start();
     final pages = <ReceiptOcrPage>[];
     final comparisonWarnings = <String>[];
     for (var index = 0; index < originals.length; index++) {
       try {
-        final text = await _ocr.recognize(adjusted[index]);
+        final text = await _ocr.recognize(engineId, adjusted[index]);
         var originalText = <OcrTextLine>[];
         if (adjusted[index] != comparison[index]) {
           try {
-            originalText = await _ocr.recognize(comparison[index]);
+            originalText = await _ocr.recognize(engineId, comparison[index]);
           } catch (_) {
             comparisonWarnings.add(
               'Photo ${index + 1}: the original photo could not be compared. Review the enhanced reading.',
@@ -568,7 +1035,20 @@ class SqliteReseeboDataAdapter implements IReseeboDataAdapter {
         throw AppException('Photo ${index + 1}: ${failure.message}');
       }
     }
-    final draft = _parser.parsePages(pages: pages);
+    watch.stop();
+    final descriptor = _ocr.descriptorFor(engineId);
+    final run = OcrRunMetadata(
+      engineId: engineId,
+      modelVersion: descriptor.modelVersion,
+      runtimeVersion: descriptor.runtimeVersion,
+      parserVersion: ReceiptParser.version,
+      inputDigest: sha256
+          .convert(utf8.encode(jsonEncode(orderedHashes)))
+          .toString(),
+      preprocessingRevision: preprocessingRevision,
+      elapsedMs: watch.elapsedMilliseconds,
+    );
+    final draft = _parser.parsePages(pages: pages, ocrRun: run);
     draft.ocrPages
       ..clear()
       ..addAll(pages);
@@ -630,18 +1110,49 @@ class SqliteReseeboDataAdapter implements IReseeboDataAdapter {
     ReceiptDraft draft,
     String digest,
   ) async {
+    final operations = await _db.query(
+      'receipt_write_operations',
+      where: 'operation_id = ?',
+      whereArgs: [draft.operationId],
+    );
+    if (operations.isNotEmpty) {
+      final operation = operations.single;
+      if (operation['kind'] != 'confirmed_save' ||
+          operation['canonical_digest'] != digest) {
+        throw const ValidationException(
+          'This operation ID was used for a different action or details. Use a new operation ID.',
+        );
+      }
+      final pages =
+          jsonDecode(operation['request_media_payload'] as String) as List;
+      if (pages.length != draft.imagePaths.length) {
+        throw const ValidationException(
+          'The receipt pages changed after this save. Start a new receipt.',
+        );
+      }
+      for (var i = 0; i < pages.length; i++) {
+        final path = draft.imagePaths[i];
+        if (await File(path).exists() &&
+            await _files.hash(path) != pages[i]['hash']) {
+          throw const ValidationException(
+            'An image changed after this save. Start a new receipt instead of retrying the earlier save.',
+          );
+        }
+      }
+      return _operationResult(operation);
+    }
     final prior = await _db.query(
       'receipts',
       where: 'operation_id = ?',
       whereArgs: [draft.operationId],
     );
     if (prior.isNotEmpty) {
-      _validateRetry(prior.first, digest);
+      _validateRetry(prior.single, digest);
       final savedPages = await _db.query(
         'receipt_images',
         columns: ['image_hash'],
         where: 'receipt_id = ?',
-        whereArgs: [prior.first['id']],
+        whereArgs: [prior.single['id']],
         orderBy: 'page_index',
       );
       if (savedPages.length != draft.imagePaths.length) {
@@ -658,207 +1169,39 @@ class SqliteReseeboDataAdapter implements IReseeboDataAdapter {
           );
         }
       }
-      return _savedResult(_db, prior.first['id'] as String, alreadySaved: true);
+      return _savedResult(
+        _db,
+        prior.single['id'] as String,
+        alreadySaved: true,
+      );
     }
     final copies = <StoredLocalFile>[];
     try {
-      final hashes = <String>{};
       for (final path in draft.imagePaths) {
-        final page = await _files.persist(path, category: 'receipts');
-        copies.add(page);
-        if (!hashes.add(page.hash)) {
-          throw const ValidationException(
-            'The same image cannot be saved as two receipt pages.',
-          );
-        }
+        copies.add(await _files.persist(path, category: 'receipts'));
       }
-      final copied = copies.first;
-      final result = await _db.transaction((txn) async {
-        final existing = await txn.query(
-          'receipts',
-          where: 'operation_id = ?',
-          whereArgs: [draft.operationId],
+      return await _db.transaction((txn) async {
+        final result = await ConfirmedReceiptWriter(
+          images: copies,
+          operationId: draft.operationId,
+          digest: digest,
+          clock: _clock,
+        ).write(txn, draft);
+        await _recordOperation(
+          txn,
+          operationId: draft.operationId,
+          kind: 'confirmed_save',
+          digest: digest,
+          targetId: result.receiptId,
+          revision: 1,
+          result: result,
+          media: [
+            for (var i = 0; i < copies.length; i++)
+              {'path': draft.imagePaths[i], 'hash': copies[i].hash},
+          ],
         );
-        if (existing.isNotEmpty) {
-          _validateRetry(existing.first, digest);
-          return _savedResult(
-            txn,
-            existing.first['id'] as String,
-            alreadySaved: true,
-          );
-        }
-        for (final id
-            in draft.lines
-                .map((line) => line.productId)
-                .whereType<String>()
-                .toSet()) {
-          final products = await txn.query(
-            'products',
-            where: 'id = ?',
-            whereArgs: [id],
-          );
-          if (products.isEmpty) {
-            throw const ValidationException(
-              'A selected product no longer exists. Confirm the product matches again.',
-            );
-          }
-        }
-        final now = _now;
-        final suppliers = await txn.query(
-          'suppliers',
-          where: draft.supplierId == null
-              ? 'name_key = ? AND branch_key = ?'
-              : 'id = ?',
-          whereArgs: draft.supplierId == null
-              ? [_key(draft.supplierName), _key(draft.supplierBranch)]
-              : [draft.supplierId],
-        );
-        if (draft.supplierId != null &&
-            (suppliers.isEmpty ||
-                suppliers.first['name_key'] != _key(draft.supplierName) ||
-                suppliers.first['branch_key'] != _key(draft.supplierBranch))) {
-          throw const ValidationException(
-            'The selected supplier changed. Choose its branch again.',
-          );
-        }
-        final supplierId = suppliers.isEmpty
-            ? const Uuid().v4()
-            : suppliers.first['id'] as String;
-        if (suppliers.isEmpty) {
-          await txn.insert('suppliers', {
-            'id': supplierId,
-            'name': draft.supplierName.trim(),
-            'branch': draft.supplierBranch.trim(),
-            'notes': draft.supplierNotes.trim(),
-            'name_key': _key(draft.supplierName),
-            'branch_key': _key(draft.supplierBranch),
-            'created_at': now,
-            'updated_at': now,
-          });
-        }
-        final numberKey = _key(draft.receiptNumber);
-        final placeholders = List.filled(copies.length, '?').join(',');
-        final duplicates = await txn.rawQuery(
-          "SELECT DISTINCT r.id AS id FROM receipts r JOIN receipt_images i ON i.receipt_id = r.id "
-          "WHERE i.image_hash IN ($placeholders) OR (r.supplier_id = ? AND r.receipt_number_key = ? AND r.receipt_number_key != '')",
-          [...copies.map((page) => page.hash), supplierId, numberKey],
-        );
-        if (duplicates.isNotEmpty && !draft.allowDuplicate) {
-          throw DuplicateReceiptException(
-            duplicates.map((row) => row['id'] as String).toList(),
-          );
-        }
-        // Supplier notes are edited through saveSupplier; receipt imports must
-        // not overwrite another branch's metadata with stale draft notes.
-        final receiptId = const Uuid().v4();
-        final date = draft.purchasedAt!;
-        final normalizedDate = draft.hasPurchaseTime
-            ? date
-            : DateTime(date.year, date.month, date.day);
-        final total = draft.lines.fold<int>(
-          0,
-          (sum, line) => sum + line.netAmountCents!,
-        );
-        await txn.insert('receipts', {
-          'id': receiptId,
-          'operation_id': draft.operationId,
-          'content_digest': digest,
-          'supplier_id': supplierId,
-          'purchased_at': normalizedDate.toIso8601String(),
-          'purchased_date':
-              '${date.year.toString().padLeft(4, '0')}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}',
-          'purchase_time': draft.hasPurchaseTime
-              ? '${date.hour.toString().padLeft(2, '0')}:${date.minute.toString().padLeft(2, '0')}:${date.second.toString().padLeft(2, '0')}'
-              : null,
-          'has_purchase_time': draft.hasPurchaseTime ? 1 : 0,
-          'image_path': copied.path,
-          'image_hash': copied.hash,
-          'receipt_number': draft.receiptNumber.trim(),
-          'receipt_number_key': numberKey,
-          'notes': draft.notes.trim(),
-          'raw_text': draft.rawText,
-          'total_cents': total,
-          'created_at': now,
-          'updated_at': now,
-        });
-        for (var page = 0; page < copies.length; page++) {
-          await txn.insert('receipt_images', {
-            'receipt_id': receiptId,
-            'page_index': page,
-            'image_path': copies[page].path,
-            'image_hash': copies[page].hash,
-          });
-        }
-        // Resolve only within this transaction. The caller snapshot and digest
-        // retain null IDs so retrying the same operation remains idempotent.
-        final importedIds = <String, String>{};
-        final lineIds = <String>[];
-        final costs = <double>[];
-        for (final line in draft.lines) {
-          var productId = line.productId;
-          if (productId == null) {
-            final key = _key(line.description);
-            productId = importedIds[key];
-            if (productId == null) {
-              productId = const Uuid().v4();
-              importedIds[key] = productId;
-              await txn.insert('products', {
-                'id': productId,
-                'name': line.description.trim(),
-                'brand': '',
-                'variant': '',
-                'size': '',
-                'name_only': 1,
-                'created_at': now,
-                'updated_at': now,
-              });
-            }
-          }
-          final lineId = const Uuid().v4();
-          await txn.insert('purchase_lines', {
-            'id': lineId,
-            'receipt_id': receiptId,
-            'product_id': productId,
-            'source_page': line.sourcePage,
-            'original_description': line.description.trim(),
-            'quantity': line.quantity,
-            'unit': line.unit!.name,
-            'pieces_per_pack': line.piecesPerPack,
-            'total_pieces': line.totalPieces,
-            'gross_amount_cents': line.grossAmountCents,
-            'discount_cents': line.discountCents,
-            'net_amount_cents': line.netAmountCents,
-            'created_at': now,
-            'updated_at': now,
-          });
-          await txn.insert(
-            'supplier_product_aliases',
-            {
-              'id': const Uuid().v4(),
-              'supplier_id': supplierId,
-              'product_id': productId,
-              'description': line.description.trim(),
-              'description_key': _key(line.description),
-              'created_at': now,
-              'updated_at': now,
-            },
-            conflictAlgorithm: sqlite.ConflictAlgorithm.ignore,
-          );
-          lineIds.add(lineId);
-          costs.add(line.netAmountCents! / line.totalPieces!);
-        }
-        return SaveReceiptResult(
-          receiptId: receiptId,
-          lineIds: lineIds,
-          unitCostsCents: costs,
-        );
+        return result;
       });
-      if (result.alreadySaved) {
-        for (final page in copies) {
-          if (page.created) await _files.remove(page.path);
-        }
-      }
-      return result;
     } catch (_) {
       for (final page in copies) {
         if (page.created) await _files.remove(page.path);
@@ -916,7 +1259,7 @@ class SqliteReseeboDataAdapter implements IReseeboDataAdapter {
       final placeholders = List.filled(batch.length, '?').join(',');
       final rows = await _db.rawQuery('''
         WITH purchases AS (
-          SELECT l.product_id, l.sequence, l.net_amount_cents, l.total_pieces,
+          SELECT l.product_id, l.sequence, r.recorded_order, l.net_amount_cents, l.total_pieces,
             r.supplier_id, r.purchased_at, r.purchased_date,
             r.has_purchase_time, r.created_at AS recorded_at
           FROM purchase_lines l JOIN receipts r ON r.id = l.receipt_id
@@ -941,14 +1284,15 @@ class SqliteReseeboDataAdapter implements IReseeboDataAdapter {
                 OR (newer.purchased_date = p.purchased_date
                   AND (newer.time_key > p.time_key
                     OR (newer.time_key = p.time_key
-                      AND newer.sequence > p.sequence))))
+                      AND (newer.recorded_order > p.recorded_order OR
+                        (newer.recorded_order = p.recorded_order AND newer.sequence > p.sequence))))))
           )
         ), product_days AS (
           SELECT product_id, purchased_date,
             MIN(has_purchase_time) AS all_times_known
           FROM supplier_latest GROUP BY product_id, purchased_date
         ), product_candidates AS (
-          SELECT p.product_id, p.sequence, p.net_amount_cents, p.total_pieces,
+          SELECT p.product_id, p.sequence, p.recorded_order, p.net_amount_cents, p.total_pieces,
             p.purchased_at, p.purchased_date, p.recorded_at,
             CASE WHEN d.all_times_known = 1
               THEN p.purchased_at ELSE '' END AS time_key
@@ -966,7 +1310,8 @@ class SqliteReseeboDataAdapter implements IReseeboDataAdapter {
                   OR (newer.time_key = p.time_key
                     AND (newer.recorded_at > p.recorded_at
                       OR (newer.recorded_at = p.recorded_at
-                        AND newer.sequence > p.sequence))))))
+                        AND (newer.recorded_order > p.recorded_order OR
+                          (newer.recorded_order = p.recorded_order AND newer.sequence > p.sequence))))))))
         )
         ''', batch);
       for (final row in rows) {

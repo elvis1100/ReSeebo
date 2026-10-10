@@ -39,8 +39,14 @@ flutter:
       fonts:
         - asset: assets/fonts/Inter.ttf
   assets:
+    - assets/brand/
     - assets/placeholders/
     - assets/fonts/
     - assets/catalog/
     - assets/catalog/images/
+    - assets/ocr/
+    - assets/ocr/ppocr_v5_mobile/det/
+    - assets/ocr/ppocr_v5_mobile/rec/
+    - assets/ocr/ppocr_v6_medium/det/
+    - assets/ocr/ppocr_v6_medium/rec/
 

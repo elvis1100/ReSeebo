@@ -9,15 +9,19 @@ class DuplicateReviewDialog extends StatefulWidget {
     super.key,
     required this.adapter,
     required this.receiptIds,
+    this.onOpenPendingReceipt,
   });
   final IReseeboDataAdapter adapter;
   final List<String> receiptIds;
+  final ValueChanged<String>? onOpenPendingReceipt;
   @override
   State<DuplicateReviewDialog> createState() => _DuplicateReviewDialogState();
 }
 
 class _DuplicateReviewDialogState extends State<DuplicateReviewDialog> {
   final Map<String, Receipt> _receipts = {};
+  final Map<String, PendingReceipt> _pending = {};
+  final Set<String> _failed = {};
   @override
   void initState() {
     super.initState();
@@ -30,7 +34,12 @@ class _DuplicateReviewDialogState extends State<DuplicateReviewDialog> {
         final detail = await widget.adapter.getReceipt(id);
         if (mounted) setState(() => _receipts[id] = detail.receipt);
       } catch (_) {
-        /* The source route can retry loading each candidate. */
+        try {
+          final pending = await widget.adapter.getPendingReceipt(id);
+          if (mounted) setState(() => _pending[id] = pending);
+        } catch (_) {
+          if (mounted) setState(() => _failed.add(id));
+        }
       }
     }
   }
@@ -50,24 +59,45 @@ class _DuplicateReviewDialogState extends State<DuplicateReviewDialog> {
           const SizedBox(height: 12),
           ...widget.receiptIds.map((id) {
             final receipt = _receipts[id];
+            final pending = _pending[id];
+            final draft = pending?.draft;
             return ListTile(
               contentPadding: EdgeInsets.zero,
-              title: Text(receipt?.supplier.label ?? 'Earlier saved receipt'),
-              subtitle: receipt == null
-                  ? null
+              title: Text(
+                receipt?.supplier.label ??
+                    (draft?.supplierName.trim().isNotEmpty == true
+                        ? draft!.supplierName
+                        : 'Earlier saved receipt'),
+              ),
+              subtitle: pending != null
+                  ? Text(
+                      'Needs review · ${draft!.purchasedAt == null ? 'Purchase date unresolved' : 'Estimated purchase date: ${purchaseDate(draft.purchasedAt!, withTime: draft.hasPurchaseTime)}'} · Provisional total: ${draft.detectedTotalCents == null ? 'Unresolved' : pesos(draft.detectedTotalCents!)}',
+                    )
+                  : receipt == null
+                  ? Text(
+                      _failed.contains(id)
+                          ? 'Could not load this receipt. Keep reviewing and try again.'
+                          : 'Loading earlier receipt…',
+                    )
                   : Text(
                       '${purchaseDate(receipt.purchasedAt, withTime: receipt.hasPurchaseTime)} · ${pesos(receipt.totalCents)}',
                     ),
               trailing: const Icon(Icons.open_in_new),
-              onTap: () => Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (_) => ReceiptDetailScreen(
-                    adapter: widget.adapter,
-                    receiptId: id,
-                  ),
-                ),
-              ),
+              onTap: pending != null
+                  ? widget.onOpenPendingReceipt == null
+                        ? null
+                        : () => widget.onOpenPendingReceipt!(id)
+                  : receipt == null
+                  ? null
+                  : () => Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) => ReceiptDetailScreen(
+                          adapter: widget.adapter,
+                          receiptId: id,
+                        ),
+                      ),
+                    ),
             );
           }),
         ],
