@@ -7,3 +7,6 @@ build/
 # Local agent configuration and references
 .agents/
 reference-repos/
+
+# Release installers are distributed separately from Git history.
+*.apk

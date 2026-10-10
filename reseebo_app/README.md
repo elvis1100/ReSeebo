@@ -1,22 +1,39 @@
-# Reseebo
+# ReSeebo
 
-Offline receipt scanning and supplier price history for Philippine sari-sari stores. Flutter/Dart, local SQLite, and bundled ML Kit OCR; no account or runtime downloads.
+Offline receipt scanning, purchase history, and supplier price comparison for sari-sari stores. Photos and data stay on your phone; no account, API key, or runtime model download is required.
 
-Run from this folder:
+## Install on an Android phone
+
+1. Copy [the release APK](releases/reseebo-1.0.0.apk) to your phone (Android 8.0 or newer).
+2. Open it in Files and allow **Install unknown apps** for Files when Android prompts you. Install ReSeebo, then turn that permission off again.
+3. Open ReSeebo, scan or select a receipt photo, choose an OCR model, and tap **Read receipt**. Review the supplier, date, quantities, and prices before saving.
+
+**PP-OCRv5 Mobile** is the faster Paddle option; PP-OCRv6 Medium takes longer. The app works offline. Updating with the same signing key preserves data; uninstalling or clearing app storage deletes local data.
+
+The supplied APK is approximately 344 MB because OCR models are bundled. [SHA-256 checksum](releases/reseebo-1.0.0.apk.sha256). This demo release uses the project's debug signing key, not a store distribution key. It was built and inspected; the documented offline device checks used an isolated debug build.
+
+## Run from source
+
+Install Flutter and the Android SDK. Enable Developer options and USB debugging on your phone, connect it by USB, and accept its debugging prompt. From this folder:
 
 ```bash
 flutter pub get
-flutter run -d <android-device-id>
-flutter analyze
-flutter test
+flutter devices
+flutter run -d <device-id>
 ```
 
-The bottom bar places a raised **Scan Receipt** action between **Home** and **Settings**. Home has a compact green gradient store card with the store name and markup; tapping the card opens Settings. Counts appear in the Receipts and Products tabs. **+ Add** sits beside the Products search field. Coordinated scrolling restores search and tabs when scrolling back, and pressed effects follow rounded control shapes. Both Home and Settings show the logo and **Reseebo**. Pull down to refresh Home, Settings, or product details; Settings preserves unsaved edits. Product details focus on supplier comparison and price history, without the restock/profit planner. New store profiles start as **Sari-sari Store**, with **20% default markup**. The fixed header icon is a placeholder for the future app logo; Settings does not edit it.
+Build with `flutter build apk --release`; output: `build/app/outputs/flutter-apk/app-release.apk`. Install the supplied APK by USB without clearing app data:
 
-Use **Edit / enhance photo** to open the full-screen editor for crop, rotate, straighten, and contrast. Photos are enhanced by default, with an Enhanced badge on the preview. The scan page supports one-handed scrolling; full-screen editing provides more space for zooming. **Compare** reveals the preserved original and enhanced photo with a draggable divider, without changing the OCR selection. The header check applies edits; the back arrow cancels them. Faded-text enhancement and Reset edits share a compact control row. Original photos remain intact, and reading disables competing actions. Review a scan by correcting supplier/date and item fields directly, optionally matching existing products, and confirming product names, quantities, and costs. Unmatched items create name-only catalog entries without photos when the receipt is saved; add a photo later from Edit product. Original photos and recognized text remain available for reference. Pieces are selected by default; select Packs and enter pack contents when needed. The unit selector and date/time selections use green. Review shows the purchase date only; time controls and optional receipt number and notes inputs are hidden without clearing existing values. The Product name field sits below optional product matching, with a matte-green field background and Cost representing the total for the item. Clear dates/times and previously confirmed product descriptions prefill locally; uncertain fields remain editable.
+```bash
+adb install -r releases/reseebo-1.0.0.apk
+```
 
-The bundled catalog includes **288 Philippine grocery products**, with 180px WebP photos totaling about **1.19 MiB**. It supplies product identities, without sample purchases or prices. Existing settings, custom products and receipt history survive upgrades. Catalog seeding preserves edited/deleted starter items and existing barcode/identity matches. Read [catalog sources and licenses](docs/starter_catalog.md); photo credits are also available offline in Settings.
+## Technical disclosure
 
-Android uses persistent local storage and original receipt images. Browser mode is a labeled sample-data demo. Rebuilding or updating the same signed app keeps local data; uninstalling or clearing app storage removes it.
+- **Framework/storage:** Flutter, Dart, and on-device SQLite through `sqflite`.
+- **AI models/runtime:** bundled Google ML Kit Latin text recognition, PaddleOCR PP-OCRv5 Mobile and PP-OCRv6 Medium; ONNX Runtime Android 1.21.1, OpenCV 4.5.3.0, and a Kotlin/coroutines native bridge. Parsing and cost calculations use local Dart code. No cloud AI API is called at runtime.
+- **Libraries/APIs:** `image_picker` (Android camera/photo picker), `image`, `path`/`path_provider`, `crypto`, `intl`, `uuid`, `pdf`, and `printing` for photos, files, validation, formatting, and document export.
+- **AI development tools:** OpenAI Codex assisted coding, debugging, tests, and documentation.
+- **Existing code/assets:** adapted Apache-2.0 PaddleOCR Android SDK; Inter font (SIL OFL 1.1); supplied ReSeebo branding; bundled Open Food Facts catalog data (ODbL/DbCL) and contributor photos (CC BY-SA 3.0). The Open Food Facts API was used during development; catalog content is bundled offline.
 
-For native offline OCR and persistence checks, see [receipt validation](docs/receipt_ocr_validation.md). Local parser tests and synthetic images do not establish accuracy on every real receipt.
+Exact revisions and local changes: [models](assets/ocr/model_manifest.json), [SDK](android/paddle_ocr/source_manifest.json). Licenses: `assets/ocr/LICENSE-*.txt`, [Inter](assets/fonts/OFL.txt), [catalog attribution](assets/catalog/ATTRIBUTION.txt). See [device verification](docs/verification/2026-10-10-paddle-device-acceptance.md) for tested behavior and accuracy limits.
